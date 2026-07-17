@@ -255,7 +255,7 @@ export default function Auth({ onLoginSuccess }) {
           position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
           backgroundColor: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000
         }}>
-          <div className="glass-card animate-fade" style={{ width: '90%', maxWidth: '480px', background: '#0b0f19', border: '1px solid #1f2937', padding: '0', overflow: 'hidden' }}>
+          <div className="glass-card animate-fade" style={{ width: '90%', maxWidth: '480px', background: '#0b0f19', border: '1px solid #1f2937', padding: '0', overflow: 'hidden', color: '#f8fafc' }}>
             
             {/* Header styled like a browser address bar */}
             <div style={{ background: '#111827', padding: '10px 15px', borderBottom: '1px solid #1f2937', display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -324,7 +324,7 @@ export default function Auth({ onLoginSuccess }) {
 
                 <button 
                   className="btn btn-secondary" 
-                  style={{ width: '100%', marginTop: '20px' }}
+                  style={{ width: '100%', marginTop: '20px', color: '#f8fafc', borderColor: '#1f2937', background: '#111827' }}
                   onClick={() => setOauthProvider(null)}
                 >
                   Cancel
