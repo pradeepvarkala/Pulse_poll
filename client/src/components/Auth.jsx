@@ -253,20 +253,20 @@ export default function Auth({ onLoginSuccess }) {
       {oauthProvider && (
         <div style={{
           position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-          backgroundColor: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000
+          backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000
         }}>
-          <div className="glass-card animate-fade" style={{ width: '90%', maxWidth: '480px', background: '#0b0f19', border: '1px solid #1f2937', padding: '0', overflow: 'hidden', color: '#f8fafc' }}>
+          <div className="animate-fade" style={{ width: '90%', maxWidth: '440px', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)', padding: '0', overflow: 'hidden', color: '#1f2937' }}>
             
             {/* Header styled like a browser address bar */}
-            <div style={{ background: '#111827', padding: '10px 15px', borderBottom: '1px solid #1f2937', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ background: '#f8fafc', padding: '12px 15px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div style={{ display: 'flex', gap: '6px' }}>
-                <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: 'var(--accent-red)' }} />
-                <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: 'var(--accent-amber)' }} />
-                <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: 'var(--accent-green)' }} />
+                <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#ef4444' }} />
+                <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#f59e0b' }} />
+                <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#10b981' }} />
               </div>
               <div style={{ 
-                flex: 1, background: '#1f2937', padding: '4px 10px', borderRadius: '4px',
-                fontSize: '0.75rem', color: '#9ca3af', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis'
+                flex: 1, background: '#f1f5f9', padding: '4px 10px', borderRadius: '4px',
+                fontSize: '0.75rem', color: '#475569', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', border: '1px solid #cbd5e1'
               }}>
                 {oauthProvider === 'google' 
                   ? 'https://accounts.google.com/o/oauth2/v2/auth?client_id=pulsepoll...' 
@@ -276,12 +276,12 @@ export default function Auth({ onLoginSuccess }) {
 
             {/* Simulated oauth screens */}
             {oauthStep === 1 ? (
-              <div style={{ padding: '30px 24px' }}>
-                <h3 style={{ fontSize: '1.25rem', marginBottom: '15px', textAlign: 'center' }}>
+              <div style={{ padding: '30px 24px', backgroundColor: '#ffffff' }}>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '15px', textAlign: 'center', color: '#0f172a', fontWeight: '700' }}>
                   Sign in with {oauthProvider === 'google' ? 'Google' : 'Microsoft'}
                 </h3>
-                <p style={{ fontSize: '0.85rem', color: '#9ca3af', marginBottom: '20px', textAlign: 'center' }}>
-                  Choose a mock account to authorize **PulsePoll**:
+                <p style={{ fontSize: '0.85rem', color: '#475569', marginBottom: '20px', textAlign: 'center' }}>
+                  Choose a mock account to authorize <strong>PulsePoll</strong>:
                 </p>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -293,13 +293,16 @@ export default function Auth({ onLoginSuccess }) {
                     )}
                     style={{ 
                       display: 'flex', alignItems: 'center', gap: '12px', padding: '12px',
-                      borderRadius: '8px', border: '1px solid #1f2937', cursor: 'pointer', background: '#111827'
+                      borderRadius: '8px', border: '1px solid #e2e8f0', cursor: 'pointer', background: '#f8fafc',
+                      transition: 'background 0.2s ease'
                     }}
+                    onMouseOver={(e) => e.currentTarget.style.background = '#f1f5f9'}
+                    onMouseOut={(e) => e.currentTarget.style.background = '#f8fafc'}
                   >
-                    <div className="admin-avatar" style={{ width: '40px', height: '40px', fontSize: '1rem' }}>SJ</div>
+                    <div className="admin-avatar" style={{ width: '40px', height: '40px', fontSize: '1rem', background: 'linear-gradient(135deg, #6366f1, #ec4899)', color: 'white' }}>SJ</div>
                     <div style={{ textAlign: 'left' }}>
-                      <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>Sarah Jenkins</div>
-                      <div style={{ fontSize: '0.75rem', color: '#9ca3af' }}>sarah.jenkins@company.com</div>
+                      <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#1f2937' }}>Sarah Jenkins</div>
+                      <div style={{ fontSize: '0.75rem', color: '#475569' }}>sarah.jenkins@company.com</div>
                     </div>
                   </div>
 
@@ -311,32 +314,37 @@ export default function Auth({ onLoginSuccess }) {
                     )}
                     style={{ 
                       display: 'flex', alignItems: 'center', gap: '12px', padding: '12px',
-                      borderRadius: '8px', border: '1px solid #1f2937', cursor: 'pointer', background: '#111827'
+                      borderRadius: '8px', border: '1px solid #e2e8f0', cursor: 'pointer', background: '#f8fafc',
+                      transition: 'background 0.2s ease'
                     }}
+                    onMouseOver={(e) => e.currentTarget.style.background = '#f1f5f9'}
+                    onMouseOut={(e) => e.currentTarget.style.background = '#f8fafc'}
                   >
-                    <div className="admin-avatar" style={{ width: '40px', height: '40px', fontSize: '1rem' }}>AR</div>
+                    <div className="admin-avatar" style={{ width: '40px', height: '40px', fontSize: '1rem', background: 'linear-gradient(135deg, #6366f1, #ec4899)', color: 'white' }}>AR</div>
                     <div style={{ textAlign: 'left' }}>
-                      <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>Alex River</div>
-                      <div style={{ fontSize: '0.75rem', color: '#9ca3af' }}>alex.river@domain.org</div>
+                      <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#1f2937' }}>Alex River</div>
+                      <div style={{ fontSize: '0.75rem', color: '#475569' }}>alex.river@domain.org</div>
                     </div>
                   </div>
                 </div>
 
                 <button 
-                  className="btn btn-secondary" 
-                  style={{ width: '100%', marginTop: '20px', color: '#f8fafc', borderColor: '#1f2937', background: '#111827' }}
+                  className="btn" 
+                  style={{ width: '100%', marginTop: '20px', color: '#475569', borderColor: '#cbd5e1', background: '#ffffff', border: '1px solid #cbd5e1', padding: '10px', borderRadius: '6px', cursor: 'pointer', fontWeight: '500' }}
                   onClick={() => setOauthProvider(null)}
+                  onMouseOver={(e) => e.currentTarget.style.background = '#f1f5f9'}
+                  onMouseOut={(e) => e.currentTarget.style.background = '#ffffff'}
                 >
                   Cancel
                 </button>
               </div>
             ) : (
-              <div style={{ padding: '40px 24px', textAlign: 'center' }}>
-                <div className="logo-icon" style={{ width: '48px', height: '48px', margin: '0 auto 20px auto', animation: 'spin 2s linear infinite' }}>
+              <div style={{ padding: '40px 24px', textAlign: 'center', backgroundColor: '#ffffff' }}>
+                <div className="logo-icon" style={{ width: '48px', height: '48px', margin: '0 auto 20px auto', animation: 'spin 2s linear infinite', background: 'linear-gradient(135deg, #6366f1, #ec4899)' }}>
                   <KeyRound size={24} color="white" />
                 </div>
-                <h3>Authorizing Account...</h3>
-                <p style={{ color: '#9ca3af', fontSize: '0.85rem', marginTop: '5px' }}>
+                <h3 style={{ color: '#0f172a', fontWeight: '700' }}>Authorizing Account...</h3>
+                <p style={{ color: '#475569', fontSize: '0.85rem', marginTop: '5px' }}>
                   Simulating OAuth callback token exchange.
                 </p>
               </div>
