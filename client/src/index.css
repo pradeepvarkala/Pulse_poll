@@ -60,6 +60,10 @@
   --secondary: #10b981;
   --secondary-glow: rgba(16, 185, 129, 0.15);
   --accent-purple: #06b6d4;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-glass: rgba(255, 255, 255, 0.08);
   --shadow-glow: 0 0 25px rgba(14, 165, 233, 0.15);
   --bg-gradient: radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.12) 0px, transparent 50%),
                  radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.08) 0px, transparent 50%),
@@ -74,6 +78,10 @@
   --secondary: #e11d48;
   --secondary-glow: rgba(225, 29, 72, 0.15);
   --accent-purple: #f59e0b;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-glass: rgba(255, 255, 255, 0.08);
   --shadow-glow: 0 0 25px rgba(249, 115, 22, 0.15);
   --bg-gradient: radial-gradient(at 0% 0%, rgba(249, 115, 22, 0.12) 0px, transparent 50%),
                  radial-gradient(at 100% 100%, rgba(225, 29, 72, 0.08) 0px, transparent 50%),
@@ -122,6 +130,10 @@
   --secondary: #94a3b8;
   --secondary-glow: rgba(148, 163, 184, 0.15);
   --accent-purple: #818cf8;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-glass: rgba(255, 255, 255, 0.08);
   --shadow-glow: 0 0 25px rgba(56, 189, 248, 0.15);
   --bg-gradient: radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.1) 0px, transparent 50%),
                  radial-gradient(at 100% 100%, rgba(129, 140, 248, 0.08) 0px, transparent 50%);
