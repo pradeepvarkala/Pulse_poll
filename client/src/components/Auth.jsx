@@ -43,6 +43,57 @@ export default function Auth({ onLoginSuccess }) {
     }
   }, [toastMessage]);
 
+  // Decode Google JWT Token
+  const handleCredentialResponse = (response) => {
+    try {
+      const base64Url = response.credential.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+
+      const profile = JSON.parse(jsonPayload);
+      const userProfile = {
+        name: profile.name,
+        email: profile.email,
+        avatar: profile.picture,
+        provider: 'google',
+        createdAt: new Date().toLocaleDateString()
+      };
+      localStorage.setItem('pulse-poll-user', JSON.stringify(userProfile));
+      onLoginSuccess(userProfile);
+    } catch (err) {
+      console.error('Failed to decode Google credential:', err);
+      setErrorMsg('Google Sign-In failed. Please try again.');
+    }
+  };
+
+  useEffect(() => {
+    const initGoogleGSI = () => {
+      if (window.google) {
+        window.google.accounts.id.initialize({
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || "1028374958-placeholder.apps.googleusercontent.com",
+          callback: handleCredentialResponse
+        });
+        
+        window.google.accounts.id.renderButton(
+          document.getElementById("google-signin-btn"),
+          { 
+            theme: "outline", 
+            size: "large", 
+            width: "350",
+            text: "signin_with",
+            shape: "pill"
+          }
+        );
+      } else {
+        setTimeout(initGoogleGSI, 500);
+      }
+    };
+
+    initGoogleGSI();
+  }, []);
+
   const handleSendCode = async (e) => {
     e.preventDefault();
     if (!email.trim() || !email.includes('@')) {
@@ -155,14 +206,13 @@ export default function Auth({ onLoginSuccess }) {
         </div>
 
         {/* OAuth Buttons */}
-        <div className="social-buttons">
-          <button className="social-btn social-btn-google" onClick={() => handleOAuthLogin('google')}>
-            <GoogleIcon />
-            <span>Continue with Google</span>
-          </button>
-          <button className="social-btn social-btn-microsoft" onClick={() => handleOAuthLogin('microsoft')}>
+        <div className="social-buttons" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+          {/* Official Google Sign-In Button Container */}
+          <div id="google-signin-btn" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}></div>
+
+          <button className="social-btn social-btn-microsoft" onClick={() => handleOAuthLogin('microsoft')} style={{ width: '100%', maxWidth: '350px' }}>
             <MicrosoftIcon />
-            <span>Continue with Microsoft</span>
+            <span>Continue with Microsoft (Mock)</span>
           </button>
         </div>
 
