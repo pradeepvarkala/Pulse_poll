@@ -636,45 +636,86 @@ h1, h2, h3, h4, h5, h6 {
 /* Presenter Controls Footer */
 .presenter-controls-wrapper {
   position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%) translateY(40px);
+  bottom: 15px;
+  right: 15px;
+  transform: translateY(30px);
   opacity: 0;
   transition: var(--transition-smooth);
   z-index: 20;
 }
 
 .presenter-viewport:hover .presenter-controls-wrapper {
-  transform: translateX(-50%) translateY(0);
+  transform: translateY(0);
   opacity: 1;
 }
 
 .presenter-controls {
-  padding: 10px 20px;
+  padding: 6px 10px;
   display: flex;
   align-items: center;
-  gap: 15px;
-  border-radius: 30px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  gap: 8px;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
   background: rgba(15, 23, 42, 0.95);
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.presenter-controls .btn-secondary {
+  color: rgba(255, 255, 255, 0.85) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  min-width: unset;
+  box-shadow: none !important;
+}
+
+.presenter-controls .btn-secondary:hover:not(:disabled) {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  transform: translateY(-1px);
+}
+
+.presenter-controls .btn-secondary:disabled {
+  color: rgba(255, 255, 255, 0.25) !important;
+  background: rgba(255, 255, 255, 0.02) !important;
+  border-color: rgba(255, 255, 255, 0.05) !important;
+  opacity: 0.5;
+  transform: none;
+}
+
+.presenter-controls .btn-secondary svg {
+  width: 16px;
+  height: 16px;
+}
+
+.presenter-controls span {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: 0.8rem !important;
 }
 
 .control-divider {
   width: 1px;
-  height: 24px;
-  background: rgba(255, 255, 255, 0.1);
+  height: 16px;
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .participant-count-badge {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.9rem;
+  gap: 4px;
+  font-size: 0.8rem;
   font-weight: 600;
-  padding: 4px 12px;
-  border-radius: 12px;
+  padding: 2px 8px;
+  border-radius: 8px;
   background: rgba(255,255,255,0.08);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 /* Chart Styles (Bar Chart) */
