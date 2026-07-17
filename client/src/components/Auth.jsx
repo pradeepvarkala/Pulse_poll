@@ -25,6 +25,7 @@ export default function Auth({ onLoginSuccess }) {
   const [verificationCode, setVerificationCode] = useState('');
   const [generatedCode, setGeneratedCode] = useState(null);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isSendingCode, setIsSendingCode] = useState(false);
   
   // Simulated Toast notification
   const [toastMessage, setToastMessage] = useState(null);
@@ -42,7 +43,7 @@ export default function Auth({ onLoginSuccess }) {
     }
   }, [toastMessage]);
 
-  const handleSendCode = (e) => {
+  const handleSendCode = async (e) => {
     e.preventDefault();
     if (!email.trim() || !email.includes('@')) {
       setErrorMsg('Please enter a valid email address.');
@@ -52,13 +53,45 @@ export default function Auth({ onLoginSuccess }) {
     setErrorMsg('');
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     setGeneratedCode(code);
-    setIsVerifying(true);
-    
-    // Slide in the simulated email notification toast containing the code!
-    setToastMessage({
-      title: 'Email Received (noreply@pulsepoll.com)',
-      body: `Subject: PulsePoll OTP. Your verification code is: ${code}`
-    });
+    setIsSendingCode(true);
+
+    try {
+      const response = await fetch('/api/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), code })
+      });
+      const data = await response.json();
+      
+      setIsSendingCode(false);
+      setIsVerifying(true);
+
+      if (data.simulated) {
+        setToastMessage({
+          title: 'Simulated Email Received (noreply@pulsepoll.com)',
+          body: `RESEND_API_KEY not configured. Simulated OTP is: ${code}`
+        });
+      } else if (response.ok) {
+        setToastMessage({
+          title: 'Verification Email Sent!',
+          body: `An actual verification code has been sent to ${email}. Please check your inbox (and spam folder).`
+        });
+      } else {
+        setErrorMsg(data.error || 'Failed to send verification email. Falling back.');
+        setToastMessage({
+          title: 'Simulated Email Received (noreply@pulsepoll.com)',
+          body: `Verification failed to send. Simulated OTP is: ${code}`
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      setIsSendingCode(false);
+      setIsVerifying(true);
+      setToastMessage({
+        title: 'Simulated Email Received (noreply@pulsepoll.com)',
+        body: `Network error sending email. Simulated OTP is: ${code}`
+      });
+    }
   };
 
   const handleVerifyCode = (e) => {
@@ -164,8 +197,8 @@ export default function Auth({ onLoginSuccess }) {
               </div>
             )}
 
-            <button type="submit" className="btn btn-primary" style={{ padding: '12px' }}>
-              Send Verification Code
+            <button type="submit" className="btn btn-primary" style={{ padding: '12px' }} disabled={isSendingCode}>
+              {isSendingCode ? 'Sending Code...' : 'Send Verification Code'}
             </button>
           </form>
         ) : (

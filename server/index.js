@@ -5,8 +5,12 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+import { Resend } from 'resend';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 const app = express();
 app.use(cors());
@@ -17,6 +21,56 @@ app.use(express.static(path.resolve(__dirname, '..', 'client', 'dist')));
 
 app.get('/health', (req, res) => {
   res.json({ status: 'Backend is running!', socketio: true });
+});
+
+app.post('/api/send-otp', async (req, res) => {
+  const { email, code } = req.body;
+  if (!email || !code) {
+    return res.status(400).json({ error: 'Email and code are required.' });
+  }
+
+  console.log(`[OTP Request] Sending code ${code} to ${email}`);
+
+  if (!resend) {
+    console.log(`[OTP Request] RESEND_API_KEY is not configured. Falling back to simulated login.`);
+    return res.json({ 
+      success: true, 
+      simulated: true,
+      message: 'RESEND_API_KEY not configured. OTP printed to server logs.' 
+    });
+  }
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: 'PulsePoll <onboarding@resend.dev>',
+      to: email,
+      subject: 'Your PulsePoll Verification Code',
+      html: `
+        <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+          <h2 style="color: #6366f1; text-align: center; margin-bottom: 24px;">PulsePoll Authentication</h2>
+          <p>Hello,</p>
+          <p>You requested a verification code to access PulsePoll. Use the 6-digit code below to complete your registration:</p>
+          <div style="background-color: #f1f5f9; padding: 16px; border-radius: 8px; font-size: 2rem; font-weight: 800; letter-spacing: 6px; text-align: center; color: #0f172a; margin: 24px 0;">
+            ${code}
+          </div>
+          <p style="color: #64748b; font-size: 0.85rem;">This code will expire in 10 minutes. If you did not request this, you can safely ignore this email.</p>
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+          <p style="text-align: center; font-size: 0.8rem; color: #94a3b8;">&copy; 2026 PulsePoll. All rights reserved.</p>
+        </div>
+      `
+    });
+
+    if (error) {
+      console.error('[OTP Error] Resend failed:', error);
+      return res.status(500).json({ error: error.message });
+    }
+
+    console.log('[OTP Success] Email sent successfully via Resend:', data.id);
+    return res.json({ success: true });
+  } catch (err) {
+    console.error('[OTP Error] Exception thrown:', err);
+    return res.status(500).json({ error: err.message });
+  }
 });
 
 // Serve index.html for all other requests to allow client-side routing
