@@ -13,7 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 // Serve static React files
-app.use(express.static(path.join(__dirname, '../client/dist')));
+app.use(express.static(path.resolve(__dirname, '..', 'client', 'dist')));
 
 app.get('/health', (req, res) => {
   res.json({ status: 'Backend is running!', socketio: true });
@@ -21,7 +21,13 @@ app.get('/health', (req, res) => {
 
 // Serve index.html for all other requests to allow client-side routing
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+  const indexPath = path.resolve(__dirname, '..', 'client', 'dist', 'index.html');
+  res.sendFile(indexPath, (err) => {
+    if (err) {
+      console.error('Error sending index.html:', err);
+      res.status(500).send('Server Error: Client files not found or inaccessible.');
+    }
+  });
 });
 
 const server = createServer(app);
