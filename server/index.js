@@ -6,11 +6,54 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { Resend } from 'resend';
+import mysql from 'mysql2/promise';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+
+// Initialize TiDB Cloud Connection Pool
+const pool = process.env.DATABASE_URL ? mysql.createPool({
+  uri: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: true
+  }
+}) : null;
+
+// Initialize Database Tables
+async function initDb() {
+  if (!pool) {
+    console.log('[Database] DATABASE_URL is not set. Running in-memory fallbacks.');
+    return;
+  }
+  
+  try {
+    const connection = await pool.getConnection();
+    console.log('[Database] Connected to TiDB Cloud MySQL cluster successfully!');
+    
+    // Create presentations table
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS presentations (
+        id VARCHAR(36) PRIMARY KEY,
+        user_email VARCHAR(255) NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        theme VARCHAR(50) DEFAULT 'corporate',
+        slides JSON NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_user_email (user_email)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+    
+    console.log('[Database] Database schema initialized.');
+    connection.release();
+  } catch (err) {
+    console.error('[Database Error] Failed to initialize database tables:', err);
+  }
+}
+
+initDb();
 
 const app = express();
 app.use(cors());
@@ -70,6 +113,83 @@ app.post('/api/send-otp', async (req, res) => {
   } catch (err) {
     console.error('[OTP Error] Exception thrown:', err);
     return res.status(500).json({ error: err.message });
+  }
+});
+
+// Database REST APIs for Presentations
+app.get('/api/presentations', async (req, res) => {
+  const email = req.headers['x-user-email'];
+  if (!email) {
+    return res.status(400).json({ error: 'User email is required in x-user-email header.' });
+  }
+  
+  if (!pool) {
+    return res.json([]);
+  }
+  
+  try {
+    const [rows] = await pool.query(
+      'SELECT id, title, theme, slides, created_at, updated_at FROM presentations WHERE user_email = ? ORDER BY updated_at DESC',
+      [email]
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error('[API Error] GET /api/presentations:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/presentations', async (req, res) => {
+  const email = req.headers['x-user-email'];
+  const { id, title, theme, slides } = req.body;
+  
+  if (!email) {
+    return res.status(400).json({ error: 'User email is required in x-user-email header.' });
+  }
+  if (!id || !title) {
+    return res.status(400).json({ error: 'Presentation id and title are required.' });
+  }
+  
+  if (!pool) {
+    return res.json({ success: true, message: 'Local mock save success.' });
+  }
+  
+  try {
+    const slidesJson = JSON.stringify(slides || []);
+    await pool.query(`
+      INSERT INTO presentations (id, user_email, title, theme, slides) 
+      VALUES (?, ?, ?, ?, ?) 
+      ON DUPLICATE KEY UPDATE title = ?, theme = ?, slides = ?
+    `, [id, email, title, theme || 'corporate', slidesJson, title, theme || 'corporate', slidesJson]);
+    
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[API Error] POST /api/presentations:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/presentations/:id', async (req, res) => {
+  const email = req.headers['x-user-email'];
+  const { id } = req.params;
+  
+  if (!email) {
+    return res.status(400).json({ error: 'User email is required in x-user-email header.' });
+  }
+  
+  if (!pool) {
+    return res.json({ success: true });
+  }
+  
+  try {
+    await pool.query(
+      'DELETE FROM presentations WHERE id = ? AND user_email = ?',
+      [id, email]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[API Error] DELETE /api/presentations:', err);
+    res.status(500).json({ error: err.message });
   }
 });
 

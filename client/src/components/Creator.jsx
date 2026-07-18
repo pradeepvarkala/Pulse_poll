@@ -43,18 +43,56 @@ export default function Creator({ presentationId, onBack, onPresent }) {
     setEmojiPickerCoords(null);
   };
 
+  const user = JSON.parse(localStorage.getItem('pulse-poll-user') || '{}');
+  const userEmail = user.email || 'guest@pulsepoll.com';
+
   useEffect(() => {
-    const saved = localStorage.getItem('pulse-poll-presentations');
-    if (saved) {
-      const presentations = JSON.parse(saved);
-      const found = presentations.find(p => p.id === presentationId);
-      if (found) {
-        setPresentation(found);
-        if (found.slides.length > 0) {
-          setActiveSlideId(found.slides[0].id);
+    const fetchPresentation = async () => {
+      try {
+        const res = await fetch('/api/presentations', {
+          headers: { 'x-user-email': userEmail }
+        });
+        const data = await res.json();
+        const found = data.find(p => p.id === presentationId);
+        if (found) {
+          const parsedFound = {
+            ...found,
+            slides: typeof found.slides === 'string' ? JSON.parse(found.slides) : found.slides
+          };
+          setPresentation(parsedFound);
+          if (parsedFound.slides.length > 0) {
+            setActiveSlideId(parsedFound.slides[0].id);
+          }
+        } else {
+          const saved = localStorage.getItem('pulse-poll-presentations');
+          if (saved) {
+            const presentations = JSON.parse(saved);
+            const localFound = presentations.find(p => p.id === presentationId);
+            if (localFound) {
+              setPresentation(localFound);
+              if (localFound.slides.length > 0) {
+                setActiveSlideId(localFound.slides[0].id);
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching presentation in creator:', err);
+        const saved = localStorage.getItem('pulse-poll-presentations');
+        if (saved) {
+          const presentations = JSON.parse(saved);
+          const localFound = presentations.find(p => p.id === presentationId);
+          if (localFound) {
+            setPresentation(localFound);
+            if (localFound.slides.length > 0) {
+              setActiveSlideId(localFound.slides[0].id);
+            }
+          }
         }
       }
-    }
+    };
+
+    fetchPresentation();
   }, [presentationId]);
 
   useEffect(() => {
@@ -69,13 +107,26 @@ export default function Creator({ presentationId, onBack, onPresent }) {
     return () => window.removeEventListener('click', handleOutsideClick);
   }, [activeEmojiPickerId]);
 
-  const savePresentation = (updatedPres) => {
+  const savePresentation = async (updatedPres) => {
     setPresentation(updatedPres);
     const saved = localStorage.getItem('pulse-poll-presentations');
     if (saved) {
       const presentations = JSON.parse(saved);
       const updatedList = presentations.map(p => p.id === presentationId ? updatedPres : p);
       localStorage.setItem('pulse-poll-presentations', JSON.stringify(updatedList));
+    }
+
+    try {
+      await fetch('/api/presentations', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-user-email': userEmail
+        },
+        body: JSON.stringify(updatedPres)
+      });
+    } catch (err) {
+      console.error('Error saving presentation in creator:', err);
     }
   };
 

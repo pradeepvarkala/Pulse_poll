@@ -313,17 +313,53 @@ export default function Presenter({ presentationId, onBack }) {
 
   const socketRef = useRef(null);
 
+  const user = JSON.parse(localStorage.getItem('pulse-poll-user') || '{}');
+  const userEmail = user.email || 'guest@pulsepoll.com';
+
   useEffect(() => {
-    const saved = localStorage.getItem('pulse-poll-presentations');
-    if (saved) {
-      const presentations = JSON.parse(saved);
-      const found = presentations.find(p => p.id === presentationId);
-      if (found) {
-        setPresentation(found);
-        setSlides(found.slides);
-        setTheme(found.theme || 'corporate');
+    const fetchPresentation = async () => {
+      try {
+        const res = await fetch('/api/presentations', {
+          headers: { 'x-user-email': userEmail }
+        });
+        const data = await res.json();
+        const found = data.find(p => p.id === presentationId);
+        if (found) {
+          const parsedFound = {
+            ...found,
+            slides: typeof found.slides === 'string' ? JSON.parse(found.slides) : found.slides
+          };
+          setPresentation(parsedFound);
+          setSlides(parsedFound.slides);
+          setTheme(parsedFound.theme || 'corporate');
+        } else {
+          const saved = localStorage.getItem('pulse-poll-presentations');
+          if (saved) {
+            const presentations = JSON.parse(saved);
+            const localFound = presentations.find(p => p.id === presentationId);
+            if (localFound) {
+              setPresentation(localFound);
+              setSlides(localFound.slides);
+              setTheme(localFound.theme || 'corporate');
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching presentation in presenter:', err);
+        const saved = localStorage.getItem('pulse-poll-presentations');
+        if (saved) {
+          const presentations = JSON.parse(saved);
+          const localFound = presentations.find(p => p.id === presentationId);
+          if (localFound) {
+            setPresentation(localFound);
+            setSlides(localFound.slides);
+            setTheme(localFound.theme || 'corporate');
+          }
+        }
       }
-    }
+    };
+
+    fetchPresentation();
   }, [presentationId]);
 
   useEffect(() => {
@@ -458,16 +494,42 @@ export default function Presenter({ presentationId, onBack }) {
   }, [presentation]);
 
   // Sync theme selection to server on local edit
-  const handleThemeChange = (nextTheme) => {
+  const handleThemeChange = async (nextTheme) => {
     setTheme(nextTheme);
     socketRef.current.emit('change_theme', { roomCode, theme: nextTheme });
     
     // Save theme to localStorage
     const saved = localStorage.getItem('pulse-poll-presentations');
+    let updatedPres = null;
     if (saved) {
       const list = JSON.parse(saved);
-      const updated = list.map(p => p.id === presentationId ? { ...p, theme: nextTheme } : p);
+      const updated = list.map(p => {
+        if (p.id === presentationId) {
+          updatedPres = { ...p, theme: nextTheme };
+          return updatedPres;
+        }
+        return p;
+      });
       localStorage.setItem('pulse-poll-presentations', JSON.stringify(updated));
+    }
+
+    if (!updatedPres && presentation) {
+      updatedPres = { ...presentation, theme: nextTheme };
+    }
+
+    if (updatedPres) {
+      try {
+        await fetch('/api/presentations', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'x-user-email': userEmail
+          },
+          body: JSON.stringify(updatedPres)
+        });
+      } catch (err) {
+        console.error('Error saving updated presentation theme:', err);
+      }
     }
   };
 

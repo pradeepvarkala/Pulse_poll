@@ -117,17 +117,53 @@ export default function Dashboard({ onViewCreator, onViewPresenter, onJoinAudien
     }
   ];
 
+  const user = JSON.parse(localStorage.getItem('pulse-poll-user') || '{}');
+  const userEmail = user.email || 'guest@pulsepoll.com';
+
   useEffect(() => {
-    const saved = localStorage.getItem('pulse-poll-presentations');
-    if (saved) {
-      setPresentations(JSON.parse(saved));
-    } else {
-      localStorage.setItem('pulse-poll-presentations', JSON.stringify(defaultPresentations));
-      setPresentations(defaultPresentations);
-    }
+    const fetchPresentations = async () => {
+      try {
+        const res = await fetch('/api/presentations', {
+          headers: { 'x-user-email': userEmail }
+        });
+        const data = await res.json();
+        
+        if (data && data.length > 0) {
+          // MySQL returns slides as parsed JSON objects in mysql2
+          const parsed = data.map(p => ({
+            ...p,
+            slides: typeof p.slides === 'string' ? JSON.parse(p.slides) : p.slides
+          }));
+          setPresentations(parsed);
+        } else {
+          setPresentations(defaultPresentations);
+          for (const pres of defaultPresentations) {
+            await fetch('/api/presentations', {
+              method: 'POST',
+              headers: { 
+                'Content-Type': 'application/json',
+                'x-user-email': userEmail
+              },
+              body: JSON.stringify(pres)
+            });
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching presentations:', err);
+        const saved = localStorage.getItem('pulse-poll-presentations');
+        if (saved) {
+          setPresentations(JSON.parse(saved));
+        } else {
+          localStorage.setItem('pulse-poll-presentations', JSON.stringify(defaultPresentations));
+          setPresentations(defaultPresentations);
+        }
+      }
+    };
+
+    fetchPresentations();
   }, []);
 
-  const handleCreatePresentation = (e) => {
+  const handleCreatePresentation = async (e) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
 
@@ -154,15 +190,38 @@ export default function Dashboard({ onViewCreator, onViewPresenter, onJoinAudien
     localStorage.setItem('pulse-poll-presentations', JSON.stringify(updated));
     setNewTitle('');
     setIsCreateModalOpen(false);
+
+    try {
+      await fetch('/api/presentations', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-user-email': userEmail
+        },
+        body: JSON.stringify(newPres)
+      });
+    } catch (err) {
+      console.error('Error saving presentation:', err);
+    }
+
     onViewCreator(newPres.id);
   };
 
-  const handleDelete = (id, e) => {
+  const handleDelete = async (id, e) => {
     e.stopPropagation();
     if (confirm('Are you sure you want to delete this presentation?')) {
       const updated = presentations.filter(p => p.id !== id);
       setPresentations(updated);
       localStorage.setItem('pulse-poll-presentations', JSON.stringify(updated));
+
+      try {
+        await fetch(`/api/presentations/${id}`, {
+          method: 'DELETE',
+          headers: { 'x-user-email': userEmail }
+        });
+      } catch (err) {
+        console.error('Error deleting presentation:', err);
+      }
     }
   };
 
