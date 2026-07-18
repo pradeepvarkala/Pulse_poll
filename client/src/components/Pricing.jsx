@@ -4,6 +4,49 @@ import { ArrowLeft, Check, Sparkles, User, Users, Upload, Download, Palette, Shi
 export default function Pricing({ onBack }) {
   const [billingPeriod, setBillingPeriod] = useState('annual'); // annual, monthly
 
+  const handleUpgrade = async (planName) => {
+    if (planName === 'Free') {
+      onBack();
+      return;
+    }
+    if (planName === 'Enterprise') {
+      alert('Contacting enterprise sales team at sales@pulsepoll.com...');
+      return;
+    }
+
+    const user = JSON.parse(localStorage.getItem('pulse-poll-user') || '{}');
+    if (!user || !user.email) {
+      alert('Please log in first to upgrade your account.');
+      return;
+    }
+
+    try {
+      // In production, you will replace these strings with your actual Stripe Price IDs (from Stripe Dashboard)
+      let priceId = '';
+      if (planName === 'Basic') {
+        priceId = billingPeriod === 'annual' ? 'price_basic_annual' : 'price_basic_monthly';
+      } else if (planName === 'Pro') {
+        priceId = billingPeriod === 'annual' ? 'price_pro_annual' : 'price_pro_monthly';
+      }
+
+      const res = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user.email, priceId })
+      });
+      const data = await res.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || 'Failed to initialize Stripe Billing. Make sure STRIPE_SECRET_KEY is configured.');
+      }
+    } catch (err) {
+      console.error('Stripe Redirect Error:', err);
+      alert('Could not open billing portal. Please try again.');
+    }
+  };
+
   const plans = [
     {
       name: 'Free',
@@ -178,7 +221,7 @@ export default function Pricing({ onBack }) {
               <button 
                 className={`btn ${plan.buttonClass}`} 
                 style={{ width: '100%', padding: '12px', fontSize: '0.85rem', fontWeight: 700, borderRadius: '12px', marginBottom: '25px' }}
-                onClick={() => alert(`Upgrading to ${plan.name} plan...`)}
+                onClick={() => handleUpgrade(plan.name)}
               >
                 {plan.buttonText}
               </button>

@@ -7,11 +7,18 @@ import { fileURLToPath } from 'url';
 
 import { Resend } from 'resend';
 import mysql from 'mysql2/promise';
+import jwt from 'jsonwebtoken';
+import Stripe from 'stripe';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
+const JWT_SECRET = process.env.JWT_SECRET || 'pulsepoll-super-secret-jwt-key-2026';
+
+// Store active OTPs in memory for verification
+const activeOtps = {};
 
 // Initialize TiDB Cloud Connection Pool
 const pool = process.env.DATABASE_URL ? mysql.createPool({
@@ -32,6 +39,20 @@ async function initDb() {
     const connection = await pool.getConnection();
     console.log('[Database] Connected to TiDB Cloud MySQL cluster successfully!');
     
+    // Create users table
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        email VARCHAR(255) PRIMARY KEY,
+        name VARCHAR(255),
+        avatar VARCHAR(255),
+        tier VARCHAR(20) DEFAULT 'free',
+        stripe_customer_id VARCHAR(100) DEFAULT NULL,
+        subscription_status VARCHAR(50) DEFAULT 'inactive',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+
     // Create presentations table
     await connection.query(`
       CREATE TABLE IF NOT EXISTS presentations (
@@ -57,7 +78,11 @@ initDb();
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({
+  verify: (req, res, buf) => {
+    req.rawBody = buf;
+  }
+}));
 
 // Serve static React files
 app.use(express.static(path.resolve(__dirname, '..', 'client', 'dist')));
@@ -72,7 +97,9 @@ app.post('/api/send-otp', async (req, res) => {
     return res.status(400).json({ error: 'Email and code are required.' });
   }
 
-  console.log(`[OTP Request] Sending code ${code} to ${email}`);
+  const emailKey = email.trim().toLowerCase();
+  activeOtps[emailKey] = code;
+  console.log(`[OTP Request] Sending code ${code} to ${emailKey}`);
 
   if (!resend) {
     console.log(`[OTP Request] RESEND_API_KEY is not configured. Falling back to simulated login.`);
@@ -86,7 +113,7 @@ app.post('/api/send-otp', async (req, res) => {
   try {
     const { data, error } = await resend.emails.send({
       from: 'PulsePoll <onboarding@resend.dev>',
-      to: email,
+      to: emailKey,
       subject: 'Your PulsePoll Verification Code',
       html: `
         <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
@@ -114,6 +141,175 @@ app.post('/api/send-otp', async (req, res) => {
     console.error('[OTP Error] Exception thrown:', err);
     return res.status(500).json({ error: err.message });
   }
+});
+
+app.post('/api/verify-otp', async (req, res) => {
+  const { email, code } = req.body;
+  if (!email || !code) {
+    return res.status(400).json({ error: 'Email and code are required.' });
+  }
+
+  const emailKey = email.trim().toLowerCase();
+  const expectedCode = activeOtps[emailKey];
+  if (!expectedCode || expectedCode !== code) {
+    return res.status(400).json({ error: 'Invalid verification code.' });
+  }
+
+  delete activeOtps[emailKey];
+
+  let user = {
+    email: emailKey,
+    name: email.split('@')[0],
+    avatar: null,
+    tier: 'free',
+    subscription_status: 'inactive'
+  };
+
+  if (pool) {
+    try {
+      const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [emailKey]);
+      if (rows.length > 0) {
+        user = rows[0];
+      } else {
+        await pool.query(
+          'INSERT INTO users (email, name, avatar, tier, subscription_status) VALUES (?, ?, ?, ?, ?)',
+          [user.email, user.name, user.avatar, user.tier, user.subscription_status]
+        );
+      }
+    } catch (err) {
+      console.error('[Verify OTP DB Error]:', err);
+    }
+  }
+
+  const token = jwt.sign({ email: user.email, tier: user.tier }, JWT_SECRET, { expiresIn: '7d' });
+  res.json({ success: true, token, user });
+});
+
+app.post('/api/auth/google', async (req, res) => {
+  const { name, email, avatar } = req.body;
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required.' });
+  }
+
+  const emailKey = email.trim().toLowerCase();
+  let user = {
+    email: emailKey,
+    name: name || email.split('@')[0],
+    avatar: avatar || null,
+    tier: 'free',
+    subscription_status: 'inactive'
+  };
+
+  if (pool) {
+    try {
+      const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [emailKey]);
+      if (rows.length > 0) {
+        user = rows[0];
+        await pool.query('UPDATE users SET name = ?, avatar = ? WHERE email = ?', [name, avatar, emailKey]);
+        user.name = name;
+        user.avatar = avatar;
+      } else {
+        await pool.query(
+          'INSERT INTO users (email, name, avatar, tier, subscription_status) VALUES (?, ?, ?, ?, ?)',
+          [user.email, user.name, user.avatar, user.tier, user.subscription_status]
+        );
+      }
+    } catch (err) {
+      console.error('[Google Auth DB Error]:', err);
+    }
+  }
+
+  const token = jwt.sign({ email: user.email, tier: user.tier }, JWT_SECRET, { expiresIn: '7d' });
+  res.json({ success: true, token, user });
+});
+
+app.post('/api/create-checkout-session', async (req, res) => {
+  const { email, priceId } = req.body;
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required.' });
+  }
+
+  if (!stripe) {
+    return res.status(500).json({ error: 'Stripe is not configured on this server.' });
+  }
+
+  try {
+    let stripeCustomerId = null;
+    if (pool) {
+      const [rows] = await pool.query('SELECT stripe_customer_id FROM users WHERE email = ?', [email]);
+      if (rows.length > 0) {
+        stripeCustomerId = rows[0].stripe_customer_id;
+      }
+    }
+
+    if (!stripeCustomerId) {
+      const customer = await stripe.customers.create({ email });
+      stripeCustomerId = customer.id;
+      
+      if (pool) {
+        await pool.query('UPDATE users SET stripe_customer_id = ? WHERE email = ?', [stripeCustomerId, email]);
+      }
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      customer: stripeCustomerId,
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price: priceId || 'price_placeholder_id',
+          quantity: 1,
+        },
+      ],
+      mode: 'subscription',
+      success_url: `${req.headers.origin}/dashboard?session_id={CHECKOUT_SESSION_ID}&payment=success`,
+      cancel_url: `${req.headers.origin}/pricing?payment=cancel`,
+    });
+
+    res.json({ url: session.url });
+  } catch (err) {
+    console.error('[Stripe Session Error]:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/webhooks/stripe', async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+  if (!stripe) {
+    return res.status(500).send('Stripe not configured');
+  }
+
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(req.rawBody, sig, webhookSecret);
+  } catch (err) {
+    console.error(`❌ Webhook Error: ${err.message}`);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  if (event.type === 'checkout.session.completed' || event.type === 'customer.subscription.updated') {
+    const session = event.data.object;
+    const customerId = session.customer;
+    const status = session.status || session.subscription_status || 'active';
+    
+    const tier = 'pro'; 
+
+    if (pool) {
+      try {
+        await pool.query(
+          'UPDATE users SET tier = ?, subscription_status = ? WHERE stripe_customer_id = ?',
+          [tier, status, customerId]
+        );
+        console.log(`[Stripe Webhook] Successfully updated customer ${customerId} to pro tier.`);
+      } catch (dbErr) {
+        console.error('[Stripe Webhook DB Error]:', dbErr);
+      }
+    }
+  }
+
+  res.json({ received: true });
 });
 
 // Database REST APIs for Presentations
@@ -226,9 +422,21 @@ io.on('connection', (socket) => {
   console.log(`Socket connected: ${socket.id}`);
 
   // 1. Host Room
-  socket.on('host_presentation', ({ slides, presentationId, theme }) => {
+  socket.on('host_presentation', async ({ slides, presentationId, theme, userEmail }) => {
     const roomCode = generateRoomCode();
     
+    let hostTier = 'free';
+    if (pool && userEmail) {
+      try {
+        const [rows] = await pool.query('SELECT tier FROM users WHERE email = ?', [userEmail]);
+        if (rows.length > 0) {
+          hostTier = rows[0].tier;
+        }
+      } catch (err) {
+        console.error('Error fetching host tier on host_room:', err);
+      }
+    }
+
     rooms[roomCode] = {
       roomCode,
       presentationId,
@@ -238,6 +446,7 @@ io.on('connection', (socket) => {
       answersVisible: true,
       leaderboardVisible: false,
       theme: theme || 'neon',
+      hostTier,
       slides: slides.map((slide) => ({
         ...slide,
         responses: slide.type === 'poll' ? {} : []
@@ -254,7 +463,7 @@ io.on('connection', (socket) => {
       theme: rooms[roomCode].theme
     });
 
-    console.log(`Presentation hosted. Code: ${roomCode}, Theme: ${rooms[roomCode].theme}`);
+    console.log(`Presentation hosted. Code: ${roomCode}, Theme: ${rooms[roomCode].theme}, Tier: ${hostTier}`);
   });
 
   // 2. Join Room
@@ -262,6 +471,14 @@ io.on('connection', (socket) => {
     const room = rooms[roomCode];
     if (!room) {
       return callback({ success: false, message: 'Room not found. Please check the code.' });
+    }
+
+    const currentParticipantCount = Object.keys(room.participants).length;
+    if (room.hostTier === 'free' && currentParticipantCount >= 5) {
+      return callback({ 
+        success: false, 
+        message: 'This presentation room is at maximum capacity (5 participants) on the Free Tier. Please ask the presenter to upgrade to a paid plan!' 
+      });
     }
 
     socket.join(roomCode);

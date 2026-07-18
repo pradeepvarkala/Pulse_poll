@@ -443,7 +443,8 @@ export default function Presenter({ presentationId, onBack }) {
     socket.emit('host_presentation', {
       presentationId: presentation.id,
       slides: presentation.slides,
-      theme: presentation.theme || 'corporate'
+      theme: presentation.theme || 'corporate',
+      userEmail: user.email
     });
 
     socket.on('presentation_hosted', ({ roomCode, currentSlideIndex: idx, slides: hostedSlides, theme: hostTheme }) => {
@@ -495,6 +496,11 @@ export default function Presenter({ presentationId, onBack }) {
 
   // Sync theme selection to server on local edit
   const handleThemeChange = async (nextTheme) => {
+    if (nextTheme !== 'corporate' && (!user || user.tier === 'free')) {
+      alert('Custom themes (Ocean, Sunset, Slate) are a premium feature! Please upgrade to a paid plan on your Dashboard.');
+      return;
+    }
+
     setTheme(nextTheme);
     socketRef.current.emit('change_theme', { roomCode, theme: nextTheme });
     

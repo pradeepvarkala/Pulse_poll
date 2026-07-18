@@ -43,8 +43,8 @@ export default function Auth({ onLoginSuccess }) {
     }
   }, [toastMessage]);
 
-  // Decode Google JWT Token
-  const handleCredentialResponse = (response) => {
+  // Decode Google JWT Token and authenticate with backend
+  const handleCredentialResponse = async (response) => {
     try {
       const base64Url = response.credential.split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -53,18 +53,28 @@ export default function Auth({ onLoginSuccess }) {
       }).join(''));
 
       const profile = JSON.parse(jsonPayload);
-      const userProfile = {
-        name: profile.name,
-        email: profile.email,
-        avatar: profile.picture,
-        provider: 'google',
-        createdAt: new Date().toLocaleDateString()
-      };
-      localStorage.setItem('pulse-poll-user', JSON.stringify(userProfile));
-      onLoginSuccess(userProfile);
+      
+      const authResponse = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: profile.name,
+          email: profile.email,
+          avatar: profile.picture
+        })
+      });
+      const data = await authResponse.json();
+
+      if (authResponse.ok) {
+        localStorage.setItem('pulse-poll-user', JSON.stringify(data.user));
+        localStorage.setItem('pulse-poll-token', data.token);
+        onLoginSuccess(data.user);
+      } else {
+        setErrorMsg(data.error || 'Google Authentication failed on the server.');
+      }
     } catch (err) {
-      console.error('Failed to decode Google credential:', err);
-      setErrorMsg('Google Sign-In failed. Please try again.');
+      console.error('Failed to authenticate Google credential:', err);
+      setErrorMsg('Google Sign-In failed. Please check your internet connection.');
     }
   };
 
@@ -145,23 +155,28 @@ export default function Auth({ onLoginSuccess }) {
     }
   };
 
-  const handleVerifyCode = (e) => {
+  const handleVerifyCode = async (e) => {
     e.preventDefault();
     setErrorMsg('');
 
-    if (verificationCode.trim() === generatedCode) {
-      // Success! Save mock profile to localStorage
-      const userProfile = {
-        name: email.split('@')[0],
-        email: email.trim(),
-        avatar: null,
-        provider: 'email',
-        createdAt: new Date().toLocaleDateString()
-      };
-      localStorage.setItem('pulse-poll-user', JSON.stringify(userProfile));
-      onLoginSuccess(userProfile);
-    } else {
-      setErrorMsg('Invalid verification code. Please check your simulated inbox!');
+    try {
+      const response = await fetch('/api/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), code: verificationCode.trim() })
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem('pulse-poll-user', JSON.stringify(data.user));
+        localStorage.setItem('pulse-poll-token', data.token);
+        onLoginSuccess(data.user);
+      } else {
+        setErrorMsg(data.error || 'Invalid verification code. Please check your inbox.');
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMsg('Network error verifying code. Please try again.');
     }
   };
 
