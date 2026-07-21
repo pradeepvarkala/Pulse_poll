@@ -288,7 +288,13 @@ export default function Presenter({ presentationId, onBack }) {
     setCorrectRevealed(false);
     setResultsVisible(true);
     setConfettiActive(false);
-  }, [currentSlideIndex]);
+    if (stopwatchIntervalRef.current) clearInterval(stopwatchIntervalRef.current);
+    setStopwatchActive(false);
+    if (slides && slides[currentSlideIndex]) {
+      const activeSlide = slides[currentSlideIndex];
+      setStopwatchTime((activeSlide.timeLimit || 15) * 1000);
+    }
+  }, [currentSlideIndex, slides]);
 
   const handleRevealCorrect = () => {
     if (correctRevealed) {
@@ -311,6 +317,11 @@ export default function Presenter({ presentationId, onBack }) {
   const timerIntervalRef = useRef(null);
   const musicOscillatorsRef = useRef([]);
   const musicIntervalRef = useRef(null);
+
+  // Stopwatch / Timer slide states
+  const [stopwatchTime, setStopwatchTime] = useState(15000);
+  const [stopwatchActive, setStopwatchActive] = useState(false);
+  const stopwatchIntervalRef = useRef(null);
 
   const socketRef = useRef(null);
 
@@ -597,6 +608,48 @@ export default function Presenter({ presentationId, onBack }) {
     const nextState = !leaderboardVisible;
     setLeaderboardVisible(nextState);
     socketRef.current.emit('toggle_leaderboard', { roomCode, visible: nextState });
+  };
+
+  const handleCategorizeCard = (cardId, category) => {
+    socketRef.current.emit('update_brainstorm_category', { roomCode, cardId, category });
+    setSlides(prev => prev.map((s, idx) => {
+      if (idx === currentSlideIndex) {
+        const updatedResponses = (s.responses || []).map(r => r.id === cardId ? { ...r, category } : r);
+        return { ...s, responses: updatedResponses };
+      }
+      return s;
+    }));
+  };
+
+  const handleStartStopwatch = () => {
+    if (stopwatchActive) {
+      setStopwatchActive(false);
+      if (stopwatchIntervalRef.current) clearInterval(stopwatchIntervalRef.current);
+      socketRef.current.emit('stopwatch_control', { roomCode, action: 'pause', remainingTime: stopwatchTime });
+    } else {
+      setStopwatchActive(true);
+      const startTime = Date.now();
+      const startRemaining = stopwatchTime;
+      stopwatchIntervalRef.current = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(0, startRemaining - elapsed);
+        setStopwatchTime(remaining);
+        if (remaining <= 0) {
+          setStopwatchActive(false);
+          if (stopwatchIntervalRef.current) clearInterval(stopwatchIntervalRef.current);
+          socketRef.current.emit('stopwatch_control', { roomCode, action: 'pause', remainingTime: 0 });
+        }
+      }, 33);
+      socketRef.current.emit('stopwatch_control', { roomCode, action: 'start', remainingTime: startRemaining });
+    }
+  };
+
+  const handleResetStopwatch = () => {
+    setStopwatchActive(false);
+    if (stopwatchIntervalRef.current) clearInterval(stopwatchIntervalRef.current);
+    const initialMs = (activeSlide.timeLimit || 15) * 1000;
+    setStopwatchTime(initialMs);
+    socketRef.current.emit('stopwatch_control', { roomCode, action: 'reset', remainingTime: initialMs });
   };
 
   const clearResponses = () => {
@@ -1688,6 +1741,218 @@ export default function Presenter({ presentationId, onBack }) {
                       )}
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* 13. Stopwatch / Timer */}
+              {activeSlide.type === 'stopwatch' && (
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '30px', padding: '20px' }}>
+                  <div style={{
+                    fontSize: '6rem', 
+                    fontWeight: 900, 
+                    fontFamily: 'monospace', 
+                    color: 'var(--primary)', 
+                    letterSpacing: '4px',
+                    textShadow: '0 0 40px rgba(6, 182, 212, 0.4)',
+                    background: 'rgba(255, 255, 255, 0.03)',
+                    padding: '20px 50px',
+                    borderRadius: '24px',
+                    border: '1px solid var(--border-glass)',
+                    minWidth: '450px',
+                    textAlign: 'center'
+                  }}>
+                    {Math.floor(stopwatchTime / 60000).toString().padStart(2, '0')}:
+                    {Math.floor((stopwatchTime % 60000) / 1000).toString().padStart(2, '0')}.
+                    {(stopwatchTime % 1000).toString().padStart(3, '0')}
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '15px' }}>
+                    <button 
+                      className={`btn ${stopwatchActive ? 'btn-secondary' : 'btn-primary'}`} 
+                      style={{ padding: '12px 30px', fontWeight: 800, minWidth: '150px' }}
+                      onClick={handleStartStopwatch}
+                    >
+                      {stopwatchActive ? 'Pause' : 'Start Timer'}
+                    </button>
+                    <button 
+                      className="btn btn-secondary" 
+                      style={{ padding: '12px 30px', fontWeight: 800 }}
+                      onClick={handleResetStopwatch}
+                    >
+                      Reset
+                    </button>
+                  </div>
+
+                  <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', maxWidth: '400px', textAlign: 'center' }}>
+                    This countdown stopwatch runs down to millisecond precision. The timer state synchronizes automatically to all participant screens!
+                  </p>
+                </div>
+              )}
+
+              {/* 14. Brainstorm Category Grouping */}
+              {activeSlide.type === 'brainstorm' && (
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '24px', padding: '10px' }}>
+                  {/* Category Grids (4 Columns) */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+                    {['Category 1', 'Category 2', 'Category 3', 'Category 4'].map((defaultLabel, idx) => {
+                      const colId = `category${idx + 1}`;
+                      const colLabel = activeSlide[colId] || defaultLabel;
+                      const cards = (activeSlide.responses || []).filter(r => r.category === colId);
+                      
+                      return (
+                        <div 
+                          key={colId} 
+                          onDragOver={(e) => e.preventDefault()}
+                          onDrop={(e) => {
+                            const cardId = e.dataTransfer.getData('text/plain');
+                            handleCategorizeCard(cardId, colId);
+                          }}
+                          style={{ 
+                            background: 'rgba(255, 255, 255, 0.02)', 
+                            border: '2px dashed var(--border-glass)', 
+                            borderRadius: '16px', 
+                            padding: '16px', 
+                            minHeight: '280px', 
+                            display: 'flex', 
+                            flexDirection: 'column', 
+                            transition: 'var(--transition-smooth)' 
+                          }}
+                        >
+                          <h3 style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--primary)', borderBottom: '1px solid var(--border-glass)', paddingBottom: '6px', marginBottom: '12px', textAlign: 'center' }}>
+                            📁 {colLabel}
+                          </h3>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
+                            {cards.map(card => (
+                              <div 
+                                key={card.id}
+                                draggable
+                                onDragStart={(e) => e.dataTransfer.setData('text/plain', card.id)}
+                                style={{ 
+                                  background: 'linear-gradient(135deg, #fef08a, #fef9c3)', 
+                                  color: '#854d0e',
+                                  padding: '12px', 
+                                  borderRadius: '8px', 
+                                  boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
+                                  fontSize: '0.85rem',
+                                  fontWeight: 700,
+                                  cursor: 'grab',
+                                  transform: 'rotate(-1deg)',
+                                  position: 'relative'
+                                }}
+                              >
+                                {card.text}
+                                <span style={{ display: 'block', fontSize: '0.65rem', color: '#a16207', marginTop: '4px', opacity: 0.8 }}>
+                                  👤 {card.nickname}
+                                </span>
+                                
+                                {/* Quick Mobile Categorize Tags */}
+                                <div style={{ display: 'flex', gap: '3px', marginTop: '8px', borderTop: '1px dashed rgba(161, 98, 7, 0.2)', paddingTop: '6px' }}>
+                                  {[1, 2, 3, 4].map(cNum => (
+                                    <button
+                                      key={cNum}
+                                      style={{
+                                        background: 'rgba(161, 98, 7, 0.1)',
+                                        border: 'none',
+                                        borderRadius: '3px',
+                                        fontSize: '0.6rem',
+                                        padding: '2px 4px',
+                                        color: '#854d0e',
+                                        cursor: 'pointer'
+                                      }}
+                                      onClick={() => handleCategorizeCard(card.id, `category${cNum}`)}
+                                    >
+                                      C{cNum}
+                                    </button>
+                                  ))}
+                                  <button
+                                    style={{
+                                      background: 'rgba(239, 68, 68, 0.1)',
+                                      border: 'none',
+                                      borderRadius: '3px',
+                                      fontSize: '0.6rem',
+                                      padding: '2px 4px',
+                                      color: '#b91c1c',
+                                      cursor: 'pointer',
+                                      marginLeft: 'auto'
+                                    }}
+                                    onClick={() => handleCategorizeCard(card.id, null)}
+                                    title="Move to Pool"
+                                  >
+                                    ↩ Pool
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Incoming Unsorted Pool */}
+                  <div style={{ background: 'rgba(255, 255, 255, 0.01)', border: '1px solid var(--border-glass)', borderRadius: '16px', padding: '16px' }}>
+                    <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '12px' }}>
+                      📥 Incoming Responses Pool (Drag to categories above or use C1-C4 shortcuts)
+                    </h4>
+                    <div 
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={(e) => {
+                        const cardId = e.dataTransfer.getData('text/plain');
+                        handleCategorizeCard(cardId, null);
+                      }}
+                      style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', minHeight: '80px', padding: '8px', borderRadius: '8px' }}
+                    >
+                      {(activeSlide.responses || []).filter(r => r.category === null || r.category === undefined).map(card => (
+                        <div 
+                          key={card.id}
+                          draggable
+                          onDragStart={(e) => e.dataTransfer.setData('text/plain', card.id)}
+                          style={{ 
+                            background: 'linear-gradient(135deg, #a7f3d0, #ecfdf5)', 
+                            color: '#065f46',
+                            padding: '12px 16px', 
+                            borderRadius: '8px', 
+                            boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+                            fontSize: '0.85rem',
+                            fontWeight: 700,
+                            cursor: 'grab',
+                            transform: 'rotate(1.5deg)',
+                            position: 'relative'
+                          }}
+                        >
+                          {card.text}
+                          <span style={{ display: 'block', fontSize: '0.65rem', color: '#047857', marginTop: '4px', opacity: 0.8 }}>
+                            👤 {card.nickname}
+                          </span>
+
+                          <div style={{ display: 'flex', gap: '3px', marginTop: '6px', borderTop: '1px dashed rgba(4, 120, 87, 0.2)', paddingTop: '6px' }}>
+                            {[1, 2, 3, 4].map(cNum => (
+                              <button
+                                key={cNum}
+                                style={{
+                                  background: 'rgba(4, 120, 87, 0.1)',
+                                  border: 'none',
+                                  borderRadius: '3px',
+                                  fontSize: '0.6rem',
+                                  padding: '2px 4px',
+                                  color: '#065f46',
+                                  cursor: 'pointer'
+                                }}
+                                onClick={() => handleCategorizeCard(card.id, `category${cNum}`)}
+                              >
+                                C{cNum}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                      {(activeSlide.responses || []).filter(r => r.category === null || r.category === undefined).length === 0 && (
+                        <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', margin: 'auto' }}>
+                          Waiting for participants to submit ideas...
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
             </>

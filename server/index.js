@@ -655,10 +655,19 @@ io.on('connection', (socket) => {
       if (form) {
         currentSlide.responses.push({ form });
       }
-    } else if (currentSlide.type === 'pin') {
-      const { x, y } = response; // { x, y } percentages
-      if (x !== undefined && y !== undefined) {
-        currentSlide.responses.push({ x, y });
+    } else if (currentSlide.type === 'brainstorm') {
+      const { words } = response;
+      if (Array.isArray(words)) {
+        words.forEach(w => {
+          if (w && w.trim()) {
+            currentSlide.responses.push({
+              id: Math.random().toString(36).substr(2, 9),
+              text: w.trim(),
+              category: null,
+              nickname
+            });
+          }
+        });
       }
     }
 
@@ -697,8 +706,31 @@ io.on('connection', (socket) => {
       if (question) {
         question.answered = true;
         io.to(roomCode).emit('qa_updated', { responses: currentSlide.responses });
+    }
+  });
+
+  // Brainstorm & Stopwatch sync helpers
+  socket.on('update_brainstorm_category', ({ roomCode, cardId, category }) => {
+    const room = rooms[roomCode];
+    if (!room) return;
+    const currentSlide = room.slides[room.currentSlideIndex];
+    if (currentSlide.type === 'brainstorm') {
+      const card = currentSlide.responses.find(r => r.id === cardId);
+      if (card) {
+        card.category = category;
+        io.to(roomCode).emit('responses_updated', {
+          slideIndex: room.currentSlideIndex,
+          responses: currentSlide.responses,
+          leaderboard: room.leaderboard
+        });
       }
     }
+  });
+
+  socket.on('stopwatch_control', ({ roomCode, action, remainingTime }) => {
+    const room = rooms[roomCode];
+    if (!room) return;
+    io.to(roomCode).emit('stopwatch_synced', { action, remainingTime });
   });
 
   // 7. Toggle answers visibility

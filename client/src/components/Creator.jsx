@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ArrowLeft, Plus, Trash2, Play, BarChart3, Cloud, HelpCircle, 
-  Trophy, Sliders, ArrowDownUp, Hash, Grid3X3, FileSpreadsheet, MapPin, AlignLeft 
+  Trophy, Sliders, ArrowDownUp, Hash, Grid3X3, FileSpreadsheet, MapPin, AlignLeft, Timer 
 } from 'lucide-react';
 
 const AVAILABLE_THEMES = [
@@ -782,6 +782,37 @@ export default function Creator({ presentationId, onBack, onPresent }) {
                   </button>
                 </div>
               )}
+
+              {activeSlide.type === 'stopwatch' && (
+                <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+                  <div style={{ fontSize: '3.5rem', fontWeight: 800, fontFamily: 'monospace', color: 'var(--primary)', letterSpacing: '2px', background: 'rgba(255, 255, 255, 0.02)', padding: '10px 24px', borderRadius: '12px', border: '1px solid var(--border-glass)' }}>
+                    00:{activeSlide.timeLimit < 10 ? `0${activeSlide.timeLimit}` : activeSlide.timeLimit}.000
+                  </div>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    ⏳ Interactive Timer Mode. Set preset duration (10s, 15s, 20s, 30s, 60s) in sidebar.
+                  </p>
+                </div>
+              )}
+
+              {activeSlide.type === 'brainstorm' && (
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
+                    {['Category A', 'Category B', 'Category C', 'Category D'].map((cat, idx) => {
+                      const categoryLabel = activeSlide[`category${idx + 1}`] || cat;
+                      return (
+                        <div key={idx} style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed var(--border-glass)', borderRadius: '12px', padding: '12px', minHeight: '140px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                          <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--primary)', borderBottom: '1px solid var(--border-glass)', width: '100%', textAlign: 'center', paddingBottom: '4px', marginBottom: '8px' }}>
+                            {categoryLabel}
+                          </span>
+                          <div className="animate-pulse" style={{ background: 'var(--primary-glow)', padding: '6px 10px', borderRadius: '8px', fontSize: '0.7rem', border: '1px solid var(--border-glass)', color: '#f8fafc', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
+                            📝 Sticky Note
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -906,6 +937,20 @@ export default function Creator({ presentationId, onBack, onPresent }) {
                   >
                     <Trophy size={12} /> Quiz
                   </button>
+                  <button 
+                    className={`btn btn-secondary ${activeSlide.type === 'stopwatch' ? 'btn-primary' : ''}`}
+                    style={{ padding: '6px 8px', fontSize: '0.75rem', gap: '4px' }}
+                    onClick={() => handleChangeSlideType('stopwatch')}
+                  >
+                    <Timer size={12} /> Stopwatch
+                  </button>
+                  <button 
+                    className={`btn btn-secondary ${activeSlide.type === 'brainstorm' ? 'btn-primary' : ''}`}
+                    style={{ padding: '6px 8px', fontSize: '0.75rem', gap: '4px' }}
+                    onClick={() => handleChangeSlideType('brainstorm')}
+                  >
+                    <Grid3X3 size={12} /> Brainstorm Grids
+                  </button>
                 </div>
               </div>
             </div>
@@ -1027,6 +1072,72 @@ export default function Creator({ presentationId, onBack, onPresent }) {
                     onChange={(e) => handleUpdateActiveSlide({ correctNumber: Number(e.target.value) || 0 })}
                   />
                 </div>
+              )}
+
+              {/* Stopwatch presets */}
+              {activeSlide.type === 'stopwatch' && (
+                <div className="settings-group">
+                  <label>Timer Duration Presets</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px', marginTop: '6px' }}>
+                    {[10, 15, 20, 30, 60].map((sec) => (
+                      <button
+                        key={sec}
+                        type="button"
+                        className={`btn ${activeSlide.timeLimit === sec ? 'btn-primary' : 'btn-secondary'}`}
+                        style={{ padding: '6px 2px', fontSize: '0.75rem', fontWeight: 800 }}
+                        onClick={() => handleUpdateActiveSlide({ timeLimit: sec })}
+                      >
+                        {sec}s
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Brainstorm Categories */}
+              {activeSlide.type === 'brainstorm' && (
+                <>
+                  <div className="settings-group">
+                    <label>Grid Category 1</label>
+                    <input 
+                      type="text" 
+                      className="input-text"
+                      value={activeSlide.category1 || ''}
+                      onChange={(e) => handleUpdateActiveSlide({ category1: e.target.value })}
+                      placeholder="e.g. Category A"
+                    />
+                  </div>
+                  <div className="settings-group">
+                    <label>Grid Category 2</label>
+                    <input 
+                      type="text" 
+                      className="input-text"
+                      value={activeSlide.category2 || ''}
+                      onChange={(e) => handleUpdateActiveSlide({ category2: e.target.value })}
+                      placeholder="e.g. Category B"
+                    />
+                  </div>
+                  <div className="settings-group">
+                    <label>Grid Category 3</label>
+                    <input 
+                      type="text" 
+                      className="input-text"
+                      value={activeSlide.category3 || ''}
+                      onChange={(e) => handleUpdateActiveSlide({ category3: e.target.value })}
+                      placeholder="e.g. Category C"
+                    />
+                  </div>
+                  <div className="settings-group">
+                    <label>Grid Category 4</label>
+                    <input 
+                      type="text" 
+                      className="input-text"
+                      value={activeSlide.category4 || ''}
+                      onChange={(e) => handleUpdateActiveSlide({ category4: e.target.value })}
+                      placeholder="e.g. Category D"
+                    />
+                  </div>
+                </>
               )}
             </div>
           )}

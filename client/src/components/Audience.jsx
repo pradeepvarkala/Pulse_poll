@@ -20,7 +20,7 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
   const [hasVoted, setHasVoted] = useState(false);
   const [selectedOptionId, setSelectedOptionId] = useState(null);
   const [selectedQuizIndex, setSelectedQuizIndex] = useState(null);
-  const [wordCloudInputs, setWordCloudInputs] = useState(['', '', '']);
+  const [wordCloudInputs, setWordCloudInputs] = useState(['', '', '', '']);
   const [qaText, setQaText] = useState('');
   const [leaderboard, setLeaderboard] = useState({});
   const [leaderboardVisible, setLeaderboardVisible] = useState(false);
@@ -34,6 +34,12 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
   const [gridCoords, setGridCoords] = useState({}); // { [optId]: { x, y } }
   const [formData, setFormData] = useState({}); // { [fieldName]: value }
   const [localPin, setLocalPin] = useState(null); // { x, y } percentages
+
+  // Stopwatch / Brainstorm states
+  const [stopwatchTime, setStopwatchTime] = useState(15000);
+  const [stopwatchActive, setStopwatchActive] = useState(false);
+  const stopwatchIntervalRef = useRef(null);
+  const [brainstormInputs, setBrainstormInputs] = useState(['', '']);
 
   // Focus Mode (Anti-Cheat) states
   const [isLockedOut, setIsLockedOut] = useState(false);
@@ -196,6 +202,9 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
       activeSlide.options?.forEach(opt => { initial[opt.text] = ''; });
       setFormData(initial);
     }
+    else if (activeSlide.type === 'brainstorm') {
+      setBrainstormInputs(['', '']);
+    }
     setLocalPin(null);
   };
 
@@ -209,13 +218,18 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
       setHasVoted(false);
       setSelectedOptionId(null);
       setSelectedQuizIndex(null);
-      setWordCloudInputs(['', '', '']);
+      setWordCloudInputs(['', '', '', '']);
       setOpenEndedText('');
       setGuessValue('');
       setIsLockedOut(false);
       setShowFocusWarningModal(false);
       setFocusWarnings(2);
       
+      if (stopwatchIntervalRef.current) clearInterval(stopwatchIntervalRef.current);
+      setStopwatchActive(false);
+      setStopwatchTime((newSlide.timeLimit || 15) * 1000);
+      setBrainstormInputs(['', '']);
+
       initializeSlideInputs(newSlide);
 
       if (newSlide.timeLimit > 0 && newSlide.timerAutoStart === false) {
@@ -272,11 +286,41 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
       setHasVoted(false);
       setSelectedOptionId(null);
       setSelectedQuizIndex(null);
-      setWordCloudInputs(['', '', '']);
+      setWordCloudInputs(['', '', '', '']);
       setOpenEndedText('');
       setGuessValue('');
       setLocalPin(null);
+      if (stopwatchIntervalRef.current) clearInterval(stopwatchIntervalRef.current);
+      setStopwatchActive(false);
+      setStopwatchTime((slide?.timeLimit || 15) * 1000);
+      setBrainstormInputs(['', '']);
       initializeSlideInputs(slide);
+    });
+
+    socket.on('stopwatch_synced', ({ action, remainingTime }) => {
+      setStopwatchTime(remainingTime);
+      if (action === 'start') {
+        setStopwatchActive(true);
+        const startTime = Date.now();
+        const startRemaining = remainingTime;
+        if (stopwatchIntervalRef.current) clearInterval(stopwatchIntervalRef.current);
+        stopwatchIntervalRef.current = setInterval(() => {
+          const elapsed = Date.now() - startTime;
+          const remaining = Math.max(0, startRemaining - elapsed);
+          setStopwatchTime(remaining);
+          if (remaining <= 0) {
+            setStopwatchActive(false);
+            if (stopwatchIntervalRef.current) clearInterval(stopwatchIntervalRef.current);
+          }
+        }, 33);
+      } else if (action === 'pause' || action === 'stop') {
+        setStopwatchActive(false);
+        if (stopwatchIntervalRef.current) clearInterval(stopwatchIntervalRef.current);
+      } else if (action === 'reset') {
+        setStopwatchActive(false);
+        if (stopwatchIntervalRef.current) clearInterval(stopwatchIntervalRef.current);
+        setStopwatchTime(remainingTime);
+      }
     });
 
     socket.on('room_closed', () => {
@@ -323,6 +367,17 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
     e.preventDefault();
     const validWords = wordCloudInputs.filter(w => w.trim().length > 0);
     if (validWords.length === 0) return;
+    handleSubmitResponse({ words: validWords });
+  };
+
+  // Brainstorm
+  const handleBrainstormSubmit = (e) => {
+    e.preventDefault();
+    const validWords = brainstormInputs.filter(w => w.trim().length > 0);
+    if (validWords.length !== 2) {
+      alert("Please enter exactly 2 words/opinions to submit!");
+      return;
+    }
     handleSubmitResponse({ words: validWords });
   };
 
@@ -967,6 +1022,63 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
                       Submit Pin Location
                     </button>
                   </div>
+                )}
+
+                {/* 13. Stopwatch / Countdown */}
+                {slide?.type === 'stopwatch' && (
+                  <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', padding: '10px' }}>
+                    <div style={{
+                      fontSize: '4.5rem', 
+                      fontWeight: 900, 
+                      fontFamily: 'monospace', 
+                      color: 'var(--primary)', 
+                      letterSpacing: '2px',
+                      textShadow: '0 0 30px rgba(6, 182, 212, 0.3)',
+                      background: 'rgba(255, 255, 255, 0.03)',
+                      padding: '15px 30px',
+                      borderRadius: '16px',
+                      border: '1px solid var(--border-glass)',
+                      textAlign: 'center',
+                      width: '100%',
+                      maxWidth: '320px'
+                    }}>
+                      {Math.floor(stopwatchTime / 60000).toString().padStart(2, '0')}:
+                      {Math.floor((stopwatchTime % 60000) / 1000).toString().padStart(2, '0')}.
+                      {(stopwatchTime % 1000).toString().padStart(3, '0')}
+                    </div>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600, textAlign: 'center' }}>
+                      {stopwatchActive ? '⏱️ Timer Ticking...' : '⏸️ Timer Paused / Waiting'}
+                    </span>
+                  </div>
+                )}
+
+                {/* 14. Brainstorm Ideas (exactly 2 inputs) */}
+                {slide?.type === 'brainstorm' && (
+                  <form onSubmit={handleBrainstormSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textAlign: 'center', marginBottom: '5px' }}>
+                      Submit your top 2 ideas/opinions to the board:
+                    </p>
+                    {[0, 1].map((idx) => (
+                      <input 
+                        key={idx}
+                        type="text"
+                        maxLength="30"
+                        className="input-text"
+                        placeholder={`Idea #${idx + 1} (Max 30 characters)`}
+                        value={brainstormInputs[idx] || ''}
+                        onChange={(e) => {
+                          const updated = [...brainstormInputs];
+                          updated[idx] = e.target.value;
+                          setBrainstormInputs(updated);
+                        }}
+                        required
+                        style={{ textAlign: 'center' }}
+                      />
+                    ))}
+                    <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '10px' }} disabled={brainstormInputs.some(w => !w.trim())}>
+                      Submit Ideas 🚀
+                    </button>
+                  </form>
                 )}
               </>
             )}
