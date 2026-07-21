@@ -6,12 +6,14 @@ import Audience from './components/Audience';
 import Auth from './components/Auth';
 import AdminPanel from './components/AdminPanel';
 import Pricing from './components/Pricing';
+import LandingPage from './components/LandingPage';
 import { Presentation as PresIcon, User as UserIcon, Settings } from 'lucide-react';
 
 export default function App() {
   const [view, setView] = useState('dashboard'); // dashboard, creator, presenter, audience, admin
   const [selectedPresentationId, setSelectedPresentationId] = useState(null);
   const [urlRoomCode, setUrlRoomCode] = useState('');
+  const [authMode, setAuthMode] = useState(null); // null (shows landing page), 'login', 'signup'
   
   // Authentication state
   const [user, setUser] = useState(null);
@@ -76,15 +78,33 @@ export default function App() {
       <Audience 
         defaultRoomCode={urlRoomCode}
         onBackToMenu={() => {
-          window.location.href = '/'; // redirect to root to trigger login if they leave
+          setView('dashboard');
+          setAuthMode(null);
+          window.history.pushState({}, '', '/');
         }}
       />
     );
   }
 
-  // Redirect to Auth if not logged in
+  // Redirect to Auth or Landing page if not logged in
   if (!user) {
-    return <Auth onLoginSuccess={handleLoginSuccess} />;
+    if (authMode === 'login' || authMode === 'signup') {
+      return (
+        <Auth 
+          onLoginSuccess={handleLoginSuccess} 
+          onBackToLanding={() => setAuthMode(null)} 
+        />
+      );
+    }
+    return (
+      <LandingPage 
+        onStartAuth={(mode) => setAuthMode(mode)} 
+        onJoinRoom={(code) => {
+          setUrlRoomCode(code);
+          setView('audience');
+        }}
+      />
+    );
   }
 
   return (

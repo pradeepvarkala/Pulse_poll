@@ -20,7 +20,7 @@ const MicrosoftIcon = () => (
   </svg>
 );
 
-export default function Auth({ onLoginSuccess }) {
+export default function Auth({ onLoginSuccess, onBackToLanding }) {
   const [email, setEmail] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [generatedCode, setGeneratedCode] = useState(null);
@@ -211,7 +211,17 @@ export default function Auth({ onLoginSuccess }) {
         </div>
       )}
 
-      <div className="glass-card auth-card">
+      <div className="glass-card auth-card" style={{ position: 'relative' }}>
+        {onBackToLanding && (
+          <button 
+            type="button"
+            className="btn btn-secondary"
+            style={{ position: 'absolute', top: '16px', left: '16px', padding: '6px 12px', fontSize: '0.8rem', zIndex: 10 }}
+            onClick={onBackToLanding}
+          >
+            ← Home
+          </button>
+        )}
         <div style={{ textAlign: 'center' }}>
           <div className="logo-icon" style={{ width: '48px', height: '48px', margin: '0 auto 16px auto' }}>
             <KeyRound size={24} color="white" />

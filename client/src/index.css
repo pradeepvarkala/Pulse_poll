@@ -2094,6 +2094,22 @@ h1, h2, h3, h4, h5, h6 {
   50% { transform: translateY(-15px) scale(1.06); }
 }
 
+.dropdown-link {
+  display: block;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.dropdown-link:hover {
+  background: var(--primary-glow);
+  color: var(--primary);
+  transform: translateX(4px);
+}
+
 
 
 
