@@ -706,6 +706,7 @@ io.on('connection', (socket) => {
       if (question) {
         question.answered = true;
         io.to(roomCode).emit('qa_updated', { responses: currentSlide.responses });
+      }
     }
   });
 
