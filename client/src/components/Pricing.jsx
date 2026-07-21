@@ -1,16 +1,13 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Check, Sparkles, User, Users, Upload, Download, Palette, Shield, Settings, HelpCircle, PhoneCall } from 'lucide-react';
+import { ArrowLeft, Check, Sparkles, User, Users, Upload, Download, Palette, Shield, Settings, HelpCircle, PhoneCall, Plus } from 'lucide-react';
 
 export default function Pricing({ onBack }) {
-  const [billingPeriod, setBillingPeriod] = useState('annual'); // annual, monthly
+  const [billingPeriod, setBillingPeriod] = useState('monthly'); // monthly, three_month, six_month
+  const [extraParticipants, setExtraParticipants] = useState(0); // in multiples of 50
 
   const handleUpgrade = async (planName) => {
     if (planName === 'Free') {
       onBack();
-      return;
-    }
-    if (planName === 'Enterprise') {
-      alert('Contacting enterprise sales team at sales@pulsepoll.com...');
       return;
     }
 
@@ -21,18 +18,33 @@ export default function Pricing({ onBack }) {
     }
 
     try {
-      // In production, you will replace these strings with your actual Stripe Price IDs (from Stripe Dashboard)
       let priceId = '';
       if (planName === 'Basic') {
-        priceId = billingPeriod === 'annual' ? 'price_basic_annual' : 'price_basic_monthly';
+        if (billingPeriod === 'monthly') priceId = 'price_basic_monthly';
+        else if (billingPeriod === 'three_month') priceId = 'price_basic_three_month';
+        else priceId = 'price_basic_six_month';
       } else if (planName === 'Pro') {
-        priceId = billingPeriod === 'annual' ? 'price_pro_annual' : 'price_pro_monthly';
+        if (billingPeriod === 'monthly') priceId = 'price_pro_monthly';
+        else if (billingPeriod === 'three_month') priceId = 'price_pro_three_month';
+        else priceId = 'price_pro_six_month';
+      } else if (planName === 'Business') {
+        if (billingPeriod === 'monthly') priceId = 'price_business_monthly';
+        else if (billingPeriod === 'three_month') priceId = 'price_business_three_month';
+        else priceId = 'price_business_six_month';
       }
+
+      // Add extra participant add-on calculation info
+      const addonCost = (extraParticipants / 50) * 5;
 
       const res = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: user.email, priceId })
+        body: JSON.stringify({ 
+          email: user.email, 
+          priceId,
+          addonParticipants: extraParticipants,
+          addonCost: addonCost
+        })
       });
       const data = await res.json();
 
@@ -51,68 +63,78 @@ export default function Pricing({ onBack }) {
     {
       name: 'Free',
       priceMonthly: 0,
-      priceAnnual: 0,
+      priceThreeMonth: 0,
+      priceSixMonth: 0,
       description: 'Explore the basics of interactive presenting.',
       features: [
-        { icon: <Sparkles size={16} />, text: 'Menti AI slide builder suggestions' },
-        { icon: <Users size={16} />, text: '50 participants per month limit' },
-        { icon: <Palette size={16} />, text: 'Multiple interactive question types' },
-        { icon: <Check size={16} />, text: 'Basic response analytics and insights' }
+        { icon: <Users size={16} />, text: 'Up to 60 participants per session' },
+        { icon: <Sparkles size={16} />, text: 'Standard interactive slides & Q&A' },
+        { icon: <Palette size={16} />, text: 'Default corporate visual theme' },
+        { icon: <Check size={16} />, text: 'Add-on: $5/month per extra 50 slots' }
       ],
-      buttonText: 'Get Started',
+      buttonText: 'Current Plan',
       buttonClass: 'btn-secondary',
       badge: 'Free Tier',
       highlighted: false
     },
     {
       name: 'Basic',
-      priceMonthly: 12,
-      priceAnnual: 9,
+      priceMonthly: 5,
+      priceThreeMonth: 4.5,
+      priceSixMonth: 4,
       description: 'For individuals presenting regularly.',
       features: [
-        { icon: <Users size={16} />, text: 'Unlimited participants per session' },
-        { icon: <Upload size={16} />, text: 'Import PDF, Keynote, and PowerPoint slides' },
-        { icon: <Download size={16} />, text: 'Export responses to Excel or PDF reports' },
-        { icon: <Check size={16} />, text: 'Everything in Free, plus features' }
+        { icon: <Users size={16} />, text: 'Up to 150 participants per session' },
+        { icon: <Palette size={16} />, text: 'Access custom themes (Ocean, Sunset, Slate)' },
+        { icon: <Upload size={16} />, text: 'Import PDF & Excel questions list' },
+        { icon: <Check size={16} />, text: 'Everything in Free, plus premium themes' }
       ],
-      buttonText: 'Buy Basic',
+      buttonText: 'Get Basic',
       buttonClass: 'btn-secondary',
-      badge: 'Popular',
+      badge: 'Starter',
       highlighted: false
     },
     {
       name: 'Pro',
-      priceMonthly: 29,
-      priceAnnual: 24,
-      description: 'For professionals sharing templates and branding.',
+      priceMonthly: 15,
+      priceThreeMonth: 13,
+      priceSixMonth: 11,
+      description: 'For professional quiz and exam moderation.',
       features: [
-        { icon: <Palette size={16} />, text: 'More design and custom branding features' },
-        { icon: <Users size={16} />, text: 'Workspace collaboration & shared templates' },
-        { icon: <Settings size={16} />, text: 'Co-create slides with team members' },
-        { icon: <Check size={16} />, text: 'Mobile presenter control & live moderation' }
+        { icon: <Users size={16} />, text: 'Up to 500 participants per session' },
+        { icon: <Shield size={16} />, text: '🔒 Focus Mode (Anti-Cheat tab lockout)' },
+        { icon: <Palette size={16} />, text: 'Add custom brand logos & colors' },
+        { icon: <Check size={16} />, text: 'Detailed CSV & Excel analytics reports' }
       ],
-      buttonText: 'Buy Pro',
+      buttonText: 'Upgrade to Pro',
       buttonClass: 'btn-primary',
-      badge: 'Best Value',
+      badge: 'Highly Popular',
       highlighted: true
     },
     {
-      name: 'Enterprise',
-      priceMonthly: 'Custom',
-      priceAnnual: 'Custom',
-      description: 'For organizations needing security and scale.',
+      name: 'Business',
+      priceMonthly: 35,
+      priceThreeMonth: 30,
+      priceSixMonth: 25,
+      description: 'For large teams and enterprise scale.',
       features: [
-        { icon: <Shield size={16} />, text: 'Single Sign-On (SSO) login integration' },
-        { icon: <Users size={16} />, text: 'Verify participant identities beforehand' },
-        { icon: <Settings size={16} />, text: 'SCIM automated user provisioning' },
-        { icon: <PhoneCall size={16} />, text: 'Dedicated customer onboarding & support' }
+        { icon: <Users size={16} />, text: 'Unlimited participants per session' },
+        { icon: <Settings size={16} />, text: 'Shared team workspaces & templates' },
+        { icon: <Shield size={16} />, text: 'SSO login integration & verified IDs' },
+        { icon: <PhoneCall size={16} />, text: '24/7 dedicated telephone support' }
       ],
-      buttonText: 'Contact Sales',
+      buttonText: 'Get Business',
       buttonClass: 'btn-secondary',
-      badge: 'Corporate',
+      badge: 'Corporate Scale',
       highlighted: false
     }
   ];
+
+  const getPrice = (plan) => {
+    if (billingPeriod === 'monthly') return plan.priceMonthly;
+    if (billingPeriod === 'three_month') return plan.priceThreeMonth;
+    return plan.priceSixMonth;
+  };
 
   return (
     <div className="pricing-viewport animate-fade" style={{ padding: '40px 20px 80px', maxWidth: '1200px', margin: '0 auto' }}>
@@ -126,7 +148,7 @@ export default function Pricing({ onBack }) {
         </div>
       </div>
 
-      <div style={{ textAlign: 'center', marginBottom: '50px' }}>
+      <div style={{ textAlign: 'center', marginBottom: '45px' }}>
         <div className="eyebrow" style={{ color: 'var(--primary)' }}>Find your plan</div>
         <h1 style={{ fontSize: '2.5rem', fontWeight: 800, margin: '10px 0 15px' }}>
           Interactive presenting <span>for everyone</span>
@@ -135,7 +157,7 @@ export default function Pricing({ onBack }) {
           Scale up participant counts, brand customizations, team collaborations, and security tools as you grow.
         </p>
 
-        {/* Annual / Monthly Billing Switcher */}
+        {/* Subscription Billing Switcher */}
         <div style={{ 
           display: 'inline-flex', 
           background: 'rgba(255,255,255,0.03)', 
@@ -152,22 +174,6 @@ export default function Pricing({ onBack }) {
               borderRadius: '20px', 
               padding: '6px 16px', 
               fontSize: '0.8rem',
-              background: billingPeriod === 'annual' ? 'var(--primary)' : 'transparent',
-              color: billingPeriod === 'annual' ? '#0b0e13' : 'var(--text-primary)',
-              border: 'none',
-              fontWeight: 600
-            }}
-            onClick={() => setBillingPeriod('annual')}
-          >
-            Yearly (Save 20%)
-          </button>
-          <button 
-            type="button"
-            className="btn" 
-            style={{ 
-              borderRadius: '20px', 
-              padding: '6px 16px', 
-              fontSize: '0.8rem',
               background: billingPeriod === 'monthly' ? 'var(--primary)' : 'transparent',
               color: billingPeriod === 'monthly' ? '#0b0e13' : 'var(--text-primary)',
               border: 'none',
@@ -177,14 +183,73 @@ export default function Pricing({ onBack }) {
           >
             Monthly
           </button>
+          <button 
+            type="button"
+            className="btn" 
+            style={{ 
+              borderRadius: '20px', 
+              padding: '6px 16px', 
+              fontSize: '0.8rem',
+              background: billingPeriod === 'three_month' ? 'var(--primary)' : 'transparent',
+              color: billingPeriod === 'three_month' ? '#0b0e13' : 'var(--text-primary)',
+              border: 'none',
+              fontWeight: 600
+            }}
+            onClick={() => setBillingPeriod('three_month')}
+          >
+            3-Month (Save 15%)
+          </button>
+          <button 
+            type="button"
+            className="btn" 
+            style={{ 
+              borderRadius: '20px', 
+              padding: '6px 16px', 
+              fontSize: '0.8rem',
+              background: billingPeriod === 'six_month' ? 'var(--primary)' : 'transparent',
+              color: billingPeriod === 'six_month' ? '#0b0e13' : 'var(--text-primary)',
+              border: 'none',
+              fontWeight: 600
+            }}
+            onClick={() => setBillingPeriod('six_month')}
+          >
+            6-Month (Save 30%)
+          </button>
+        </div>
+      </div>
+
+      {/* Real-time Participant Add-On Calculator widget */}
+      <div className="glass-card animate-fade" style={{ maxWidth: '600px', margin: '0 auto 40px auto', padding: '24px', border: '1px dashed var(--primary)' }}>
+        <h3 style={{ fontSize: '1.2rem', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          ➕ Participant Add-on Calculator
+        </h3>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '16px' }}>
+          Need to host more participants? Drag the slider below to calculate your custom add-on plan (**+$5 for every 50 additional participants**).
+        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px' }}>
+          <input 
+            type="range" 
+            min="0" 
+            max="500" 
+            step="50" 
+            value={extraParticipants} 
+            onChange={(e) => setExtraParticipants(parseInt(e.target.value))} 
+            style={{ flex: 1, accentColor: 'var(--primary)', height: '6px', cursor: 'pointer' }}
+          />
+          <span style={{ fontSize: '1.1rem', fontWeight: 800, minWidth: '95px', textAlign: 'right' }}>
+            +{extraParticipants} Slots
+          </span>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', fontWeight: 700, borderTop: '1px solid var(--border-glass)', paddingTop: '12px', marginTop: '12px' }}>
+          <span style={{ color: 'var(--text-secondary)' }}>Custom Add-On Cost:</span>
+          <span style={{ color: 'var(--primary)', fontSize: '1rem' }}>+${(extraParticipants / 50) * 5}/month</span>
         </div>
       </div>
 
       {/* Grid of 4 columns */}
       <div className="pricing-grid">
         {plans.map((plan) => {
-          const isCustom = typeof plan.priceMonthly === 'string';
-          const price = billingPeriod === 'annual' ? plan.priceAnnual : plan.priceMonthly;
+          const price = getPrice(plan);
           
           return (
             <div 
@@ -201,15 +266,9 @@ export default function Pricing({ onBack }) {
                 </span>
                 
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', margin: '15px 0 10px' }}>
-                  {isCustom ? (
-                    <span style={{ fontSize: '2.2rem', fontWeight: 800 }}>Custom</span>
-                  ) : (
-                    <>
-                      <span style={{ fontSize: '1.2rem', fontWeight: 600, color: 'var(--text-secondary)' }}>$</span>
-                      <span style={{ fontSize: '2.8rem', fontWeight: 800 }}>{price}</span>
-                      <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>/ month</span>
-                    </>
-                  )}
+                  <span style={{ fontSize: '1.2rem', fontWeight: 600, color: 'var(--text-secondary)' }}>$</span>
+                  <span style={{ fontSize: '2.8rem', fontWeight: 800 }}>{price}</span>
+                  <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>/ month</span>
                 </div>
                 
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', minHeight: '38px', margin: 0 }}>

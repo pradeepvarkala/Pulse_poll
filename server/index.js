@@ -485,10 +485,15 @@ io.on('connection', (socket) => {
     }
 
     const currentParticipantCount = Object.keys(room.participants).length;
-    if (room.hostTier === 'free' && currentParticipantCount >= 5) {
+    let maxCapacity = 60;
+    if (room.hostTier === 'basic') maxCapacity = 150;
+    else if (room.hostTier === 'pro') maxCapacity = 500;
+    else if (room.hostTier === 'admin' || room.hostTier === 'enterprise') maxCapacity = 999999;
+
+    if (currentParticipantCount >= maxCapacity) {
       return callback({ 
         success: false, 
-        message: 'This presentation room is at maximum capacity (5 participants) on the Free Tier. Please ask the presenter to upgrade to a paid plan!' 
+        message: `This presentation room is at maximum capacity (${maxCapacity} participants) for the host's tier. Please ask the presenter to upgrade their plan!` 
       });
     }
 
