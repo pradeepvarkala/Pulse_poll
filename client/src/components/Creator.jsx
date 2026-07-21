@@ -16,12 +16,78 @@ const AVAILABLE_THEMES = [
   { id: 'classic-slate', name: 'Classic Slate', bg: '#0f172a', colors: ['#38bdf8', '#94a3b8', '#818cf8'], type: 'dark' }
 ];
 
+const INSTRUCTIONS = {
+  quiz: {
+    title: "🌟 Timed Quiz Mode",
+    description: "Create competitive trivia games! Set timers, define options, and mark the correct answer. The fastest participant gets the most points!",
+    icon: "🏆",
+    checklist: [
+      "Type your question in the text box",
+      "Add answer options using the grid",
+      "Check the box next to correct answer(s)",
+      "Set your timer limit (default: 15s)",
+      "Click 'Present' in the header to launch!"
+    ],
+    tips: "💡 Pro-Tip: Turn on 'Playroom (Kids)' theme in Design tab for cute emojis and rounded fonts!"
+  },
+  poll: {
+    title: "📈 Live Polling Mode",
+    description: "Gather votes and watch real-time bar charts animate as options are selected by the audience. Ideal for gathering feedback, voting, or icebreakers.",
+    icon: "📊",
+    checklist: [
+      "Type your poll question",
+      "Add vote options",
+      "Mark correct answers (optional)",
+      "Click 'Present' and join the audience code!"
+    ],
+    tips: "💡 Pro-Tip: You can hide/reveal results dynamically while presenting to avoid herd-bias!"
+  },
+  wordcloud: {
+    title: "☁️ Live Word Cloud Mode",
+    description: "Collect brainstorming ideas! As the audience submits words, they pop up and float on screen. If multiple people enter the same word, it grows bigger and more colorful!",
+    icon: "💬",
+    checklist: [
+      "Type your brainstorming prompt",
+      "Decide limit of entries per participant",
+      "Start hosting by clicking 'Present'"
+    ],
+    tips: "💡 Pro-Tip: Use this for prompt check-ins (e.g. 'How are you feeling today in one word?')."
+  },
+  scales: {
+    title: "📏 Scale Ratings Mode",
+    description: "Let participants rate items or statements from 1 to 5 on interactive sliders. Perfect for surveys, feedback loops, and aligning goals.",
+    icon: "📐",
+    checklist: [
+      "Type your main rating question",
+      "Define rating statements (milestones/metrics)",
+      "Check the live visual sliders after presenting!"
+    ],
+    tips: "💡 Pro-Tip: Use this for corporate meeting align-checks (e.g., 'Clarity of milestones')."
+  },
+  qa: {
+    title: "💬 Interactive Q&A Mode",
+    description: "Host open-floor question panels! Participants type anonymous questions. They can upvote other questions they care about, and the host displays selected questions on the projector screen.",
+    icon: "🤝",
+    checklist: [
+      "Set up your Q&A panel instructions",
+      "Present the slide live to open the floor",
+      "Review the question list on your presenter deck!"
+    ],
+    tips: "💡 Pro-Tip: You can moderate questions on your presenter monitor before showing them publicly!"
+  }
+};
+
 export default function Creator({ presentationId, onBack, onPresent }) {
   const [presentation, setPresentation] = useState(null);
   const [activeSlideId, setActiveSlideId] = useState(null);
   const [activeEmojiPickerId, setActiveEmojiPickerId] = useState(null);
   const [activeSidebarTab, setActiveSidebarTab] = useState('content'); // type, content, design
   const [emojiPickerCoords, setEmojiPickerCoords] = useState(null);
+  const [showInstructionPopup, setShowInstructionPopup] = useState(true);
+
+  useEffect(() => {
+    setShowInstructionPopup(true);
+  }, [activeSlideId]);
 
   const handleToggleEmojiPicker = (e, optId) => {
     if (activeEmojiPickerId === optId) {
@@ -456,8 +522,72 @@ export default function Creator({ presentationId, onBack, onPresent }) {
         </div>
 
         {/* Center: Slide Preview Mockup */}
-        <div className="editor-center">
-          <div className="glass-card slide-preview-container">
+        <div className="editor-center" style={{ position: 'relative' }}>
+          <div className="glass-card slide-preview-container" style={{ position: 'relative' }}>
+            {/* Quick Access Help Badge */}
+            <div style={{ position: 'absolute', top: '15px', right: '15px', zIndex: 10 }}>
+              <button 
+                className="btn btn-secondary" 
+                style={{ fontSize: '0.75rem', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px', border: '1px solid var(--border-glass)' }}
+                onClick={() => setShowInstructionPopup(true)}
+              >
+                ❓ How to Test
+              </button>
+            </div>
+
+            {/* Floating Instruction Overlay Popup */}
+            {showInstructionPopup && INSTRUCTIONS[activeSlide.type] && (
+              <div style={{
+                position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+                backgroundColor: 'rgba(9, 13, 22, 0.94)', backdropFilter: 'blur(8px)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50,
+                borderRadius: '16px', padding: '30px'
+              }}>
+                <div className="glass-card animate-fade" style={{
+                  width: '100%', maxWidth: '480px', padding: '32px', textAlign: 'left',
+                  border: '1px solid rgba(6, 182, 212, 0.4)', background: '#0b0f19',
+                  boxShadow: '0 20px 40px rgba(6, 182, 212, 0.15)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '15px' }}>
+                    <span style={{ fontSize: '2.5rem' }}>{INSTRUCTIONS[activeSlide.type].icon}</span>
+                    <div>
+                      <h3 style={{ fontSize: '1.4rem', fontWeight: 800, margin: 0, color: 'var(--primary)' }}>
+                        {INSTRUCTIONS[activeSlide.type].title}
+                      </h3>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Module Guide</span>
+                    </div>
+                  </div>
+
+                  <p style={{ fontSize: '0.9rem', color: '#cbd5e1', lineHeight: 1.5, marginBottom: '20px' }}>
+                    {INSTRUCTIONS[activeSlide.type].description}
+                  </p>
+
+                  <div style={{ background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-glass)', marginBottom: '20px' }}>
+                    <div style={{ fontWeight: 800, fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--primary)', marginBottom: '10px', letterSpacing: '0.05em' }}>
+                      How to test:
+                    </div>
+                    <ul style={{ paddingLeft: '20px', fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '8px', margin: 0 }}>
+                      {INSTRUCTIONS[activeSlide.type].checklist.map((item, idx) => (
+                        <li key={idx} style={{ color: '#e2e8f0' }}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div style={{ fontSize: '0.8rem', fontStyle: 'italic', color: 'var(--text-muted)', marginBottom: '24px' }}>
+                    {INSTRUCTIONS[activeSlide.type].tips}
+                  </div>
+
+                  <button 
+                    className="btn btn-primary" 
+                    style={{ width: '100%', padding: '12px', fontWeight: 800, fontSize: '0.95rem' }}
+                    onClick={() => setShowInstructionPopup(false)}
+                  >
+                    Got it, Let's build! 🚀
+                  </button>
+                </div>
+              </div>
+            )}
+
             <input 
               type="text"
               className="preview-question-input"
