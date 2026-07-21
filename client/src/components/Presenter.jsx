@@ -277,6 +277,7 @@ export default function Presenter({ presentationId, onBack }) {
   const [answersVisible, setAnswersVisible] = useState(true);
   const [leaderboardVisible, setLeaderboardVisible] = useState(false);
   const [showLobbyOverlay, setShowLobbyOverlay] = useState(false);
+  const [focusViolations, setFocusViolations] = useState([]);
 
   // New Reveal/Results States
   const [correctRevealed, setCorrectRevealed] = useState(false);
@@ -488,6 +489,17 @@ export default function Presenter({ presentationId, onBack }) {
       setTheme(nextTheme);
     });
 
+    socket.on('presenter_focus_warning', ({ nickname, action, warningsLeft }) => {
+      const id = Math.random().toString(36).substr(2, 9);
+      const newViolation = { id, nickname, action, warningsLeft, time: new Date().toLocaleTimeString() };
+      setFocusViolations(prev => [newViolation, ...prev]);
+      
+      // Auto-clear violation notification after 8 seconds
+      setTimeout(() => {
+        setFocusViolations(prev => prev.filter(v => v.id !== id));
+      }, 8000);
+    });
+
     return () => {
       socket.disconnect();
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
@@ -496,7 +508,7 @@ export default function Presenter({ presentationId, onBack }) {
 
   // Sync theme selection to server on local edit
   const handleThemeChange = async (nextTheme) => {
-    if (nextTheme !== 'corporate' && (!user || user.tier === 'free')) {
+    if (nextTheme !== 'corporate' && (!user || (user.tier !== 'pro' && user.tier !== 'admin'))) {
       alert('Custom themes (Ocean, Sunset, Slate) are a premium feature! Please upgrade to a paid plan on your Dashboard.');
       return;
     }
@@ -1984,6 +1996,32 @@ export default function Presenter({ presentationId, onBack }) {
           </button>
         </div>
       )}
+
+      {/* Real-time Focus Violations Alerts (Bottom-Right) */}
+      <div style={{
+        position: 'fixed', bottom: '100px', right: '24px', zIndex: 10000,
+        display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: '320px', width: '100%'
+      }}>
+        {focusViolations.map((v) => (
+          <div 
+            key={v.id} 
+            className="glass-card animate-fade" 
+            style={{
+              background: '#0b0f19', border: `1px solid ${v.action === 'locked_out' ? '#ef4444' : '#f59e0b'}`,
+              padding: '12px 16px', borderRadius: '8px', color: '#f8fafc',
+              boxShadow: '0 10px 25px -5px rgba(0,0,0,0.5)'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, fontSize: '0.85rem', color: v.action === 'locked_out' ? '#f87171' : '#fbbf24' }}>
+              <span>⚠️ FOCUS VIOLATION</span>
+              <span style={{ fontSize: '0.75rem', opacity: 0.6, marginLeft: 'auto' }}>{v.time}</span>
+            </div>
+            <div style={{ fontSize: '0.9rem', marginTop: '6px', fontWeight: 600 }}>
+              {v.nickname} {v.action === 'locked_out' ? 'was LOCKED OUT!' : `switched tabs (${v.warningsLeft} warnings left)`}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

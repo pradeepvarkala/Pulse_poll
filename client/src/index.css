@@ -7,15 +7,15 @@
   --bg-card-dark: rgba(255, 255, 255, 0.85);
   --bg-card-light: rgba(255, 255, 255, 0.75);
   
-  --primary: #6366f1;
-  --primary-glow: rgba(99, 102, 241, 0.08);
-  --secondary: #ec4899;
-  --secondary-glow: rgba(236, 72, 153, 0.08);
+  --primary: #2563eb;
+  --primary-glow: rgba(37, 99, 235, 0.06);
+  --secondary: #475569;
+  --secondary-glow: rgba(71, 85, 105, 0.06);
   
-  --accent-green: #10b981;
-  --accent-amber: #f59e0b;
-  --accent-red: #ef4444;
-  --accent-purple: #8b5cf6;
+  --accent-green: #0d9488;
+  --accent-amber: #d97706;
+  --accent-red: #dc2626;
+  --accent-purple: #1d4ed8;
   
   --text-primary: #0f172a;
   --text-secondary: #475569;
@@ -230,13 +230,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary), var(--accent-purple));
+  background: var(--primary);
   color: white;
-  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
 }
 .btn-primary:hover {
+  background: var(--accent-purple);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
 }
 .btn-primary:active {
   transform: translateY(0);
@@ -254,13 +255,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-accent {
-  background: linear-gradient(135deg, var(--secondary), #f43f5e);
+  background: var(--secondary);
   color: white;
-  box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
+  box-shadow: 0 4px 12px rgba(71, 85, 105, 0.15);
 }
 .btn-accent:hover {
+  background: #334155;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(236, 72, 153, 0.45);
+  box-shadow: 0 6px 16px rgba(71, 85, 105, 0.25);
 }
 
 .btn-outline {

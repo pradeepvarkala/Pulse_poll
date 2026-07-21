@@ -157,12 +157,13 @@ app.post('/api/verify-otp', async (req, res) => {
 
   delete activeOtps[emailKey];
 
+  const isAdmin = emailKey === 'pradeepvarkala@gmail.com';
   let user = {
     email: emailKey,
     name: email.split('@')[0],
     avatar: null,
-    tier: 'free',
-    subscription_status: 'inactive'
+    tier: isAdmin ? 'admin' : 'free',
+    subscription_status: isAdmin ? 'active' : 'inactive'
   };
 
   if (pool) {
@@ -170,6 +171,11 @@ app.post('/api/verify-otp', async (req, res) => {
       const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [emailKey]);
       if (rows.length > 0) {
         user = rows[0];
+        if (isAdmin && user.tier !== 'admin') {
+          user.tier = 'admin';
+          user.subscription_status = 'active';
+          await pool.query('UPDATE users SET tier = "admin", subscription_status = "active" WHERE email = ?', [emailKey]);
+        }
       } else {
         await pool.query(
           'INSERT INTO users (email, name, avatar, tier, subscription_status) VALUES (?, ?, ?, ?, ?)',
@@ -192,12 +198,13 @@ app.post('/api/auth/google', async (req, res) => {
   }
 
   const emailKey = email.trim().toLowerCase();
+  const isAdmin = emailKey === 'pradeepvarkala@gmail.com';
   let user = {
     email: emailKey,
     name: name || email.split('@')[0],
     avatar: avatar || null,
-    tier: 'free',
-    subscription_status: 'inactive'
+    tier: isAdmin ? 'admin' : 'free',
+    subscription_status: isAdmin ? 'active' : 'inactive'
   };
 
   if (pool) {
@@ -205,9 +212,13 @@ app.post('/api/auth/google', async (req, res) => {
       const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [emailKey]);
       if (rows.length > 0) {
         user = rows[0];
-        await pool.query('UPDATE users SET name = ?, avatar = ? WHERE email = ?', [name, avatar, emailKey]);
+        const targetTier = isAdmin ? 'admin' : user.tier;
+        const targetStatus = isAdmin ? 'active' : user.subscription_status;
+        await pool.query('UPDATE users SET name = ?, avatar = ?, tier = ?, subscription_status = ? WHERE email = ?', [name, avatar, targetTier, targetStatus, emailKey]);
         user.name = name;
         user.avatar = avatar;
+        user.tier = targetTier;
+        user.subscription_status = targetStatus;
       } else {
         await pool.query(
           'INSERT INTO users (email, name, avatar, tier, subscription_status) VALUES (?, ?, ?, ?, ?)',
@@ -502,6 +513,19 @@ io.on('connection', (socket) => {
     });
 
     console.log(`Participant Joined: ${nickname || 'Anonymous'} in ${roomCode}`);
+  });
+
+  // Focus Mode (Anti-Cheat) notification
+  socket.on('audience_focus_lost', ({ roomCode, nickname, action, warningsLeft }) => {
+    const room = rooms[roomCode];
+    if (room && room.presenterSocketId) {
+      io.to(room.presenterSocketId).emit('presenter_focus_warning', {
+        nickname,
+        action,
+        warningsLeft
+      });
+      console.log(`[Focus Violation] Room ${roomCode}: ${nickname} - ${action} (${warningsLeft} warnings remaining)`);
+    }
   });
 
   // 3. Change Slide

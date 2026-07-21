@@ -888,6 +888,20 @@ export default function Creator({ presentationId, onBack, onPresent }) {
                 </label>
               </div>
 
+              {/* Focus Mode / Anti-Cheat Toggle */}
+              <div className="settings-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '8px', marginTop: '-10px' }}>
+                <input 
+                  type="checkbox"
+                  id="sidebar-focus-mode"
+                  checked={activeSlide.focusMode === true}
+                  onChange={(e) => handleUpdateActiveSlide({ focusMode: e.target.checked })}
+                  style={{ accentColor: 'var(--primary)', cursor: 'pointer', width: '16px', height: '16px' }}
+                />
+                <label htmlFor="sidebar-focus-mode" style={{ cursor: 'pointer', userSelect: 'none', margin: 0, fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  🔒 Focus Mode (Anti-Cheat)
+                </label>
+              </div>
+
               {/* Pin Image Background selection */}
               {activeSlide.type === 'pin' && (
                 <div className="settings-group">

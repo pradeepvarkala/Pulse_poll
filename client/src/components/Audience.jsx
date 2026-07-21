@@ -35,6 +35,11 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
   const [formData, setFormData] = useState({}); // { [fieldName]: value }
   const [localPin, setLocalPin] = useState(null); // { x, y } percentages
 
+  // Focus Mode (Anti-Cheat) states
+  const [isLockedOut, setIsLockedOut] = useState(false);
+  const [focusWarnings, setFocusWarnings] = useState(2);
+  const [showFocusWarningModal, setShowFocusWarningModal] = useState(false);
+
   // Quiz timer
   const [quizTimeRemaining, setQuizTimeRemaining] = useState(0);
   const [timerStarted, setTimerStarted] = useState(true);
@@ -61,6 +66,48 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
       if (quizTimerRef.current) clearInterval(quizTimerRef.current);
     };
   }, []);
+
+  // Track window blur and visibility changes for Focus Mode (Anti-Cheat)
+  useEffect(() => {
+    if (!isJoined || !slide || !slide.focusMode || isLockedOut) return;
+
+    const handleFocusLoss = () => {
+      setFocusWarnings((prev) => {
+        const next = prev - 1;
+        if (next <= 0) {
+          setIsLockedOut(true);
+          if (socketRef.current) {
+            socketRef.current.emit('audience_focus_lost', { roomCode, nickname: nickname.trim(), action: 'locked_out' });
+          }
+          return 0;
+        } else {
+          setShowFocusWarningModal(true);
+          if (socketRef.current) {
+            socketRef.current.emit('audience_focus_lost', { roomCode, nickname: nickname.trim(), action: 'warning', warningsLeft: next });
+          }
+          return next;
+        }
+      });
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        handleFocusLoss();
+      }
+    };
+
+    const handleBlur = () => {
+      handleFocusLoss();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('blur', handleBlur);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('blur', handleBlur);
+    };
+  }, [isJoined, slide, isLockedOut, roomCode, nickname]);
 
   const handleRoomCodeChange = (val) => {
     // Strip all spaces, dashes, or non-digits immediately
@@ -165,6 +212,9 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
       setWordCloudInputs(['', '', '']);
       setOpenEndedText('');
       setGuessValue('');
+      setIsLockedOut(false);
+      setShowFocusWarningModal(false);
+      setFocusWarnings(2);
       
       initializeSlideInputs(newSlide);
 
@@ -502,6 +552,16 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
       </div>
 
       <div className="glass-card audience-card animate-fade" style={{ flex: 1, justifyContent: 'flex-start', minHeight: '420px' }}>
+        {slide?.focusMode && (
+          <div style={{
+            width: '100%', padding: '8px 12px', background: 'rgba(37, 99, 235, 0.1)',
+            border: '1px dashed #2563eb', borderRadius: '8px', color: '#2563eb',
+            fontSize: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center',
+            justifyContent: 'center', gap: '6px', marginBottom: '16px'
+          }}>
+            🔒 FOCUS MODE ACTIVE: Do not leave this tab
+          </div>
+        )}
         
         {leaderboardVisible ? (
           <div className="animate-fade" style={{ width: '100%' }}>
@@ -960,6 +1020,48 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
           </>
         )}
       </div>
+
+      {isLockedOut && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+          backgroundColor: '#0b0f19', display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center', zIndex: 20000, padding: '24px',
+          color: '#f8fafc', textAlign: 'center'
+        }}>
+          <div className="logo-icon" style={{ width: '64px', height: '64px', backgroundColor: 'var(--accent-red)', margin: '0 auto 24px auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Lock size={32} color="white" />
+          </div>
+          <h2 style={{ fontSize: '2rem', fontWeight: 800, color: '#f8fafc', marginBottom: '12px' }}>Access Blocked</h2>
+          <p style={{ color: '#94a3b8', maxWidth: '400px', fontSize: '1rem', lineHeight: 1.6, marginBottom: '24px' }}>
+            You switched tabs or minimized the browser during a <strong>Focus Mode</strong> slide. This attempt has been blocked.
+          </p>
+          <div style={{ padding: '8px 16px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', borderRadius: '8px', color: '#f87171', fontSize: '0.85rem' }}>
+            The presenter has been notified of this violation.
+          </div>
+        </div>
+      )}
+
+      {showFocusWarningModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+          backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center',
+          justifyContent: 'center', zIndex: 19999, padding: '24px'
+        }}>
+          <div className="glass-card animate-fade" style={{ width: '90%', maxWidth: '400px', background: '#0b0f19', border: '1px solid var(--border-glass)', padding: '30px 24px', textAlign: 'center', color: '#f8fafc' }}>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f8fafc', marginBottom: '10px' }}>Tab Switch Detected</h3>
+            <p style={{ color: '#94a3b8', fontSize: '0.9rem', lineHeight: 1.5, marginBottom: '24px' }}>
+              Do not switch tabs, minimize the window, or open other apps. You have <strong>{focusWarnings} warning(s) left</strong> before you are locked out.
+            </p>
+            <button 
+              className="btn btn-primary" 
+              style={{ width: '100%', padding: '12px' }}
+              onClick={() => setShowFocusWarningModal(false)}
+            >
+              I Understand, Resume Test
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
