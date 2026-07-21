@@ -20,7 +20,7 @@ const MicrosoftIcon = () => (
   </svg>
 );
 
-export default function Auth({ onLoginSuccess, onBackToLanding }) {
+export default function Auth({ onLoginSuccess, onBackToLanding, featureContext }) {
   const [email, setEmail] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [generatedCode, setGeneratedCode] = useState(null);
@@ -226,8 +226,12 @@ export default function Auth({ onLoginSuccess, onBackToLanding }) {
           <div className="logo-icon" style={{ width: '48px', height: '48px', margin: '0 auto 16px auto' }}>
             <KeyRound size={24} color="white" />
           </div>
-          <h2 style={{ fontSize: '1.8rem', marginBottom: '8px' }}>Welcome to PulsePoll</h2>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Choose a login provider or use verified email registration.</p>
+          <h2 style={{ fontSize: '1.8rem', marginBottom: '8px' }}>
+            {featureContext ? `Unlock ${featureContext}` : 'Welcome to PulsePoll'}
+          </h2>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+            {featureContext ? `Sign up to access ${featureContext} features on PulsePoll.` : 'Choose a login provider or use verified email registration.'}
+          </p>
         </div>
 
         {/* OAuth Buttons */}

@@ -48,9 +48,9 @@ export default function LandingPage({ onStartAuth, onJoinRoom }) {
                     borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '12px',
                     boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
                   }}>
-                    <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup')}>K-12 Education</span>
-                    <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup')}>Higher Education</span>
-                    <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup')}>Student Activities</span>
+                    <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'K-12 Education')}>K-12 Education</span>
+                    <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'Higher Education')}>Higher Education</span>
+                    <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'Student Activities')}>Student Activities</span>
                   </div>
                 </div>
               )}
@@ -71,9 +71,9 @@ export default function LandingPage({ onStartAuth, onJoinRoom }) {
                     borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '12px',
                     boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
                   }}>
-                    <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup')}>Corporate Training</span>
-                    <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup')}>Staff Meetings</span>
-                    <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup')}>Security & Compliance</span>
+                    <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'Corporate Training')}>Corporate Training</span>
+                    <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'Staff Meetings')}>Staff Meetings</span>
+                    <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'Security & Compliance')}>Security & Compliance</span>
                   </div>
                 </div>
               )}
@@ -100,14 +100,14 @@ export default function LandingPage({ onStartAuth, onJoinRoom }) {
                       <div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#f8fafc', borderBottom: '1px solid var(--border-glass)', paddingBottom: '6px', marginBottom: '4px' }}>
                         Features overview
                       </div>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup')}>AI presentation</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup')}>AI quiz generator</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup')}>Live polling</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup')}>Word cloud</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup')}>Quiz</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup')}>Survey</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup')}>Presentations</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup')}>Q&A</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'AI presentation')}>AI presentation</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'AI quiz generator')}>AI quiz generator</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'Live polling')}>Live polling</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'Word cloud')}>Word cloud</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'Quiz')}>Quiz</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'Survey')}>Survey</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'Presentations')}>Presentations</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'Q&A')}>Q&A</span>
                     </div>
 
                     {/* Column 2 */}
@@ -115,13 +115,13 @@ export default function LandingPage({ onStartAuth, onJoinRoom }) {
                       <div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#f8fafc', borderBottom: '1px solid var(--border-glass)', paddingBottom: '6px', marginBottom: '4px' }}>
                         Learning hub
                       </div>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup')}>How to</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup')}>MentiAcademy</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup')}>Templates</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup')}>Webinars</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup')}>Blog</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup')}>Integrations</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup')}>Help center</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'How to Guide')}>How to</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'MentiAcademy')}>MentiAcademy</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'Templates')}>Templates</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'Webinars')}>Webinars</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'Blog')}>Blog</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'Integrations')}>Integrations</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'Help center')}>Help center</span>
                     </div>
                   </div>
                 </div>

@@ -14,6 +14,7 @@ export default function App() {
   const [selectedPresentationId, setSelectedPresentationId] = useState(null);
   const [urlRoomCode, setUrlRoomCode] = useState('');
   const [authMode, setAuthMode] = useState(null); // null (shows landing page), 'login', 'signup'
+  const [selectedFeature, setSelectedFeature] = useState('');
   
   // Authentication state
   const [user, setUser] = useState(null);
@@ -92,13 +93,20 @@ export default function App() {
       return (
         <Auth 
           onLoginSuccess={handleLoginSuccess} 
-          onBackToLanding={() => setAuthMode(null)} 
+          onBackToLanding={() => {
+            setAuthMode(null);
+            setSelectedFeature('');
+          }} 
+          featureContext={selectedFeature}
         />
       );
     }
     return (
       <LandingPage 
-        onStartAuth={(mode) => setAuthMode(mode)} 
+        onStartAuth={(mode, feature = '') => {
+          setAuthMode(mode);
+          setSelectedFeature(feature);
+        }} 
         onJoinRoom={(code) => {
           setUrlRoomCode(code);
           setView('audience');
@@ -160,6 +168,7 @@ export default function App() {
         <main className="main-content">
           {view === 'dashboard' && (
             <Dashboard 
+              user={user}
               onViewCreator={handleNavigateToCreator}
               onViewPresenter={handleNavigateToPresenter}
               onJoinAudience={handleNavigateToAudience}

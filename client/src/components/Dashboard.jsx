@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Play, Edit3, Trash2, Users, Presentation as PresentationIcon } from 'lucide-react';
 
-export default function Dashboard({ onViewCreator, onViewPresenter, onJoinAudience }) {
+export default function Dashboard({ user, onViewCreator, onViewPresenter, onJoinAudience }) {
   const [presentations, setPresentations] = useState([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newTitle, setNewTitle] = useState('');
@@ -117,8 +117,7 @@ export default function Dashboard({ onViewCreator, onViewPresenter, onJoinAudien
     }
   ];
 
-  const user = JSON.parse(localStorage.getItem('pulse-poll-user') || '{}');
-  const userEmail = user.email || 'guest@pulsepoll.com';
+  const userEmail = user?.email || 'guest@pulsepoll.com';
 
   useEffect(() => {
     const fetchPresentations = async () => {
@@ -225,12 +224,95 @@ export default function Dashboard({ onViewCreator, onViewPresenter, onJoinAudien
     }
   };
 
+  const getBannerStyle = () => {
+    const tier = user?.tier || 'free';
+    if (tier === 'admin') {
+      return {
+        background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(6, 182, 212, 0.15))',
+        border: '1px solid rgba(16, 185, 129, 0.3)',
+        borderRadius: '16px',
+        padding: '24px',
+        marginBottom: '30px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: '20px',
+        boxShadow: '0 8px 32px rgba(16, 185, 129, 0.05)'
+      };
+    } else if (tier === 'business') {
+      return {
+        background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(239, 68, 68, 0.15))',
+        border: '1px solid rgba(245, 158, 11, 0.3)',
+        borderRadius: '16px',
+        padding: '24px',
+        marginBottom: '30px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: '20px',
+        boxShadow: '0 8px 32px rgba(245, 158, 11, 0.05)'
+      };
+    } else if (tier === 'pro') {
+      return {
+        background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.15))',
+        border: '1px solid rgba(99, 102, 241, 0.3)',
+        borderRadius: '16px',
+        padding: '24px',
+        marginBottom: '30px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: '20px',
+        boxShadow: '0 8px 32px rgba(99, 102, 241, 0.05)'
+      };
+    }
+    return {
+      background: 'rgba(255, 255, 255, 0.01)',
+      border: '1px solid var(--border-glass)',
+      borderRadius: '16px',
+      padding: '24px',
+      marginBottom: '30px',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+      gap: '20px'
+    };
+  };
+
+  const getBadgeStyle = () => {
+    const tier = user?.tier || 'free';
+    if (tier === 'admin') return { background: '#10b981', color: 'white', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800 };
+    if (tier === 'business') return { background: '#f59e0b', color: 'white', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800 };
+    if (tier === 'pro') return { background: 'var(--primary)', color: 'white', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800 };
+    return { background: 'var(--text-muted)', color: 'white', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800 };
+  };
+
+  const getBadgeText = () => {
+    const tier = user?.tier || 'free';
+    if (tier === 'admin') return '🛡️ System Admin';
+    if (tier === 'business') return '👑 Business User';
+    if (tier === 'pro') return '✨ Pro Member';
+    return '🌱 Free Account';
+  };
+
   return (
     <div className="animate-fade">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      {/* Tier Custom Differentiated Dashboard Header */}
+      <div style={getBannerStyle()}>
         <div>
-          <h1 style={{ fontSize: '2.5rem', marginBottom: '8px' }}>Your Presentations</h1>
-          <p style={{ color: 'var(--text-secondary)' }}>Create interactive slides, collect votes, and run live polls.</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+            <h1 style={{ fontSize: '2.2rem', margin: 0 }}>Welcome back, {user?.name || 'Presenter'}</h1>
+            <span style={getBadgeStyle()}>{getBadgeText()}</span>
+          </div>
+          <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
+            {user?.tier === 'admin' 
+              ? 'You have complete administrative root permissions. Manage presentations, system settings, and core databases.' 
+              : 'Create interactive slides, collect live audience feedback, and run timed tests.'}
+          </p>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
           <button className="btn btn-secondary" onClick={onJoinAudience}>
