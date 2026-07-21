@@ -538,15 +538,16 @@ export default function Creator({ presentationId, onBack, onPresent }) {
             {/* Floating Instruction Overlay Popup */}
             {showInstructionPopup && INSTRUCTIONS[activeSlide.type] && (
               <div style={{
-                position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-                backgroundColor: 'rgba(9, 13, 22, 0.94)', backdropFilter: 'blur(8px)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50,
-                borderRadius: '16px', padding: '30px'
+                position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+                backgroundColor: 'rgba(9, 13, 22, 0.85)', backdropFilter: 'blur(8px)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100,
+                padding: '24px'
               }}>
                 <div className="glass-card animate-fade" style={{
-                  width: '100%', maxWidth: '480px', padding: '32px', textAlign: 'left',
+                  width: '100%', maxWidth: '520px', padding: '32px', textAlign: 'left',
                   border: '1px solid rgba(6, 182, 212, 0.4)', background: '#0b0f19',
-                  boxShadow: '0 20px 40px rgba(6, 182, 212, 0.15)'
+                  boxShadow: '0 20px 40px rgba(6, 182, 212, 0.25)',
+                  maxHeight: '90vh', overflowY: 'auto'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '15px' }}>
                     <span style={{ fontSize: '2.5rem' }}>{INSTRUCTIONS[activeSlide.type].icon}</span>
