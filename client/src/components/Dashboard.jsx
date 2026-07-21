@@ -300,89 +300,134 @@ export default function Dashboard({ user, onViewCreator, onViewPresenter, onJoin
   };
 
   return (
-    <div className="animate-fade">
-      {/* Tier Custom Differentiated Dashboard Header */}
-      <div style={getBannerStyle()}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-            <h1 style={{ fontSize: '2.2rem', margin: 0 }}>Welcome back, {user?.name || 'Presenter'}</h1>
-            <span style={getBadgeStyle()}>{getBadgeText()}</span>
-          </div>
-          <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
-            {user?.tier === 'admin' 
-              ? 'You have complete administrative root permissions. Manage presentations, system settings, and core databases.' 
-              : 'Create interactive slides, collect live audience feedback, and run timed tests.'}
-          </p>
+    <div style={{ display: 'flex', gap: '30px', alignItems: 'flex-start', minHeight: 'calc(100vh - 120px)', width: '100%' }} className="animate-fade">
+      {/* 1. Left Sidebar Navigation Menu */}
+      <div className="glass-card" style={{
+        width: '260px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px',
+        position: 'sticky', top: '90px', border: '1px solid var(--border-glass)', borderRadius: '16px'
+      }}>
+        <div style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          Navigation Menu
         </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button className="btn btn-secondary" onClick={onJoinAudience}>
-            <Users size={18} /> Join Room
-          </button>
-          <button className="btn btn-primary" onClick={() => setIsCreateModalOpen(true)}>
-            <Plus size={18} /> New Presentation
-          </button>
-        </div>
-      </div>
-
-      <div className="dashboard-grid">
-        {presentations.map((pres) => (
-          <div 
-            key={pres.id} 
-            className="glass-card presentation-card"
-            onClick={() => onViewCreator(pres.id)}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <button 
+            className="btn" 
+            style={{ 
+              width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', justifyContent: 'flex-start', fontSize: '0.9rem',
+              background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)', border: '1px solid rgba(99, 102, 241, 0.2)', fontWeight: 700
+            }}
           >
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                <div className="logo-icon" style={{ width: '28px', height: '28px' }}>
-                  <PresentationIcon size={14} color="white" />
-                </div>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 600 }}>{pres.title}</h3>
-              </div>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-                {pres.slides.length} {pres.slides.length === 1 ? 'slide' : 'slides'} • Theme: <span style={{ textTransform: 'capitalize', color: 'var(--primary)', fontWeight: '700' }}>{pres.theme || 'neon'}</span>
-              </p>
-            </div>
+            📂 My Presentations
+          </button>
+          
+          <button 
+            className="btn btn-secondary" 
+            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', justifyContent: 'flex-start', fontSize: '0.9rem', background: 'transparent', border: 'none' }}
+            onClick={onJoinAudience}
+          >
+            🧩 Join a Room
+          </button>
+          
+          <button 
+            className="btn btn-secondary" 
+            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', justifyContent: 'flex-start', fontSize: '0.9rem', background: 'transparent', border: 'none' }}
+            onClick={() => alert('Explore premium templates inside our learning & educational drop-downs in the header menu!')}
+          >
+            🎨 Templates Library
+          </button>
 
-            <div className="card-meta">
-              <span>Updated {pres.updatedAt}</span>
-              <div style={{ display: 'flex', gap: '8px' }} onClick={(e) => e.stopPropagation()}>
-                <button 
-                  className="btn btn-secondary btn-icon" 
-                  style={{ width: '32px', height: '32px' }}
-                  onClick={() => onViewCreator(pres.id)}
-                  title="Edit"
-                >
-                  <Edit3 size={14} />
-                </button>
-                <button 
-                  className="btn btn-primary btn-icon" 
-                  style={{ width: '32px', height: '32px' }}
-                  onClick={() => onViewPresenter(pres.id)}
-                  title="Present Live"
-                >
-                  <Play size={14} />
-                </button>
-                <button 
-                  className="btn btn-secondary btn-icon" 
-                  style={{ width: '32px', height: '32px', color: 'var(--accent-red)' }}
-                  onClick={(e) => handleDelete(pres.id, e)}
-                  title="Delete"
-                >
-                  <Trash2 size={14} />
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
+          <button 
+            className="btn btn-secondary" 
+            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', justifyContent: 'flex-start', fontSize: '0.9rem', background: 'transparent', border: 'none' }}
+            onClick={() => alert('Check the user_manual.md inside your workspace directory for tips & tricks!')}
+          >
+            📚 Help & Guides
+          </button>
+        </div>
       </div>
 
-      {presentations.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '4rem 2rem', color: 'var(--text-secondary)' }}>
-          <PresentationIcon size={48} style={{ marginBottom: '16px', opacity: 0.5 }} />
-          <h3>No presentations yet</h3>
-          <p>Click "New Presentation" above to build your first interactive deck.</p>
+      {/* 2. Main Content Dashboard */}
+      <div style={{ flex: 1 }}>
+        {/* Tier Custom Differentiated Dashboard Header */}
+        <div style={getBannerStyle()}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+              <h1 style={{ fontSize: '2.2rem', margin: 0 }}>Welcome back, {user?.name || 'Presenter'}</h1>
+              <span style={getBadgeStyle()}>{getBadgeText()}</span>
+            </div>
+            <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
+              {user?.tier === 'admin' 
+                ? 'You have complete administrative root permissions. Manage presentations, system settings, and core databases.' 
+                : 'Create interactive slides, collect live audience feedback, and run timed tests.'}
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button className="btn btn-primary" onClick={() => setIsCreateModalOpen(true)}>
+              <Plus size={18} /> New Presentation
+            </button>
+          </div>
         </div>
-      )}
+
+        <div className="dashboard-grid">
+          {presentations.map((pres) => (
+            <div 
+              key={pres.id} 
+              className="glass-card presentation-card"
+              onClick={() => onViewCreator(pres.id)}
+            >
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+                  <div className="logo-icon" style={{ width: '28px', height: '28px' }}>
+                    <PresentationIcon size={14} color="white" />
+                  </div>
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 600 }}>{pres.title}</h3>
+                </div>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                  {pres.slides.length} {pres.slides.length === 1 ? 'slide' : 'slides'} • Theme: <span style={{ textTransform: 'capitalize', color: 'var(--primary)', fontWeight: '700' }}>{pres.theme || 'neon'}</span>
+                </p>
+              </div>
+
+              <div className="card-meta">
+                <span>Updated {pres.updatedAt}</span>
+                <div style={{ display: 'flex', gap: '8px' }} onClick={(e) => e.stopPropagation()}>
+                  <button 
+                    className="btn btn-secondary btn-icon" 
+                    style={{ width: '32px', height: '32px' }}
+                    onClick={() => onViewCreator(pres.id)}
+                    title="Edit"
+                  >
+                    <Edit3 size={14} />
+                  </button>
+                  <button 
+                    className="btn btn-primary btn-icon" 
+                    style={{ width: '32px', height: '32px' }}
+                    onClick={() => onViewPresenter(pres.id)}
+                    title="Present Live"
+                  >
+                    <Play size={14} />
+                  </button>
+                  <button 
+                    className="btn btn-secondary btn-icon" 
+                    style={{ width: '32px', height: '32px', color: 'var(--accent-red)' }}
+                    onClick={(e) => handleDelete(pres.id, e)}
+                    title="Delete"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {presentations.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '4rem 2rem', color: 'var(--text-secondary)' }}>
+            <PresentationIcon size={48} style={{ marginBottom: '16px', opacity: 0.5 }} />
+            <h3>No presentations yet</h3>
+            <p>Click "New Presentation" above to build your first interactive deck.</p>
+          </div>
+        )}
+      </div>
 
       {isCreateModalOpen && (
         <div style={{
