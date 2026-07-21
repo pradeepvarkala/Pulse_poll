@@ -52,6 +52,32 @@
                  radial-gradient(at 50% 50%, rgba(139, 92, 246, 0.05) 0px, transparent 50%);
 }
 
+.theme-playroom {
+  --bg-dark: #fffdf0;
+  --bg-card-dark: #ffffff;
+  --primary: #ff477e;
+  --primary-glow: rgba(255, 71, 126, 0.15);
+  --secondary: #4ea8de;
+  --secondary-glow: rgba(78, 168, 222, 0.15);
+  --text-primary: #2d3748;
+  --text-secondary: #4a5568;
+  --text-muted: #a0aec0;
+  --border-glass: rgba(0, 0, 0, 0.08);
+  --shadow-glow: 0 10px 30px rgba(255, 71, 126, 0.1);
+  --bg-gradient: radial-gradient(circle at 10% 20%, #fef3c7 0%, #fffdf0 90%);
+}
+.theme-playroom h1, 
+.theme-playroom h2, 
+.theme-playroom h3, 
+.theme-playroom h4, 
+.theme-playroom span, 
+.theme-playroom p, 
+.theme-playroom div, 
+.theme-playroom label,
+.theme-playroom button {
+  font-family: "Comic Sans MS", "Chalkboard SE", "Comic Neue", system-ui, sans-serif !important;
+}
+
 .theme-ocean {
   --bg-dark: #031220;
   --bg-card-dark: rgba(3, 22, 38, 0.75);

@@ -652,9 +652,9 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
                 {/* 1. Multiple Choice */}
                 {slide?.type === 'poll' && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
-                    {slide.options?.map((opt) => (
+                    {slide.options?.map((opt, i) => (
                       <button key={opt.id} className="audience-poll-choice-btn" onClick={() => handleVotePoll(opt.id)}>
-                        {opt.text}
+                        {theme === 'playroom' ? `${['🍎', '🍌', '🍇', '🍉', '🍓', '🍒'][i % 6] || '⭐'} ${opt.text}` : opt.text}
                       </button>
                     ))}
                   </div>
