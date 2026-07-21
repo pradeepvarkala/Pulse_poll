@@ -309,6 +309,70 @@ export default function Pricing({ onBack }) {
           );
         })}
       </div>
+
+      {/* Dynamic Comparison Matrix Table */}
+      <div className="glass-card animate-fade" style={{ marginTop: '60px', padding: '32px', border: '1px solid var(--border-glass)', borderRadius: '24px', overflowX: 'auto' }}>
+        <h2 style={{ fontSize: '1.8rem', fontWeight: 800, textAlign: 'center', marginBottom: '8px' }}>Compare Tiers & Features</h2>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', textAlign: 'center', marginBottom: '30px' }}>
+          Detailed matrix comparison of capacities, integrations, custom options, and support.
+        </p>
+
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '650px' }}>
+          <thead>
+            <tr style={{ borderBottom: '2px solid var(--border-glass)' }}>
+              <th style={{ padding: '16px 12px', fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-primary)' }}>Core Features</th>
+              <th style={{ padding: '16px 12px', fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-primary)', textAlign: 'center' }}>Free</th>
+              <th style={{ padding: '16px 12px', fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-primary)', textAlign: 'center' }}>Basic</th>
+              <th style={{ padding: '16px 12px', fontSize: '0.95rem', fontWeight: 800, color: 'var(--primary)', textAlign: 'center' }}>⭐ Pro</th>
+              <th style={{ padding: '16px 12px', fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-primary)', textAlign: 'center' }}>Business</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              { category: 'Capacity & Limits', items: [
+                { name: 'Live Participants / Session', free: '60', basic: '150', pro: '500', business: 'Unlimited' },
+                { name: 'Extra Attendee Add-ons', free: '✔️ ($5/50 slots)', basic: '✔️ ($5/50 slots)', pro: '✔️ ($5/50 slots)', business: 'Included' },
+                { name: 'Presentation Slide Decks', free: 'Unlimited', basic: 'Unlimited', pro: 'Unlimited', business: 'Unlimited' }
+              ]},
+              { category: 'Presentation Controls', items: [
+                { name: 'Standard Interactive Slides', free: '✔️', basic: '✔️', pro: '✔️', business: '✔️' },
+                { name: 'Premium Themes (Ocean, Sunset, Slate)', free: '❌ (Corporate only)', basic: '✔️', pro: '✔️', business: '✔️' },
+                { name: '🔒 Focus Mode (Anti-Cheat Tab Lock)', free: '❌', basic: '❌', pro: '✔️', business: '✔️' },
+                { name: 'Custom Brand Colors & Logo', free: '❌', basic: '❌', pro: '✔️', business: '✔️' }
+              ]},
+              { category: 'Data & Integration', items: [
+                { name: 'Excel Questions Bulk Import', free: '❌', basic: '✔️', pro: '✔️', business: '✔️' },
+                { name: 'PDF Performance Reports', free: '✔️', basic: '✔️', pro: '✔️', business: '✔️' },
+                { name: 'CSV & Excel Data Export', free: '❌', basic: '❌', pro: '✔️', business: '✔️' },
+                { name: 'SSO Login & SCIM Provisioning', free: '❌', basic: '❌', pro: '❌', business: '✔️' }
+              ]},
+              { category: 'Collaboration & Support', items: [
+                { name: 'Shared Team Workspaces', free: '❌', basic: '❌', pro: '❌', business: '✔️' },
+                { name: 'Co-create Presentation Templates', free: '❌', basic: '❌', pro: '❌', business: '✔️' },
+                { name: 'Support Channels', free: 'Community', basic: 'Email support', pro: 'Priority Email', business: '24/7 Phone & Slack' }
+              ]}
+            ].map((cat, cIdx) => (
+              <React.Fragment key={cIdx}>
+                {/* Category Header Row */}
+                <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
+                  <td colSpan="5" style={{ padding: '12px', fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--primary)' }}>
+                    {cat.category}
+                  </td>
+                </tr>
+                {cat.items.map((row, rIdx) => (
+                  <tr key={rIdx} style={{ borderBottom: '1px solid var(--border-glass)', transition: 'background 0.2s' }}>
+                    <td style={{ padding: '14px 12px', fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: 600 }}>{row.name}</td>
+                    <td style={{ padding: '14px 12px', fontSize: '0.9rem', color: 'var(--text-secondary)', textAlign: 'center' }}>{row.free}</td>
+                    <td style={{ padding: '14px 12px', fontSize: '0.9rem', color: 'var(--text-secondary)', textAlign: 'center' }}>{row.basic}</td>
+                    <td style={{ padding: '14px 12px', fontSize: '0.9rem', color: 'var(--primary)', fontWeight: 700, textAlign: 'center', background: 'rgba(37, 99, 235, 0.02)' }}>{row.pro}</td>
+                    <td style={{ padding: '14px 12px', fontSize: '0.9rem', color: 'var(--text-secondary)', textAlign: 'center' }}>{row.business}</td>
+                  </tr>
+                ))}
+              </React.Fragment>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
