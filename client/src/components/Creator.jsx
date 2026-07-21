@@ -285,19 +285,42 @@ export default function Creator({ presentationId, onBack, onPresent }) {
     const isOptCorrect = ['quiz', 'poll'].includes(activeSlide.type) && 
       ((activeSlide.correctAnswerIndices || []).includes(index) || activeSlide.correctAnswerIndex === index);
 
+    // Beautiful premium vibrant colors
+    const colors = [
+      { bg: 'linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(239, 68, 68, 0.04))', border: 'rgba(239, 68, 68, 0.35)' }, // Red/Coral
+      { bg: 'linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(59, 130, 246, 0.04))', border: 'rgba(59, 130, 246, 0.35)' }, // Blue
+      { bg: 'linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.04))', border: 'rgba(16, 185, 129, 0.35)' }, // Green
+      { bg: 'linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(245, 158, 11, 0.04))', border: 'rgba(245, 158, 11, 0.35)' }, // Orange
+      { bg: 'linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(139, 92, 246, 0.04))', border: 'rgba(139, 92, 246, 0.35)' }, // Purple
+      { bg: 'linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(6, 182, 212, 0.04))', border: 'rgba(6, 182, 212, 0.35)' }  // Cyan
+    ];
+
+    const currentStyle = colors[index % colors.length] || colors[0];
+
     return (
       <div 
         key={opt.id} 
+        className="animate-fade"
         style={{ 
           display: 'flex', 
           alignItems: 'center', 
-          gap: '8px', 
+          gap: '10px', 
           width: '100%', 
-          padding: '6px 10px', 
-          borderRadius: '8px', 
-          background: isOptCorrect ? 'rgba(16, 185, 129, 0.08)' : 'rgba(255,255,255,0.03)', 
-          border: isOptCorrect ? '1px solid var(--accent-green)' : '1px solid var(--border-glass)',
-          transition: 'all 0.15s ease'
+          padding: '10px 14px', 
+          borderRadius: '12px', 
+          background: isOptCorrect ? 'rgba(16, 185, 129, 0.15)' : currentStyle.bg, 
+          border: isOptCorrect ? '2px solid var(--accent-green)' : `1px solid ${currentStyle.border}`,
+          boxShadow: isOptCorrect ? '0 0 15px rgba(16, 185, 129, 0.2)' : '0 4px 12px rgba(0, 0, 0, 0.1)',
+          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+          cursor: 'pointer',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
+          if (!isOptCorrect) e.currentTarget.style.boxShadow = `0 6px 20px ${currentStyle.border.replace('0.35', '0.2')}`;
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'translateY(0) scale(1)';
+          e.currentTarget.style.boxShadow = isOptCorrect ? '0 0 15px rgba(16, 185, 129, 0.2)' : '0 4px 12px rgba(0, 0, 0, 0.1)';
         }}
       >
         {['quiz', 'poll'].includes(activeSlide.type) && (
@@ -512,9 +535,18 @@ export default function Creator({ presentationId, onBack, onPresent }) {
             
             <div className="preview-content">
               {activeSlide.type === 'poll' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', maxWidth: '400px', maxHeight: '185px', overflowY: 'auto', paddingRight: '4px' }}>
-                  {activeSlide.options?.map((opt, i) => renderEditableOption(opt, i))}
-                  <button className="btn btn-secondary" onClick={handleAddOption} style={{ marginTop: '10px', fontSize: '0.85rem' }}>
+                <div style={{ width: '100%', maxWidth: '650px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                    gap: '10px',
+                    maxHeight: '230px',
+                    overflowY: 'auto',
+                    paddingRight: '4px'
+                  }}>
+                    {activeSlide.options?.map((opt, i) => renderEditableOption(opt, i))}
+                  </div>
+                  <button className="btn btn-secondary" onClick={handleAddOption} style={{ alignSelf: 'flex-start', fontSize: '0.85rem' }}>
                     <Plus size={12} /> Add Option
                   </button>
                 </div>
@@ -603,9 +635,18 @@ export default function Creator({ presentationId, onBack, onPresent }) {
               )}
 
               {activeSlide.type === 'quiz' && (
-                <div style={{ width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '185px', overflowY: 'auto', paddingRight: '4px' }}>
-                  {activeSlide.options?.map((opt, i) => renderEditableOption(opt, i))}
-                  <button className="btn btn-secondary" onClick={handleAddOption} style={{ marginTop: '10px', fontSize: '0.85rem' }}>
+                <div style={{ width: '100%', maxWidth: '650px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                    gap: '10px',
+                    maxHeight: '230px',
+                    overflowY: 'auto',
+                    paddingRight: '4px'
+                  }}>
+                    {activeSlide.options?.map((opt, i) => renderEditableOption(opt, i))}
+                  </div>
+                  <button className="btn btn-secondary" onClick={handleAddOption} style={{ alignSelf: 'flex-start', fontSize: '0.85rem' }}>
                     <Plus size={12} /> Add Quiz Option
                   </button>
                 </div>

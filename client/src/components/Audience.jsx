@@ -651,12 +651,52 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
               <>
                 {/* 1. Multiple Choice */}
                 {slide?.type === 'poll' && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
-                    {slide.options?.map((opt, i) => (
-                      <button key={opt.id} className="audience-poll-choice-btn" onClick={() => handleVotePoll(opt.id)}>
-                        {theme === 'playroom' ? `${['🍎', '🍌', '🍇', '🍉', '🍓', '🍒'][i % 6] || '⭐'} ${opt.text}` : opt.text}
-                      </button>
-                    ))}
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+                    gap: '12px',
+                    width: '100%'
+                  }}>
+                    {slide.options?.map((opt, i) => {
+                      const colors = [
+                        { bg: 'linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05))', border: 'rgba(239, 68, 68, 0.4)' },
+                        { bg: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.05))', border: 'rgba(59, 130, 246, 0.4)' },
+                        { bg: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05))', border: 'rgba(16, 185, 129, 0.4)' },
+                        { bg: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05))', border: 'rgba(245, 158, 11, 0.4)' },
+                        { bg: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0.05))', border: 'rgba(139, 92, 246, 0.4)' },
+                        { bg: 'linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(6, 182, 212, 0.05))', border: 'rgba(6, 182, 212, 0.4)' }
+                      ];
+                      const current = colors[i % colors.length] || colors[0];
+                      return (
+                        <button 
+                          key={opt.id} 
+                          className="audience-poll-choice-btn animate-fade" 
+                          style={{
+                            background: current.bg,
+                            border: `2px solid ${current.border}`,
+                            color: 'white',
+                            padding: '16px 20px',
+                            borderRadius: '12px',
+                            fontSize: '1.05rem',
+                            fontWeight: 700,
+                            boxShadow: '0 4px 15px rgba(0,0,0,0.15)',
+                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                            cursor: 'pointer'
+                          }}
+                          onClick={() => handleVotePoll(opt.id)}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-3px)';
+                            e.currentTarget.style.boxShadow = `0 8px 25px ${current.border.replace('0.4', '0.25')}`;
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.15)';
+                          }}
+                        >
+                          {theme === 'playroom' ? `${['🍎', '🍌', '🍇', '🍉', '🍓', '🍒'][i % 6] || '⭐'} ${opt.text}` : opt.text}
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
 
@@ -1006,13 +1046,53 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
                   </div>
                 )}
 
-                {!hasVoted && !votingLocked && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {slide.options?.map((opt, i) => (
-                      <button key={opt.id} className="audience-poll-choice-btn" onClick={() => handleQuizAnswer(i)}>
-                        {opt.text}
-                      </button>
-                    ))}
+                 {!hasVoted && !votingLocked && (
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+                    gap: '12px',
+                    width: '100%'
+                  }}>
+                    {slide.options?.map((opt, i) => {
+                      const colors = [
+                        { bg: 'linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05))', border: 'rgba(239, 68, 68, 0.4)' },
+                        { bg: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.05))', border: 'rgba(59, 130, 246, 0.4)' },
+                        { bg: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05))', border: 'rgba(16, 185, 129, 0.4)' },
+                        { bg: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05))', border: 'rgba(245, 158, 11, 0.4)' },
+                        { bg: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0.05))', border: 'rgba(139, 92, 246, 0.4)' },
+                        { bg: 'linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(6, 182, 212, 0.05))', border: 'rgba(6, 182, 212, 0.4)' }
+                      ];
+                      const current = colors[i % colors.length] || colors[0];
+                      return (
+                        <button 
+                          key={opt.id} 
+                          className="audience-poll-choice-btn animate-fade" 
+                          style={{
+                            background: current.bg,
+                            border: `2px solid ${current.border}`,
+                            color: 'white',
+                            padding: '16px 20px',
+                            borderRadius: '12px',
+                            fontSize: '1.05rem',
+                            fontWeight: 700,
+                            boxShadow: '0 4px 15px rgba(0,0,0,0.15)',
+                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                            cursor: 'pointer'
+                          }}
+                          onClick={() => handleQuizAnswer(i)}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-3px)';
+                            e.currentTarget.style.boxShadow = `0 8px 25px ${current.border.replace('0.4', '0.25')}`;
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.15)';
+                          }}
+                        >
+                          {theme === 'playroom' ? `${['🍎', '🍌', '🍇', '🍉', '🍓', '🍒'][i % 6] || '⭐'} ${opt.text}` : opt.text}
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
               </div>
