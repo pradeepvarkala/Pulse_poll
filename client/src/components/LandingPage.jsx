@@ -116,7 +116,7 @@ export default function LandingPage({ onStartAuth, onJoinRoom, onStartDemo }) {
                         Learning hub
                       </div>
                       <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartDemo('How to Guide')}>How to</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartDemo('MentiAcademy')}>MentiAcademy</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartDemo('PulseAcademy')}>PulseAcademy</span>
                       <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartDemo('Templates')}>Templates</span>
                       <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartDemo('Webinars')}>Webinars</span>
                       <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartDemo('Blog')}>Blog</span>

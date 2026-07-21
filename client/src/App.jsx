@@ -39,72 +39,202 @@ export default function App() {
     }
   }, []);
 
+  const generateSlidesForFeature = (featureName) => {
+    const featLower = (featureName || '').toLowerCase();
+    
+    // Default fallback slide list
+    let slides = [
+      {
+        id: 'slide-fall1',
+        type: 'poll',
+        question: `Welcome to the ${featureName} Workspace!`,
+        options: [
+          { id: 'opt-f1', text: 'Ready to start!' },
+          { id: 'opt-f2', text: 'Show me features' }
+        ]
+      }
+    ];
+
+    if (featLower.includes('education') || featLower.includes('activities') || featLower.includes('pulseacademy')) {
+      slides = [
+        {
+          id: 'slide-ed1',
+          type: 'quiz',
+          question: 'What is the capital of France? 🇫🇷',
+          options: [
+            { id: 'opt-ed1', text: 'Paris (Correct)' },
+            { id: 'opt-ed2', text: 'Rome' },
+            { id: 'opt-ed3', text: 'London' }
+          ],
+          timeLimit: 15
+        },
+        {
+          id: 'slide-ed2',
+          type: 'wordcloud',
+          question: 'Describe your school week in one word! 🎒',
+          options: []
+        },
+        {
+          id: 'slide-ed3',
+          type: 'poll',
+          question: 'Which school subject is your absolute favorite?',
+          options: [
+            { id: 'opt-sub1', text: 'Science 🧪' },
+            { id: 'opt-sub2', text: 'Maths 📐' },
+            { id: 'opt-sub3', text: 'Art & Craft 🎨' }
+          ]
+        }
+      ];
+    } else if (featLower.includes('corporate') || featLower.includes('meetings') || featLower.includes('enterprise') || featLower.includes('compliance')) {
+      slides = [
+        {
+          id: 'slide-corp1',
+          type: 'scales',
+          question: 'Rate the alignment and clarity of today\'s Q3 Objectives (1-5):',
+          options: [
+            { id: 'opt-corp1', text: 'Clarity of milestones' },
+            { id: 'opt-corp2', text: 'Resource allocations' },
+            { id: 'opt-corp3', text: 'Timeline feasibility' }
+          ]
+        },
+        {
+          id: 'slide-corp2',
+          type: 'poll',
+          question: 'Which initiative should we prioritize next quarter?',
+          options: [
+            { id: 'opt-pri1', text: 'Product Refinement' },
+            { id: 'opt-pri2', text: 'Marketing Outreach' },
+            { id: 'opt-pri3', text: 'Customer Success Hires' }
+          ]
+        },
+        {
+          id: 'slide-corp3',
+          type: 'qa',
+          question: 'Audience compliance & policy questions panel',
+          options: []
+        }
+      ];
+    } else if (featLower.includes('cloud')) {
+      slides = [
+        {
+          id: 'slide-wc1',
+          type: 'wordcloud',
+          question: 'Describe your current workspace environment in one word:',
+          options: []
+        },
+        {
+          id: 'slide-wc2',
+          type: 'wordcloud',
+          question: 'What are your core values for teamwork?',
+          options: []
+        }
+      ];
+    } else if (featLower.includes('qa') || featLower.includes('q&a') || featLower.includes('help') || featLower.includes('webinars')) {
+      slides = [
+        {
+          id: 'slide-qa1',
+          type: 'qa',
+          question: 'Host Q&A - Ask anything about features & modules!',
+          options: []
+        }
+      ];
+    } else if (featLower.includes('quiz') || featLower.includes('trivia')) {
+      slides = [
+        {
+          id: 'slide-qz1',
+          type: 'quiz',
+          question: 'Which planet is known as the Red Planet? 🪐',
+          options: [
+            { id: 'qz-o1', text: 'Mars (Correct)' },
+            { id: 'qz-o2', text: 'Venus' },
+            { id: 'qz-o3', text: 'Jupiter' }
+          ],
+          timeLimit: 15
+        },
+        {
+          id: 'slide-qz2',
+          type: 'quiz',
+          question: 'How many bones are there in an adult human body?',
+          options: [
+            { id: 'qz2-o1', text: '206 (Correct)' },
+            { id: 'qz2-o2', text: '186' },
+            { id: 'qz2-o3', text: '306' }
+          ],
+          timeLimit: 20
+        }
+      ];
+    } else if (featLower.includes('poll') || featLower.includes('survey') || featLower.includes('presentations')) {
+      slides = [
+        {
+          id: 'slide-pl1',
+          type: 'poll',
+          question: 'How do you currently capture team engagement?',
+          options: [
+            { id: 'pl-o1', text: 'Live Polling software' },
+            { id: 'pl-o2', text: 'Email Surveys' },
+            { id: 'pl-o3', text: 'We do not capture it' }
+          ]
+        },
+        {
+          id: 'slide-pl2',
+          type: 'scales',
+          question: 'Rate the importance of the following product aspects:',
+          options: [
+            { id: 'pl-s1', text: 'Interface speed' },
+            { id: 'pl-s2', text: 'Custom templates' }
+          ]
+        }
+      ];
+    } else if (featLower.includes('templates') || featLower.includes('blog') || featLower.includes('integrations') || featLower.includes('how to')) {
+      slides = [
+        {
+          id: 'slide-t1',
+          type: 'poll',
+          question: 'Which third-party tool integrations do you use most?',
+          options: [
+            { id: 'ti-1', text: 'Slack Messages' },
+            { id: 'ti-2', text: 'Microsoft Teams' },
+            { id: 'ti-3', text: 'Zoom Webinars' }
+          ]
+        },
+        {
+          id: 'slide-t2',
+          type: 'scales',
+          question: 'Rate your familiarity with PulsePoll functions:',
+          options: [
+            { id: 'ti-s1', text: 'Creating presentations' },
+            { id: 'ti-s2', text: 'Configuring anti-cheat mode' }
+          ]
+        }
+      ];
+    }
+
+    return slides;
+  };
+
+  const getThemeForFeature = (featureName) => {
+    const featLower = (featureName || '').toLowerCase();
+    if (featLower.includes('education') || featLower.includes('activities') || featLower.includes('pulseacademy')) return 'playroom';
+    if (featLower.includes('corporate') || featLower.includes('meetings') || featLower.includes('enterprise') || featLower.includes('compliance')) return 'corporate';
+    if (featLower.includes('cloud')) return 'ocean';
+    if (featLower.includes('qa') || featLower.includes('q&a') || featLower.includes('help') || featLower.includes('webinars')) return 'classic-slate';
+    if (featLower.includes('quiz') || featLower.includes('trivia')) return 'sunset';
+    return 'light-luxe';
+  };
+
   const handleLoginSuccess = (profile) => {
     setUser(profile);
     
     if (selectedFeature) {
-      // Create a contextual presentation template for the selected feature
-      let targetSlideType = 'poll';
-      let targetQuestion = 'Enter your question here';
-      let targetOptions = [
-        { id: 'opt-c1', text: 'Option A' },
-        { id: 'opt-c2', text: 'Option B' }
-      ];
-      let targetTheme = 'corporate';
-
-      const featLower = selectedFeature.toLowerCase();
-
-      if (featLower.includes('education') || featLower.includes('activities')) {
-        targetSlideType = 'quiz';
-        targetQuestion = 'What is the capital of France? 🇫🇷';
-        targetOptions = [
-          { id: 'opt-ed1', text: 'Paris (Correct)' },
-          { id: 'opt-ed2', text: 'Rome' },
-          { id: 'opt-ed3', text: 'London' }
-        ];
-        targetTheme = 'playroom'; // Kids theme!
-      } else if (featLower.includes('corporate') || featLower.includes('meetings') || featLower.includes('enterprise')) {
-        targetSlideType = 'scales';
-        targetQuestion = 'Rate the training session objectives (1-5):';
-        targetOptions = [
-          { id: 'opt-corp1', text: 'Clarity of Goals' },
-          { id: 'opt-corp2', text: 'Engagement of Slides' }
-        ];
-        targetTheme = 'corporate';
-      } else if (featLower.includes('cloud')) {
-        targetSlideType = 'wordcloud';
-        targetQuestion = 'What is your word of the day?';
-        targetOptions = [];
-        targetTheme = 'ocean';
-      } else if (featLower.includes('qa') || featLower.includes('q&a')) {
-        targetSlideType = 'qa';
-        targetQuestion = 'Audience Q&A - Submit questions here!';
-        targetOptions = [];
-        targetTheme = 'classic-slate';
-      } else if (featLower.includes('quiz')) {
-        targetSlideType = 'quiz';
-        targetQuestion = 'Which planet is closest to the Sun? ☀️';
-        targetOptions = [
-          { id: 'q-s1', text: 'Mercury' },
-          { id: 'q-s2', text: 'Venus' },
-          { id: 'q-s3', text: 'Mars' }
-        ];
-        targetTheme = 'sunset';
-      }
+      const targetTheme = getThemeForFeature(selectedFeature);
+      const slides = generateSlidesForFeature(selectedFeature);
 
       const contextualPres = {
         id: `context-pres-${Math.random().toString(36).substr(2, 5)}`,
         title: `${selectedFeature} Workspace`,
         updatedAt: new Date().toLocaleDateString(),
         theme: targetTheme,
-        slides: [
-          {
-            id: 'context-slide-1',
-            type: targetSlideType,
-            question: targetQuestion,
-            options: targetOptions
-          }
-        ]
+        slides: slides
       };
 
       // Save to local storage
@@ -173,44 +303,15 @@ export default function App() {
     setUser(guestUser);
     localStorage.setItem('pulse-poll-user', JSON.stringify(guestUser));
 
-    // Determine slide types based on which feature was clicked
-    let targetSlideType = 'poll';
-    let targetQuestion = 'How would you rate your learning experience today?';
-    let targetOptions = [
-      { id: 'opt-d1', text: 'Option A (Correct)' },
-      { id: 'opt-d2', text: 'Option B' }
-    ];
-
-    if (featureName.toLowerCase().includes('cloud')) {
-      targetSlideType = 'wordcloud';
-      targetQuestion = 'Describe this slide features in one word:';
-      targetOptions = [];
-    } else if (featureName.toLowerCase().includes('quiz')) {
-      targetSlideType = 'quiz';
-      targetQuestion = 'What is the color of the sun?';
-      targetOptions = [
-        { id: 'q-d1', text: 'Yellow ☀️' },
-        { id: 'q-d2', text: 'Blue 💙' }
-      ];
-    } else if (featureName.toLowerCase().includes('qa') || featureName.toLowerCase().includes('q&a')) {
-      targetSlideType = 'qa';
-      targetQuestion = 'Submit your questions to the host below:';
-      targetOptions = [];
-    }
+    const targetTheme = getThemeForFeature(featureName);
+    const slides = generateSlidesForFeature(featureName);
 
     const demoPres = {
       id: 'demo-learning-sandbox',
       title: `${featureName || 'Interactive Demo'} Sandbox`,
       updatedAt: new Date().toLocaleDateString(),
-      theme: 'playroom',
-      slides: [
-        {
-          id: 'demo-slide-1',
-          type: targetSlideType,
-          question: targetQuestion,
-          options: targetOptions
-        }
-      ]
+      theme: targetTheme,
+      slides: slides
     };
 
     // Save demo presentation to localStorage
@@ -226,68 +327,15 @@ export default function App() {
   };
 
   const handleTriggerContextualSlide = (featureName) => {
-    // Determine slide types based on selection
-    let targetSlideType = 'poll';
-    let targetQuestion = 'Enter your question here';
-    let targetOptions = [
-      { id: 'opt-c1', text: 'Option A' },
-      { id: 'opt-c2', text: 'Option B' }
-    ];
-    let targetTheme = 'corporate';
-
-    const featLower = featureName.toLowerCase();
-
-    if (featLower.includes('education') || featLower.includes('activities')) {
-      targetSlideType = 'quiz';
-      targetQuestion = 'What is the capital of France? 🇫🇷';
-      targetOptions = [
-        { id: 'opt-ed1', text: 'Paris (Correct)' },
-        { id: 'opt-ed2', text: 'Rome' },
-        { id: 'opt-ed3', text: 'London' }
-      ];
-      targetTheme = 'playroom'; // Kids theme!
-    } else if (featLower.includes('corporate') || featLower.includes('meetings') || featLower.includes('enterprise')) {
-      targetSlideType = 'scales';
-      targetQuestion = 'Rate the training session objectives (1-5):';
-      targetOptions = [
-        { id: 'opt-corp1', text: 'Clarity of Goals' },
-        { id: 'opt-corp2', text: 'Engagement of Slides' }
-      ];
-      targetTheme = 'corporate';
-    } else if (featLower.includes('cloud')) {
-      targetSlideType = 'wordcloud';
-      targetQuestion = 'What is your word of the day?';
-      targetOptions = [];
-      targetTheme = 'ocean';
-    } else if (featLower.includes('qa') || featLower.includes('q&a')) {
-      targetSlideType = 'qa';
-      targetQuestion = 'Audience Q&A - Submit questions here!';
-      targetOptions = [];
-      targetTheme = 'classic-slate';
-    } else if (featLower.includes('quiz')) {
-      targetSlideType = 'quiz';
-      targetQuestion = 'Which planet is closest to the Sun? ☀️';
-      targetOptions = [
-        { id: 'q-s1', text: 'Mercury' },
-        { id: 'q-s2', text: 'Venus' },
-        { id: 'q-s3', text: 'Mars' }
-      ];
-      targetTheme = 'sunset';
-    }
+    const targetTheme = getThemeForFeature(featureName);
+    const slides = generateSlidesForFeature(featureName);
 
     const contextualPres = {
       id: `context-pres-${Math.random().toString(36).substr(2, 5)}`,
       title: `${featureName} Workspace`,
       updatedAt: new Date().toLocaleDateString(),
       theme: targetTheme,
-      slides: [
-        {
-          id: 'context-slide-1',
-          type: targetSlideType,
-          question: targetQuestion,
-          options: targetOptions
-        }
-      ]
+      slides: slides
     };
 
     // Save to local storage
@@ -453,7 +501,7 @@ export default function App() {
                           Learning hub
                         </div>
                         <span className="dropdown-link" style={{ fontSize: '0.8rem' }} onClick={() => { handleTriggerContextualSlide('How to Guide'); setActiveDropdown(null); }}>How to</span>
-                        <span className="dropdown-link" style={{ fontSize: '0.8rem' }} onClick={() => { handleTriggerContextualSlide('MentiAcademy'); setActiveDropdown(null); }}>MentiAcademy</span>
+                        <span className="dropdown-link" style={{ fontSize: '0.8rem' }} onClick={() => { handleTriggerContextualSlide('PulseAcademy'); setActiveDropdown(null); }}>PulseAcademy</span>
                         <span className="dropdown-link" style={{ fontSize: '0.8rem' }} onClick={() => { handleTriggerContextualSlide('Templates'); setActiveDropdown(null); }}>Templates</span>
                         <span className="dropdown-link" style={{ fontSize: '0.8rem' }} onClick={() => { handleTriggerContextualSlide('Webinars'); setActiveDropdown(null); }}>Webinars</span>
                         <span className="dropdown-link" style={{ fontSize: '0.8rem' }} onClick={() => { handleTriggerContextualSlide('Blog'); setActiveDropdown(null); }}>Blog</span>
