@@ -40,7 +40,96 @@ export default function App() {
 
   const handleLoginSuccess = (profile) => {
     setUser(profile);
-    setView('dashboard');
+    
+    if (selectedFeature) {
+      // Create a contextual presentation template for the selected feature
+      let targetSlideType = 'poll';
+      let targetQuestion = 'Enter your question here';
+      let targetOptions = [
+        { id: 'opt-c1', text: 'Option A' },
+        { id: 'opt-c2', text: 'Option B' }
+      ];
+      let targetTheme = 'corporate';
+
+      const featLower = selectedFeature.toLowerCase();
+
+      if (featLower.includes('education') || featLower.includes('activities')) {
+        targetSlideType = 'quiz';
+        targetQuestion = 'What is the capital of France? 🇫🇷';
+        targetOptions = [
+          { id: 'opt-ed1', text: 'Paris (Correct)' },
+          { id: 'opt-ed2', text: 'Rome' },
+          { id: 'opt-ed3', text: 'London' }
+        ];
+        targetTheme = 'playroom'; // Kids theme!
+      } else if (featLower.includes('corporate') || featLower.includes('meetings') || featLower.includes('enterprise')) {
+        targetSlideType = 'scales';
+        targetQuestion = 'Rate the training session objectives (1-5):';
+        targetOptions = [
+          { id: 'opt-corp1', text: 'Clarity of Goals' },
+          { id: 'opt-corp2', text: 'Engagement of Slides' }
+        ];
+        targetTheme = 'corporate';
+      } else if (featLower.includes('cloud')) {
+        targetSlideType = 'wordcloud';
+        targetQuestion = 'What is your word of the day?';
+        targetOptions = [];
+        targetTheme = 'ocean';
+      } else if (featLower.includes('qa') || featLower.includes('q&a')) {
+        targetSlideType = 'qa';
+        targetQuestion = 'Audience Q&A - Submit questions here!';
+        targetOptions = [];
+        targetTheme = 'classic-slate';
+      } else if (featLower.includes('quiz')) {
+        targetSlideType = 'quiz';
+        targetQuestion = 'Which planet is closest to the Sun? ☀️';
+        targetOptions = [
+          { id: 'q-s1', text: 'Mercury' },
+          { id: 'q-s2', text: 'Venus' },
+          { id: 'q-s3', text: 'Mars' }
+        ];
+        targetTheme = 'sunset';
+      }
+
+      const contextualPres = {
+        id: `context-pres-${Math.random().toString(36).substr(2, 5)}`,
+        title: `${selectedFeature} Workspace`,
+        updatedAt: new Date().toLocaleDateString(),
+        theme: targetTheme,
+        slides: [
+          {
+            id: 'context-slide-1',
+            type: targetSlideType,
+            question: targetQuestion,
+            options: targetOptions
+          }
+        ]
+      };
+
+      // Save to local storage
+      const saved = localStorage.getItem('pulse-poll-presentations');
+      let presentations = saved ? JSON.parse(saved) : [];
+      presentations = presentations.filter(p => p.id !== 'demo-learning-sandbox');
+      presentations.unshift(contextualPres);
+      localStorage.setItem('pulse-poll-presentations', JSON.stringify(presentations));
+
+      // Sync to remote database in background
+      fetch('/api/presentations', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-user-email': profile.email || 'guest@pulsepoll.com'
+        },
+        body: JSON.stringify(contextualPres)
+      }).catch(err => console.error('Error auto-syncing contextual presentation:', err));
+
+      // Open directly in creator view
+      setSelectedPresentationId(contextualPres.id);
+      setView('creator');
+      setSelectedFeature(''); // clear context
+    } else {
+      setView('dashboard');
+    }
   };
 
   const handleLogout = () => {
