@@ -9,109 +9,182 @@ export default function Dashboard({ user, onViewCreator, onViewPresenter, onJoin
   // 11 distinct slide types seeded across 2 templates
   const defaultPresentations = [
     {
-      id: 'demo-1',
-      title: 'Interactive Survey & Image Pinning',
+      id: 'kids-template-1',
+      title: '🦖 Dinosaur Riddle Adventure',
       updatedAt: new Date().toLocaleDateString(),
-      theme: 'corporate',
+      theme: 'playroom',
       slides: [
         {
-          id: 'slide-1',
-          type: 'scales',
-          question: 'Rate our session on these dimensions (1-5):',
+          id: 'k1-s1',
+          type: 'quiz',
+          question: 'I have a tiny brain, plates on my back, and a spiked tail. Who am I? 🦕',
           options: [
-            { id: 'sc-1', text: 'Content Quality' },
-            { id: 'sc-2', text: 'Pace & Timing' },
-            { id: 'sc-3', text: 'Presenter Delivery' }
-          ]
-        },
-        {
-          id: 'slide-2',
-          type: 'ranking',
-          question: 'Rank the following project constraints by priority:',
-          options: [
-            { id: 'rk-1', text: 'Budget / Cost' },
-            { id: 'rk-2', text: 'Timeline / Speed' },
-            { id: 'rk-3', text: 'Scope / Features' }
-          ]
-        },
-        {
-          id: 'slide-3',
-          type: 'points',
-          question: 'Distribute 100 points among these development areas:',
-          options: [
-            { id: 'pt-1', text: 'New Features' },
-            { id: 'pt-2', text: 'Bug Fixing' },
-            { id: 'pt-3', text: 'UI Refactoring' },
-            { id: 'pt-4', text: 'Documentation' }
-          ]
-        },
-        {
-          id: 'slide-4',
-          type: 'grid',
-          question: 'Place these tools: Ease of Use vs Business Value',
-          options: [
-            { id: 'gd-1', text: 'Jira' },
-            { id: 'gd-2', text: 'Excel' },
-            { id: 'gd-3', text: 'Slack' }
+            { id: 'k1-o1', text: 'Stegosaurus (Correct)' },
+            { id: 'k1-o2', text: 'T-Rex' },
+            { id: 'k1-o3', text: 'Triceratops' }
           ],
-          xAxisLabel: 'Ease of Use',
-          yAxisLabel: 'Business Value'
+          timeLimit: 15
         },
         {
-          id: 'slide-5',
-          type: 'pin',
-          question: 'Pin where you feel we stand on this Target Matrix:',
-          pinImageType: 'target' // 'target' or 'quadrants'
+          id: 'k1-s2',
+          type: 'wordcloud',
+          question: 'Describe a dinosaur roar sound in one funny word! 📣',
+          options: []
         },
         {
-          id: 'slide-6',
-          type: 'form',
-          question: 'Quick Feedback Form:',
+          id: 'k1-s3',
+          type: 'scales',
+          question: 'Rate these prehistoric dinosaurs from cool to scary (1-5):',
           options: [
-            { id: 'fm-1', text: 'Full Name' },
-            { id: 'fm-2', text: 'Department' },
-            { id: 'fm-3', text: 'Key Takeaway' }
+            { id: 'k1-sc1', text: 'Tyrannosaurus Rex' },
+            { id: 'k1-sc2', text: 'Brachiosaurus' },
+            { id: 'k1-sc3', text: 'Velociraptor' }
           ]
         }
       ]
     },
     {
-      id: 'demo-2',
-      title: 'Icebreakers & Group Guessing Game',
+      id: 'kids-template-2',
+      title: '🪐 Space Explorer Quest',
       updatedAt: new Date().toLocaleDateString(),
-      theme: 'light-luxe',
+      theme: 'ocean',
       slides: [
         {
-          id: 'slide-7',
-          type: 'wordcloud',
-          question: 'Describe your workplace culture in ONE word:'
-        },
-        {
-          id: 'slide-8',
-          type: 'guess',
-          question: 'Guess the Number: How many lines of code are in this app?',
-          correctNumber: 1540
-        },
-        {
-          id: 'slide-9',
-          type: 'openended',
-          question: 'What is the biggest challenge in implementing agentic AI?'
-        },
-        {
-          id: 'slide-10',
-          type: 'poll',
-          question: 'Which interactive element do you find most engaging?',
+          id: 'k2-s1',
+          type: 'quiz',
+          question: 'True or False: A day on Venus is longer than a year on Venus! 🌌',
           options: [
-            { id: 'pl-1', text: 'Real-time Word Clouds' },
-            { id: 'pl-2', text: 'Pin on Targets' },
-            { id: 'pl-3', text: '2x2 Matrix Plots' },
-            { id: 'pl-4', text: 'Live Quizzes & Leaderboards' }
-          ]
+            { id: 'k2-o1', text: 'True (Correct)' },
+            { id: 'k2-o2', text: 'False' }
+          ],
+          timeLimit: 15
         },
         {
-          id: 'slide-11',
-          type: 'qa',
-          question: 'Audience Q&A Session'
+          id: 'k2-s2',
+          type: 'wordcloud',
+          question: 'If you discovered a new star, what would you name it? ⭐',
+          options: []
+        },
+        {
+          id: 'k2-s3',
+          type: 'poll',
+          question: 'Which place in the solar system would you explore first?',
+          options: [
+            { id: 'k2-p1', text: 'The Crimson Mars 🔴' },
+            { id: 'k2-p2', text: 'Saturn\'s Icy Rings 🪐' },
+            { id: 'k2-p3', text: 'Dark Side of the Moon 🌕' }
+          ]
+        }
+      ]
+    },
+    {
+      id: 'kids-template-3',
+      title: '🐙 Deep Ocean Secrets & Grid Classifiers',
+      updatedAt: new Date().toLocaleDateString(),
+      theme: 'cyber-mint',
+      slides: [
+        {
+          id: 'k3-s1',
+          type: 'quiz',
+          question: 'Where is a shrimp\'s heart located? 🦐',
+          options: [
+            { id: 'k3-o1', text: 'In its head (Correct)' },
+            { id: 'k3-o2', text: 'In its tail' },
+            { id: 'k3-o3', text: 'In its stomach' }
+          ],
+          timeLimit: 15
+        },
+        {
+          id: 'k3-s2',
+          type: 'brainstorm',
+          question: 'Brainstorm 2 deep ocean creatures that glow in the dark! 🌟',
+          category1: 'Glowing Fish 🐟',
+          category2: 'Lantern Squid 🦑',
+          category3: 'Jellyfish 🪼',
+          category4: 'Microbes / Plankton 🦠',
+          options: []
+        },
+        {
+          id: 'k3-s3',
+          type: 'poll',
+          question: 'Which ocean zone receives absolutely zero sunlight?',
+          options: [
+            { id: 'k3-p1', text: 'Sunlight Zone' },
+            { id: 'k3-p2', text: 'Twilight Zone' },
+            { id: 'k3-p3', text: 'Midnight Zone (Correct)' }
+          ]
+        }
+      ]
+    },
+    {
+      id: 'kids-template-4',
+      title: '🦁 Wild Animal Safari & Puzzles',
+      updatedAt: new Date().toLocaleDateString(),
+      theme: 'sunset',
+      slides: [
+        {
+          id: 'k4-s1',
+          type: 'quiz',
+          question: 'What animal produces pink sweat to stay cool? 🦛',
+          options: [
+            { id: 'k4-o1', text: 'Hippopotamus (Correct)' },
+            { id: 'k4-o2', text: 'Zebra' },
+            { id: 'k4-o3', text: 'Cheetah' }
+          ],
+          timeLimit: 20
+        },
+        {
+          id: 'k4-s2',
+          type: 'wordcloud',
+          question: 'What sound does a sleeping koala make? 🐨',
+          options: []
+        },
+        {
+          id: 'k4-s3',
+          type: 'grid',
+          question: 'Plot these wild animals on a speed vs weight coordinate matrix:',
+          options: [
+            { id: 'k4-g1', text: 'Lion' },
+            { id: 'k4-g2', text: 'Grizzly Bear' }
+          ],
+          xAxisLabel: 'Running Speed',
+          yAxisLabel: 'Body Weight'
+        }
+      ]
+    },
+    {
+      id: 'kids-template-5',
+      title: '🧪 Science Riddles & Millisecond Countdown',
+      updatedAt: new Date().toLocaleDateString(),
+      theme: 'classic-slate',
+      slides: [
+        {
+          id: 'k5-s1',
+          type: 'quiz',
+          question: 'What is the only rock that is light enough to float on water? 🪨',
+          options: [
+            { id: 'k5-o1', text: 'Pumice (Correct)' },
+            { id: 'k5-o2', text: 'Granite' },
+            { id: 'k5-o3', text: 'Basalt' }
+          ],
+          timeLimit: 15
+        },
+        {
+          id: 'k5-s2',
+          type: 'stopwatch',
+          question: '🎹 Riddle Countdown: I have keys but no locks. What am I?',
+          options: [],
+          timeLimit: 30
+        },
+        {
+          id: 'k5-s3',
+          type: 'poll',
+          question: 'Which science experiment is most fun to watch?',
+          options: [
+            { id: 'k5-p1', text: 'Mentos in Soda Volcanoes 🌋' },
+            { id: 'k5-p2', text: 'Tesla Coil Lightning Bolts ⚡' },
+            { id: 'k5-p3', text: 'Glow-in-the-dark Slime 🧪' }
+          ]
         }
       ]
     }
