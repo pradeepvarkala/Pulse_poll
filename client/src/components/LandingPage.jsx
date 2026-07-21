@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowRight, Sparkles, Users, Shield, Zap, BarChart3, Trophy, Play, CheckCircle } from 'lucide-react';
 
-export default function LandingPage({ onStartAuth, onJoinRoom }) {
+export default function LandingPage({ onStartAuth, onJoinRoom, onStartDemo }) {
   const [roomCode, setRoomCode] = useState('');
   const [activeDropdown, setActiveDropdown] = useState(null);
 
@@ -100,14 +100,14 @@ export default function LandingPage({ onStartAuth, onJoinRoom }) {
                       <div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#f8fafc', borderBottom: '1px solid var(--border-glass)', paddingBottom: '6px', marginBottom: '4px' }}>
                         Features overview
                       </div>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'AI presentation')}>AI presentation</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'AI quiz generator')}>AI quiz generator</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'Live polling')}>Live polling</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'Word cloud')}>Word cloud</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'Quiz')}>Quiz</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'Survey')}>Survey</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'Presentations')}>Presentations</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'Q&A')}>Q&A</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartDemo('AI presentation')}>AI presentation</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartDemo('AI quiz generator')}>AI quiz generator</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartDemo('Live polling')}>Live polling</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartDemo('Word cloud')}>Word cloud</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartDemo('Quiz')}>Quiz</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartDemo('Survey')}>Survey</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartDemo('Presentations')}>Presentations</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartDemo('Q&A')}>Q&A</span>
                     </div>
 
                     {/* Column 2 */}
@@ -115,13 +115,13 @@ export default function LandingPage({ onStartAuth, onJoinRoom }) {
                       <div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#f8fafc', borderBottom: '1px solid var(--border-glass)', paddingBottom: '6px', marginBottom: '4px' }}>
                         Learning hub
                       </div>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'How to Guide')}>How to</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'MentiAcademy')}>MentiAcademy</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'Templates')}>Templates</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'Webinars')}>Webinars</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'Blog')}>Blog</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'Integrations')}>Integrations</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartAuth('signup', 'Help center')}>Help center</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartDemo('How to Guide')}>How to</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartDemo('MentiAcademy')}>MentiAcademy</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartDemo('Templates')}>Templates</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartDemo('Webinars')}>Webinars</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartDemo('Blog')}>Blog</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartDemo('Integrations')}>Integrations</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.85rem' }} onClick={() => onStartDemo('Help center')}>Help center</span>
                     </div>
                   </div>
                 </div>
@@ -160,6 +160,10 @@ export default function LandingPage({ onStartAuth, onJoinRoom }) {
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '20px', alignItems: 'center', marginBottom: '50px' }}>
             <button className="btn btn-primary" style={{ padding: '16px 32px', fontSize: '1.05rem', gap: '10px' }} onClick={() => onStartAuth('signup')}>
               Get Started for Free <ArrowRight size={18} />
+            </button>
+
+            <button className="btn btn-secondary" style={{ padding: '16px 32px', fontSize: '1.05rem', border: '1px solid var(--border-glass)' }} onClick={() => onStartDemo('General Poll')}>
+              Try Live Demo (No Login)
             </button>
 
             {/* Inline Room Code Input */}

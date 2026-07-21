@@ -73,6 +73,68 @@ export default function App() {
     setView('audience');
   };
 
+  const handleStartDemo = (featureName = '') => {
+    const guestUser = {
+      name: 'Guest Explorer',
+      email: `guest-${Math.random().toString(36).substr(2, 5)}@pulsepoll.com`,
+      tier: 'free',
+      isDemo: true
+    };
+    setUser(guestUser);
+    localStorage.setItem('pulse-poll-user', JSON.stringify(guestUser));
+
+    // Determine slide types based on which feature was clicked
+    let targetSlideType = 'poll';
+    let targetQuestion = 'How would you rate your learning experience today?';
+    let targetOptions = [
+      { id: 'opt-d1', text: 'Option A (Correct)' },
+      { id: 'opt-d2', text: 'Option B' }
+    ];
+
+    if (featureName.toLowerCase().includes('cloud')) {
+      targetSlideType = 'wordcloud';
+      targetQuestion = 'Describe this slide features in one word:';
+      targetOptions = [];
+    } else if (featureName.toLowerCase().includes('quiz')) {
+      targetSlideType = 'quiz';
+      targetQuestion = 'What is the color of the sun?';
+      targetOptions = [
+        { id: 'q-d1', text: 'Yellow ☀️' },
+        { id: 'q-d2', text: 'Blue 💙' }
+      ];
+    } else if (featureName.toLowerCase().includes('qa') || featureName.toLowerCase().includes('q&a')) {
+      targetSlideType = 'qa';
+      targetQuestion = 'Submit your questions to the host below:';
+      targetOptions = [];
+    }
+
+    const demoPres = {
+      id: 'demo-learning-sandbox',
+      title: `${featureName || 'Interactive Demo'} Sandbox`,
+      updatedAt: new Date().toLocaleDateString(),
+      theme: 'playroom',
+      slides: [
+        {
+          id: 'demo-slide-1',
+          type: targetSlideType,
+          question: targetQuestion,
+          options: targetOptions
+        }
+      ]
+    };
+
+    // Save demo presentation to localStorage
+    const saved = localStorage.getItem('pulse-poll-presentations');
+    let presentations = saved ? JSON.parse(saved) : [];
+    presentations = presentations.filter(p => p.id !== 'demo-learning-sandbox');
+    presentations.unshift(demoPres);
+    localStorage.setItem('pulse-poll-presentations', JSON.stringify(presentations));
+
+    // Open Creator view immediately
+    setSelectedPresentationId('demo-learning-sandbox');
+    setView('creator');
+  };
+
   // Audience view does not require presenter log-in
   if (!user && view === 'audience') {
     return (
@@ -111,6 +173,7 @@ export default function App() {
           setUrlRoomCode(code);
           setView('audience');
         }}
+        onStartDemo={handleStartDemo}
       />
     );
   }
