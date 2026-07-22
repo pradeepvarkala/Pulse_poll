@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import io from 'socket.io-client';
-import { Send, ThumbsUp, Lock, Trophy, Award, CheckCircle, XCircle, ArrowUp, ArrowDown, HelpCircle } from 'lucide-react';
+import { Send, ThumbsUp, Lock, Trophy, Award, CheckCircle, XCircle, ArrowUp, ArrowDown, HelpCircle, Mic, MicOff, Video, VideoOff, Volume2 } from 'lucide-react';
 
 export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
   // Join states
@@ -50,6 +50,8 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
   const [escapeRoomKeyInput, setEscapeRoomKeyInput] = useState('');
   const [escapeRoomUnlocked, setEscapeRoomUnlocked] = useState(false);
   const [assignedBreakoutRoom, setAssignedBreakoutRoom] = useState('Room Alpha (Cyber Vault)');
+  const [participantMicMuted, setParticipantMicMuted] = useState(false);
+  const [participantVideoOn, setParticipantVideoOn] = useState(true);
 
   // Quiz timer
   const [quizTimeRemaining, setQuizTimeRemaining] = useState(0);
@@ -1218,8 +1220,38 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
             {/* Escape Room Participant Breakout Solve Interface */}
             {slide?.type === 'escaperoom' && (
               <div className="glass-card animate-fade" style={{ width: '100%', maxWidth: '500px', padding: '24px', background: '#0b0f19', border: '1px solid rgba(6, 182, 212, 0.4)', borderRadius: '20px', textAlign: 'center' }}>
-                <div style={{ background: 'rgba(6, 182, 212, 0.15)', color: '#06b6d4', padding: '6px 14px', borderRadius: '20px', fontWeight: 800, fontSize: '0.8rem', display: 'inline-block', marginBottom: '15px' }}>
-                  👥 {assignedBreakoutRoom}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                  <div style={{ background: 'rgba(6, 182, 212, 0.15)', color: '#06b6d4', padding: '6px 14px', borderRadius: '20px', fontWeight: 800, fontSize: '0.8rem' }}>
+                    👥 {assignedBreakoutRoom}
+                  </div>
+                  <span style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 700 }}>● Audio Discussion Room Live</span>
+                </div>
+
+                {/* Team Live Video Stream Simulator Box */}
+                <div style={{ height: '110px', background: '#030712', borderRadius: '12px', border: '1px solid var(--border-glass)', marginBottom: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                  <span style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>
+                    📹 {participantVideoOn ? 'Your Camera Live (Team Video On)' : 'Camera Muted'}
+                  </span>
+                  <div style={{ position: 'absolute', bottom: '8px', right: '8px', display: 'flex', gap: '6px' }}>
+                    <button 
+                      className={`btn ${participantMicMuted ? 'btn-secondary' : 'btn-primary'}`}
+                      onClick={() => setParticipantMicMuted(!participantMicMuted)}
+                      style={{ padding: '4px 8px', fontSize: '0.7rem', display: 'flex', gap: '4px', alignItems: 'center' }}
+                      title="Toggle Microphone"
+                    >
+                      {participantMicMuted ? <MicOff size={12} color="#ef4444" /> : <Mic size={12} color="#10b981" />}
+                      {participantMicMuted ? 'Muted' : 'Mic Active'}
+                    </button>
+                    <button 
+                      className={`btn ${!participantVideoOn ? 'btn-secondary' : 'btn-primary'}`}
+                      onClick={() => setParticipantVideoOn(!participantVideoOn)}
+                      style={{ padding: '4px 8px', fontSize: '0.7rem', display: 'flex', gap: '4px', alignItems: 'center' }}
+                      title="Toggle Camera"
+                    >
+                      {!participantVideoOn ? <VideoOff size={12} color="#ef4444" /> : <Video size={12} color="#06b6d4" />}
+                      {!participantVideoOn ? 'Cam Off' : 'Camera On'}
+                    </button>
+                  </div>
                 </div>
 
                 <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#f8fafc', marginBottom: '10px' }}>
