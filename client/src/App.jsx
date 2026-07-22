@@ -8,6 +8,8 @@ import AdminPanel from './components/AdminPanel';
 import Pricing from './components/Pricing';
 import LandingPage from './components/LandingPage';
 import InstructorRemote from './components/InstructorRemote';
+import AnalyticsReport from './components/AnalyticsReport';
+import EscapeRoomBuilder from './components/EscapeRoomBuilder';
 import { Presentation as PresIcon, User as UserIcon, Settings } from 'lucide-react';
 
 const CATEGORY_TEMPLATES = [
@@ -1509,6 +1511,14 @@ export default function App() {
               onViewPresenter={handleNavigateToPresenter}
               onJoinAudience={handleNavigateToAudience}
               onOpenAiGenerator={() => handleTriggerContextualSlide('AI quiz generator', true)}
+              onViewAnalytics={(pres) => {
+                if (pres) setSelectedPresentationId(pres.id);
+                setView('analytics');
+              }}
+              onViewEscapeRoom={(pres) => {
+                if (pres) setSelectedPresentationId(pres.id);
+                setView('escaperoom');
+              }}
             />
           )}
 
@@ -1517,6 +1527,23 @@ export default function App() {
               presentationId={selectedPresentationId}
               onBack={handleNavigateToDashboard}
               onPresent={handleNavigateToPresenter}
+              user={user}
+              onRequestUpgrade={() => setShowUpgradeModal(true)}
+            />
+          )}
+
+          {view === 'analytics' && (
+            <AnalyticsReport 
+              presentation={CATEGORY_TEMPLATES[0]}
+              onBack={handleNavigateToDashboard}
+              user={user}
+            />
+          )}
+
+          {view === 'escaperoom' && (
+            <EscapeRoomBuilder 
+              presentation={CATEGORY_TEMPLATES[0]}
+              onBack={handleNavigateToDashboard}
               user={user}
               onRequestUpgrade={() => setShowUpgradeModal(true)}
             />

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Play, Edit3, Trash2, Users, Presentation as PresentationIcon } from 'lucide-react';
 
-export default function Dashboard({ user, onViewCreator, onViewPresenter, onJoinAudience, onOpenAiGenerator }) {
+export default function Dashboard({ user, onViewCreator, onViewPresenter, onJoinAudience, onOpenAiGenerator, onViewAnalytics, onViewEscapeRoom }) {
   const [presentations, setPresentations] = useState([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newTitle, setNewTitle] = useState('');
@@ -300,6 +300,22 @@ export default function Dashboard({ user, onViewCreator, onViewPresenter, onJoin
             }}
           >
             🎁 Refer & Earn (Coins)
+          </button>
+          
+          <button 
+            className="btn btn-secondary" 
+            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', justifyContent: 'flex-start', fontSize: '0.9rem', background: 'transparent', border: 'none', color: '#06b6d4', fontWeight: 700 }}
+            onClick={() => onViewAnalytics && onViewAnalytics(presentations[0])}
+          >
+            📊 Slide-by-Slide Analytics
+          </button>
+
+          <button 
+            className="btn btn-secondary" 
+            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', justifyContent: 'flex-start', fontSize: '0.9rem', background: 'transparent', border: 'none', color: '#10b981', fontWeight: 700 }}
+            onClick={() => onViewEscapeRoom && onViewEscapeRoom(presentations[0])}
+          >
+            🗝️ Escape Room Builder (Max 7)
           </button>
           
           <button 

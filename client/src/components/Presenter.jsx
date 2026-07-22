@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import io from 'socket.io-client';
 import { 
   ChevronLeft, ChevronRight, Lock, Unlock, Eye, EyeOff, RotateCcw, 
-  Users, Trophy, Presentation as PresIcon, HelpCircle, ArrowLeft, CheckCircle2, QrCode 
+  Users, Trophy, Presentation as PresIcon, HelpCircle, ArrowLeft, CheckCircle2, QrCode, Edit3 
 } from 'lucide-react';
 
 const OPTION_COLORS = ['#4ecdc4', '#cbe86b', '#9adefa', '#ff6b6b', '#6b7c85', '#1e90ff', '#1dd1a1', '#ffb936', '#ffb8b8', '#8e44ad'];
@@ -283,6 +283,121 @@ function BeakerCanvas({ votes, color }) {
   );
 }
 
+function PenCanvasOverlay({ isActive, penTool, penColor, penSize, onSaveStroke, penStrokes }) {
+  const canvasRef = useRef(null);
+  const isDrawingRef = useRef(false);
+  const currentPathRef = useRef([]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    penStrokes.forEach(stroke => {
+      if (!stroke.points || stroke.points.length < 2) return;
+      ctx.save();
+      ctx.beginPath();
+      ctx.strokeStyle = stroke.color;
+      ctx.lineWidth = stroke.size;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.globalAlpha = stroke.tool === 'highlighter' ? 0.45 : 1.0;
+      ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
+      for (let i = 1; i < stroke.points.length; i++) {
+        ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
+      }
+      ctx.stroke();
+      ctx.restore();
+    });
+  }, [penStrokes, isActive]);
+
+  const getPos = (e) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+      x: clientX - rect.left,
+      y: clientY - rect.top
+    };
+  };
+
+  const startDrawing = (e) => {
+    if (!isActive) return;
+    isDrawingRef.current = true;
+    const pos = getPos(e);
+    currentPathRef.current = [pos];
+  };
+
+  const draw = (e) => {
+    if (!isDrawingRef.current || !isActive) return;
+    const pos = getPos(e);
+    currentPathRef.current.push(pos);
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const points = currentPathRef.current;
+    if (points.length < 2) return;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.strokeStyle = penColor;
+    ctx.lineWidth = penTool === 'highlighter' ? penSize * 3.5 : penSize;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.globalAlpha = penTool === 'highlighter' ? 0.45 : 1.0;
+
+    const p1 = points[points.length - 2];
+    const p2 = points[points.length - 1];
+    ctx.moveTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    ctx.stroke();
+    ctx.restore();
+  };
+
+  const stopDrawing = () => {
+    if (!isDrawingRef.current) return;
+    isDrawingRef.current = false;
+    if (currentPathRef.current.length > 1) {
+      onSaveStroke({
+        tool: penTool,
+        color: penColor,
+        size: penTool === 'highlighter' ? penSize * 3.5 : penSize,
+        points: [...currentPathRef.current]
+      });
+    }
+    currentPathRef.current = [];
+  };
+
+  if (!isActive && penStrokes.length === 0) return null;
+
+  return (
+    <canvas 
+      ref={canvasRef}
+      width={window.innerWidth}
+      height={window.innerHeight}
+      onMouseDown={startDrawing}
+      onMouseMove={draw}
+      onMouseUp={stopDrawing}
+      onTouchStart={startDrawing}
+      onTouchMove={draw}
+      onTouchEnd={stopDrawing}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        zIndex: 99999,
+        pointerEvents: isActive ? 'auto' : 'none',
+        touchAction: 'none'
+      }}
+    />
+  );
+}
+
 export default function Presenter({ presentationId, onBack }) {
   const [presentation, setPresentation] = useState(null);
   const [roomCode, setRoomCode] = useState('');
@@ -301,6 +416,13 @@ export default function Presenter({ presentationId, onBack }) {
   const [leaderboardVisible, setLeaderboardVisible] = useState(false);
   const [showLobbyOverlay, setShowLobbyOverlay] = useState(false);
   const [focusViolations, setFocusViolations] = useState([]);
+
+  // Interactive Live Pen / Touchpen Stencil Annotation State
+  const [isPenActive, setIsPenActive] = useState(false);
+  const [penTool, setPenTool] = useState('pen'); // 'pen' or 'highlighter'
+  const [penColor, setPenColor] = useState('#06b6d4');
+  const [penSize, setPenSize] = useState(4);
+  const [penStrokes, setPenStrokes] = useState([]);
 
   // New Reveal/Results States
   const [correctRevealed, setCorrectRevealed] = useState(false);
@@ -2143,6 +2265,15 @@ export default function Presenter({ presentationId, onBack }) {
 
           <button 
             className="btn btn-secondary btn-icon" 
+            style={{ border: 'none', color: isPenActive ? '#06b6d4' : 'white', background: isPenActive ? 'rgba(6,182,212,0.2)' : 'transparent' }}
+            onClick={() => setIsPenActive(!isPenActive)}
+            title="Interactive Pen / Touchpen Stencil Annotation"
+          >
+            <Edit3 size={20} />
+          </button>
+
+          <button 
+            className="btn btn-secondary btn-icon" 
             style={{ border: 'none' }}
             onClick={clearResponses}
             title="Clear Responses"
@@ -2151,6 +2282,96 @@ export default function Presenter({ presentationId, onBack }) {
           </button>
         </div>
       </div>
+
+      {/* Live Touchpen / Stencil Canvas Overlay */}
+      <PenCanvasOverlay 
+        isActive={isPenActive}
+        penTool={penTool}
+        penColor={penColor}
+        penSize={penSize}
+        penStrokes={penStrokes}
+        onSaveStroke={(stroke) => setPenStrokes([...penStrokes, stroke])}
+      />
+
+      {/* Floating Pen Controls Toolbar */}
+      {isPenActive && (
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 100000,
+          background: '#0b0f19',
+          border: '1px solid rgba(6, 182, 212, 0.5)',
+          borderRadius: '30px',
+          padding: '8px 18px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.6)'
+        }}>
+          <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#06b6d4' }}>✏️ Pen Mode:</span>
+
+          <button 
+            type="button"
+            style={{ padding: '4px 12px', borderRadius: '15px', border: 'none', background: penTool === 'pen' ? '#06b6d4' : 'rgba(255,255,255,0.1)', color: 'white', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
+            onClick={() => setPenTool('pen')}
+          >
+            Pen
+          </button>
+          <button 
+            type="button"
+            style={{ padding: '4px 12px', borderRadius: '15px', border: 'none', background: penTool === 'highlighter' ? '#f59e0b' : 'rgba(255,255,255,0.1)', color: 'white', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
+            onClick={() => setPenTool('highlighter')}
+          >
+            Highlighter
+          </button>
+
+          {/* Color Palette */}
+          {['#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#ffffff'].map(c => (
+            <div 
+              key={c}
+              onClick={() => setPenColor(c)}
+              style={{
+                width: '20px',
+                height: '20px',
+                borderRadius: '50%',
+                backgroundColor: c,
+                cursor: 'pointer',
+                border: penColor === c ? '2px solid white' : '1px solid rgba(255,255,255,0.2)',
+                transform: penColor === c ? 'scale(1.2)' : 'scale(1)',
+                transition: 'transform 0.15s ease'
+              }}
+              title={`Select Color ${c}`}
+            />
+          ))}
+
+          <div style={{ width: '1px', height: '16px', background: 'rgba(255,255,255,0.2)' }} />
+
+          <button 
+            type="button"
+            style={{ background: 'transparent', border: 'none', color: '#cbd5e1', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 700 }}
+            onClick={() => setPenStrokes(penStrokes.slice(0, -1))}
+          >
+            ↩ Undo
+          </button>
+          <button 
+            type="button"
+            style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 700 }}
+            onClick={() => setPenStrokes([])}
+          >
+            🧹 Clear
+          </button>
+          <button 
+            type="button"
+            style={{ background: '#334155', border: 'none', borderRadius: '50%', width: '24px', height: '24px', color: 'white', fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            onClick={() => setIsPenActive(false)}
+            title="Close Pen Interface"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {showLobbyOverlay && (
         <div 
