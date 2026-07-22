@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Play, Edit3, Trash2, Users, Presentation as PresentationIcon } from 'lucide-react';
 
-export default function Dashboard({ user, onViewCreator, onViewPresenter, onJoinAudience }) {
+export default function Dashboard({ user, onViewCreator, onViewPresenter, onJoinAudience, onOpenAiGenerator }) {
   const [presentations, setPresentations] = useState([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newTitle, setNewTitle] = useState('');
