@@ -51,10 +51,15 @@ export default function Dashboard({ user, onViewCreator, onViewPresenter, onJoin
         }
       } catch (err) {
         console.error('Error fetching presentations:', err);
-        const saved = localStorage.getItem('pulse-poll-presentations');
-        if (saved) {
-          setPresentations(JSON.parse(saved));
-        } else {
+        try {
+          const saved = localStorage.getItem('pulse-poll-presentations');
+          if (saved && saved !== 'undefined') {
+            const parsed = JSON.parse(saved);
+            setPresentations(Array.isArray(parsed) ? parsed : []);
+          } else {
+            setPresentations([]);
+          }
+        } catch (e) {
           setPresentations([]);
         }
       }

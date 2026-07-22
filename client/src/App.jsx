@@ -1487,10 +1487,10 @@ export default function App() {
               onClick={() => setView('admin')}
               title="View Profile Settings"
             >
-              {user.avatar ? (
+              {user?.avatar ? (
                 <img src={user.avatar} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
-                user.name.slice(0, 2).toUpperCase()
+                (user?.name || user?.email || 'User').slice(0, 2).toUpperCase()
               )}
             </div>
           </div>
