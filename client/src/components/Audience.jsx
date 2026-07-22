@@ -50,6 +50,8 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
   const [escapeRoomKeyInput, setEscapeRoomKeyInput] = useState('');
   const [escapeRoomUnlocked, setEscapeRoomUnlocked] = useState(false);
   const [assignedBreakoutRoom, setAssignedBreakoutRoom] = useState('Room Alpha (Cyber Vault)');
+  const [userEnteredGroupCode, setUserEnteredGroupCode] = useState('');
+  const [isGroupJoined, setIsGroupJoined] = useState(false);
   const [participantMicMuted, setParticipantMicMuted] = useState(false);
   const [participantVideoOn, setParticipantVideoOn] = useState(true);
   const mobileVideoRef = useRef(null);
@@ -1242,83 +1244,141 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
             {/* Escape Room Participant Breakout Solve Interface */}
             {slide?.type === 'escaperoom' && (
               <div className="glass-card animate-fade" style={{ width: '100%', maxWidth: '500px', padding: '24px', background: '#0b0f19', border: '1px solid rgba(6, 182, 212, 0.4)', borderRadius: '20px', textAlign: 'center' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                  <div style={{ background: 'rgba(6, 182, 212, 0.15)', color: '#06b6d4', padding: '6px 14px', borderRadius: '20px', fontWeight: 800, fontSize: '0.8rem' }}>
-                    👥 {assignedBreakoutRoom}
+                {!isGroupJoined ? (
+                  /* 🔐 Step 1: Pre-Assigned Group Room Code Entry */
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <div style={{ background: 'rgba(6, 182, 212, 0.15)', color: '#06b6d4', padding: '6px 14px', borderRadius: '20px', fontWeight: 800, fontSize: '0.85rem', display: 'inline-block', margin: '0 auto' }}>
+                      🔐 Pre-Assigned Breakout Entry
+                    </div>
+                    <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
+                      Enter Your Group Room Access Code
+                    </h2>
+                    <p style={{ color: '#cbd5e1', fontSize: '0.85rem', margin: 0, lineHeight: 1.5 }}>
+                      Please enter the specific group code assigned to you by your host (e.g. <strong>ALPHA-101</strong>, <strong>BETA-202</strong>, <strong>GAMMA-303</strong>).
+                    </p>
+
+                    <form onSubmit={(e) => {
+                      e.preventDefault();
+                      const code = userEnteredGroupCode.trim().toUpperCase();
+                      if (!code) return;
+
+                      let roomName = 'Room Alpha (Cyber Vault)';
+                      if (code.includes('BETA') || code.includes('202')) roomName = 'Room Beta (Quantum Core)';
+                      else if (code.includes('GAMMA') || code.includes('303')) roomName = 'Room Gamma (Matrix Grid)';
+                      else if (code.includes('DELTA') || code.includes('404')) roomName = 'Room Delta (AI Substation)';
+                      else if (code.includes('EPSILON') || code.includes('505')) roomName = 'Room Epsilon (Nebula Lab)';
+                      
+                      setAssignedBreakoutRoom(roomName);
+                      setIsGroupJoined(true);
+                    }} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <input 
+                        type="text" 
+                        className="input-text"
+                        placeholder="Enter Group Code (e.g. ALPHA-101)"
+                        value={userEnteredGroupCode}
+                        onChange={(e) => setUserEnteredGroupCode(e.target.value)}
+                        style={{ padding: '12px', textAlign: 'center', fontSize: '1.05rem', fontWeight: 800, letterSpacing: '2px', textTransform: 'uppercase' }}
+                        required
+                      />
+                      <button type="submit" className="btn btn-primary" style={{ padding: '12px', fontWeight: 800, fontSize: '0.95rem' }}>
+                        🔑 Join Assigned Group Room 🚀
+                      </button>
+                    </form>
                   </div>
-                  <span style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 700 }}>● Audio Discussion Room Live</span>
-                </div>
-
-                {/* Team Live Video Stream Box with Mobile Camera Feed */}
-                <div style={{ height: '130px', background: '#030712', borderRadius: '12px', border: '1px solid var(--border-glass)', marginBottom: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
-                  {participantVideoOn ? (
-                    <video 
-                      ref={mobileVideoRef} 
-                      autoPlay 
-                      playsInline 
-                      muted 
-                      style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }} 
-                    />
-                  ) : (
-                    <span style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>
-                      📹 Camera Muted
-                    </span>
-                  )}
-                  <div style={{ position: 'absolute', bottom: '8px', right: '8px', display: 'flex', gap: '6px', zIndex: 10 }}>
-                    <button 
-                      className={`btn ${participantMicMuted ? 'btn-secondary' : 'btn-primary'}`}
-                      onClick={() => setParticipantMicMuted(!participantMicMuted)}
-                      style={{ padding: '4px 8px', fontSize: '0.7rem', display: 'flex', gap: '4px', alignItems: 'center' }}
-                      title="Toggle Microphone"
-                    >
-                      {participantMicMuted ? <MicOff size={12} color="#ef4444" /> : <Mic size={12} color="#10b981" />}
-                      {participantMicMuted ? 'Muted' : 'Mic Active'}
-                    </button>
-                    <button 
-                      className={`btn ${!participantVideoOn ? 'btn-secondary' : 'btn-primary'}`}
-                      onClick={() => setParticipantVideoOn(!participantVideoOn)}
-                      style={{ padding: '4px 8px', fontSize: '0.7rem', display: 'flex', gap: '4px', alignItems: 'center' }}
-                      title="Toggle Camera"
-                    >
-                      {!participantVideoOn ? <VideoOff size={12} color="#ef4444" /> : <Video size={12} color="#06b6d4" />}
-                      {!participantVideoOn ? 'Cam Off' : 'Camera On'}
-                    </button>
-                  </div>
-                </div>
-
-                <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#f8fafc', marginBottom: '10px' }}>
-                  🧩 Escape Room Cipher Puzzle
-                </h2>
-                <p style={{ color: '#cbd5e1', fontSize: '0.9rem', lineHeight: 1.5, marginBottom: '20px' }}>
-                  {slide.question || 'Decipher the secret code with your team to unlock the breakout room!'}
-                </p>
-
-                {!escapeRoomUnlocked ? (
-                  <form onSubmit={(e) => {
-                    e.preventDefault();
-                    if (escapeRoomKeyInput.trim().toUpperCase() === (slide.secretKey || 'PUZZLE-904')) {
-                      setEscapeRoomUnlocked(true);
-                    } else {
-                      alert('❌ Incorrect key code! Discuss with your team and try again.');
-                    }
-                  }} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <input 
-                      type="text" 
-                      className="input-text"
-                      placeholder="Enter Secret Key Code (e.g. PUZZLE-904)"
-                      value={escapeRoomKeyInput}
-                      onChange={(e) => setEscapeRoomKeyInput(e.target.value)}
-                      style={{ padding: '12px', textAlign: 'center', fontSize: '1rem', fontWeight: 800, letterSpacing: '2px', textTransform: 'uppercase' }}
-                      required
-                    />
-                    <button type="submit" className="btn btn-primary" style={{ padding: '12px', fontWeight: 800, fontSize: '0.95rem' }}>
-                      🔓 Submit Unlock Key
-                    </button>
-                  </form>
                 ) : (
-                  <div style={{ padding: '20px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid #10b981', borderRadius: '12px', color: '#10b981', fontWeight: 800, fontSize: '1.1rem' }}>
-                    🎉 Vault Unlocked! Your team escaped successfully! 🏆
-                  </div>
+                  /* 🧩 Step 2: Inside Joined Breakout Room */
+                  <>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                      <div style={{ background: 'rgba(6, 182, 212, 0.15)', color: '#06b6d4', padding: '6px 14px', borderRadius: '20px', fontWeight: 800, fontSize: '0.8rem' }}>
+                        👥 {assignedBreakoutRoom}
+                      </div>
+                      <button 
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={() => {
+                          if (confirm('🚪 Exit this breakout room and enter a different group access code?')) {
+                            setIsGroupJoined(false);
+                            setUserEnteredGroupCode('');
+                          }
+                        }}
+                        style={{ padding: '4px 10px', fontSize: '0.75rem', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.1)' }}
+                      >
+                        🚪 Exit & Switch Room
+                      </button>
+                    </div>
+
+                    {/* Team Live Video Stream Box with Mobile Camera Feed */}
+                    <div style={{ height: '130px', background: '#030712', borderRadius: '12px', border: '1px solid var(--border-glass)', marginBottom: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
+                      {participantVideoOn ? (
+                        <video 
+                          ref={mobileVideoRef} 
+                          autoPlay 
+                          playsInline 
+                          muted 
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }} 
+                        />
+                      ) : (
+                        <span style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>
+                          📹 Camera Muted
+                        </span>
+                      )}
+                      <div style={{ position: 'absolute', bottom: '8px', right: '8px', display: 'flex', gap: '6px', zIndex: 10 }}>
+                        <button 
+                          className={`btn ${participantMicMuted ? 'btn-secondary' : 'btn-primary'}`}
+                          onClick={() => setParticipantMicMuted(!participantMicMuted)}
+                          style={{ padding: '4px 8px', fontSize: '0.7rem', display: 'flex', gap: '4px', alignItems: 'center' }}
+                          title="Toggle Microphone"
+                        >
+                          {participantMicMuted ? <MicOff size={12} color="#ef4444" /> : <Mic size={12} color="#10b981" />}
+                          {participantMicMuted ? 'Muted' : 'Mic Active'}
+                        </button>
+                        <button 
+                          className={`btn ${!participantVideoOn ? 'btn-secondary' : 'btn-primary'}`}
+                          onClick={() => setParticipantVideoOn(!participantVideoOn)}
+                          style={{ padding: '4px 8px', fontSize: '0.7rem', display: 'flex', gap: '4px', alignItems: 'center' }}
+                          title="Toggle Camera"
+                        >
+                          {!participantVideoOn ? <VideoOff size={12} color="#ef4444" /> : <Video size={12} color="#06b6d4" />}
+                          {!participantVideoOn ? 'Cam Off' : 'Camera On'}
+                        </button>
+                      </div>
+                    </div>
+
+                    <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#f8fafc', marginBottom: '10px' }}>
+                      🧩 Escape Room Cipher Puzzle
+                    </h2>
+                    <p style={{ color: '#cbd5e1', fontSize: '0.9rem', lineHeight: 1.5, marginBottom: '20px' }}>
+                      {slide.question || 'Decipher the secret code with your team to unlock the breakout room!'}
+                    </p>
+
+                    {!escapeRoomUnlocked ? (
+                      <form onSubmit={(e) => {
+                        e.preventDefault();
+                        if (escapeRoomKeyInput.trim().toUpperCase() === (slide.secretKey || 'PUZZLE-904')) {
+                          setEscapeRoomUnlocked(true);
+                        } else {
+                          alert('❌ Incorrect key code! Discuss with your team and try again.');
+                        }
+                      }} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <input 
+                          type="text" 
+                          className="input-text"
+                          placeholder="Enter Secret Key Code (e.g. PUZZLE-904)"
+                          value={escapeRoomKeyInput}
+                          onChange={(e) => setEscapeRoomKeyInput(e.target.value)}
+                          style={{ padding: '12px', textAlign: 'center', fontSize: '1rem', fontWeight: 800, letterSpacing: '2px', textTransform: 'uppercase' }}
+                          required
+                        />
+                        <button type="submit" className="btn btn-primary" style={{ padding: '12px', fontWeight: 800, fontSize: '0.95rem' }}>
+                          🔓 Submit Unlock Key
+                        </button>
+                      </form>
+                    ) : (
+                      <div style={{ padding: '20px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid #10b981', borderRadius: '12px', color: '#10b981', fontWeight: 800, fontSize: '1.1rem' }}>
+                        🎉 Vault Unlocked! Your team escaped successfully! 🏆
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             )}
