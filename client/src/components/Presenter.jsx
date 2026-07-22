@@ -1139,6 +1139,7 @@ export default function Presenter({ presentationId, onBack }) {
             style={{ padding: '6px 12px', fontSize: '0.85rem', width: '130px', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', border: '1px solid var(--border-glass)' }}
           >
             <option value="neon">Neon Eclipse</option>
+            <option value="midnight-gold">Midnight Gold (Executive)</option>
             <option value="ocean">Ocean Breeze</option>
             <option value="sunset">Sunset Glow</option>
             <option value="light-luxe">Light Luxe</option>
