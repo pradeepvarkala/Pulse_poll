@@ -269,11 +269,11 @@ export default function Auth({ onLoginSuccess, onBackToLanding, featureContext }
             <button 
               type="button"
               className="social-btn social-btn-google" 
-              onClick={() => handleInstantDemoLogin(email.trim() || 'pradeepvarkala@gmail.com')}
+              onClick={() => handleOAuthLogin('google')}
               style={{ width: '100%', maxWidth: '350px', padding: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
             >
               <GoogleIcon />
-              <span>Continue with Google ({email.trim() ? email.trim() : 'pradeepvarkala@gmail.com'})</span>
+              <span>Continue with Google</span>
             </button>
           )}
 
@@ -372,9 +372,9 @@ export default function Auth({ onLoginSuccess, onBackToLanding, featureContext }
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   <div 
                     onClick={() => selectOAuthProfile(
-                      'Sarah Jenkins', 
-                      'sarah.jenkins@company.com', 
-                      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=facearea&facepad=2&w=150&h=150&q=80'
+                      'Pradeep Varkala', 
+                      'pradeepvarkala@gmail.com', 
+                      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80'
                     )}
                     style={{ 
                       display: 'flex', alignItems: 'center', gap: '12px', padding: '12px',
@@ -384,18 +384,18 @@ export default function Auth({ onLoginSuccess, onBackToLanding, featureContext }
                     onMouseOver={(e) => e.currentTarget.style.background = '#f1f5f9'}
                     onMouseOut={(e) => e.currentTarget.style.background = '#f8fafc'}
                   >
-                    <div className="admin-avatar" style={{ width: '40px', height: '40px', fontSize: '1rem', background: 'linear-gradient(135deg, #6366f1, #ec4899)', color: 'white' }}>SJ</div>
+                    <div className="admin-avatar" style={{ width: '40px', height: '40px', fontSize: '1rem', background: 'linear-gradient(135deg, #10b981, #06b6d4)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, borderRadius: '50%' }}>PV</div>
                     <div style={{ textAlign: 'left' }}>
-                      <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#1f2937' }}>Sarah Jenkins</div>
-                      <div style={{ fontSize: '0.75rem', color: '#475569' }}>sarah.jenkins@company.com</div>
+                      <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#1f2937' }}>Pradeep Varkala (Admin)</div>
+                      <div style={{ fontSize: '0.75rem', color: '#475569' }}>pradeepvarkala@gmail.com</div>
                     </div>
                   </div>
 
                   <div 
                     onClick={() => selectOAuthProfile(
-                      'Alex River', 
-                      'alex.river@domain.org', 
-                      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=150&h=150&q=80'
+                      'Mekzek Swmp', 
+                      'mekzekswmp@gmail.com', 
+                      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80'
                     )}
                     style={{ 
                       display: 'flex', alignItems: 'center', gap: '12px', padding: '12px',
@@ -405,10 +405,10 @@ export default function Auth({ onLoginSuccess, onBackToLanding, featureContext }
                     onMouseOver={(e) => e.currentTarget.style.background = '#f1f5f9'}
                     onMouseOut={(e) => e.currentTarget.style.background = '#f8fafc'}
                   >
-                    <div className="admin-avatar" style={{ width: '40px', height: '40px', fontSize: '1rem', background: 'linear-gradient(135deg, #6366f1, #ec4899)', color: 'white' }}>AR</div>
+                    <div className="admin-avatar" style={{ width: '40px', height: '40px', fontSize: '1rem', background: 'linear-gradient(135deg, #6366f1, #ec4899)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, borderRadius: '50%' }}>MS</div>
                     <div style={{ textAlign: 'left' }}>
-                      <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#1f2937' }}>Alex River</div>
-                      <div style={{ fontSize: '0.75rem', color: '#475569' }}>alex.river@domain.org</div>
+                      <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#1f2937' }}>Mekzek Swmp</div>
+                      <div style={{ fontSize: '0.75rem', color: '#475569' }}>mekzekswmp@gmail.com</div>
                     </div>
                   </div>
                 </div>
