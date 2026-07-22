@@ -52,6 +52,21 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
   const [assignedBreakoutRoom, setAssignedBreakoutRoom] = useState('Room Alpha (Cyber Vault)');
   const [participantMicMuted, setParticipantMicMuted] = useState(false);
   const [participantVideoOn, setParticipantVideoOn] = useState(true);
+  const mobileVideoRef = useRef(null);
+
+  useEffect(() => {
+    if (participantVideoOn && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: true, audio: !participantMicMuted })
+        .then((stream) => {
+          if (mobileVideoRef.current) {
+            mobileVideoRef.current.srcObject = stream;
+          }
+        })
+        .catch((err) => {
+          console.log('Mobile media stream note:', err);
+        });
+    }
+  }, [participantVideoOn, participantMicMuted]);
 
   // Quiz timer
   const [quizTimeRemaining, setQuizTimeRemaining] = useState(0);
@@ -1227,12 +1242,22 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
                   <span style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 700 }}>● Audio Discussion Room Live</span>
                 </div>
 
-                {/* Team Live Video Stream Simulator Box */}
-                <div style={{ height: '110px', background: '#030712', borderRadius: '12px', border: '1px solid var(--border-glass)', marginBottom: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-                  <span style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>
-                    📹 {participantVideoOn ? 'Your Camera Live (Team Video On)' : 'Camera Muted'}
-                  </span>
-                  <div style={{ position: 'absolute', bottom: '8px', right: '8px', display: 'flex', gap: '6px' }}>
+                {/* Team Live Video Stream Box with Mobile Camera Feed */}
+                <div style={{ height: '130px', background: '#030712', borderRadius: '12px', border: '1px solid var(--border-glass)', marginBottom: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
+                  {participantVideoOn ? (
+                    <video 
+                      ref={mobileVideoRef} 
+                      autoPlay 
+                      playsInline 
+                      muted 
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }} 
+                    />
+                  ) : (
+                    <span style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>
+                      📹 Camera Muted
+                    </span>
+                  )}
+                  <div style={{ position: 'absolute', bottom: '8px', right: '8px', display: 'flex', gap: '6px', zIndex: 10 }}>
                     <button 
                       className={`btn ${participantMicMuted ? 'btn-secondary' : 'btn-primary'}`}
                       onClick={() => setParticipantMicMuted(!participantMicMuted)}
