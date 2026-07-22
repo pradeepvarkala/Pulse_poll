@@ -672,6 +672,9 @@ app.delete('/api/presentations/:id', async (req, res) => {
 
 // Serve index.html for all other requests to allow client-side routing
 app.get('*', (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   const indexPath = path.resolve(__dirname, '..', 'client', 'dist', 'index.html');
   res.sendFile(indexPath, (err) => {
     if (err) {
