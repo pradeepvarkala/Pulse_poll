@@ -35,6 +35,40 @@
                  radial-gradient(at 100% 100%, rgba(37, 99, 235, 0.04) 0px, transparent 50%);
 }
 
+/* High Contrast Select Dropdown Styling for readable text on all browsers */
+select option {
+  background-color: #0f172a !important;
+  color: #ffffff !important;
+  padding: 8px 12px !important;
+}
+
+select option:checked {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+}
+
+/* Slide Question Text Auto-fit & Break Word */
+.preview-question-input {
+  max-width: 100% !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  white-space: pre-wrap !important;
+  box-sizing: border-box !important;
+}
+
+/* Drag and Drop Thumbnail Cursor */
+.slide-thumbnail {
+  cursor: grab;
+  user-select: none;
+}
+.slide-thumbnail:active {
+  cursor: grabbing;
+}
+.slide-thumbnail.dragging {
+  opacity: 0.4;
+  border: 2px dashed #06b6d4 !important;
+}
+
 .theme-neon {
   --bg-dark: #090d16;
   --bg-card-dark: rgba(17, 24, 39, 0.75);

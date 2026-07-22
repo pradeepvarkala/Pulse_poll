@@ -81,12 +81,13 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
   const [presentation, setPresentation] = useState(null);
   const [activeSlideId, setActiveSlideId] = useState(null);
   const [activeEmojiPickerId, setActiveEmojiPickerId] = useState(null);
-  const [activeSidebarTab, setActiveSidebarTab] = useState('content'); // type, content, design, ai
+  const [activeSidebarTab, setActiveSidebarTab] = useState('type'); // type, content, design, ai
   const [emojiPickerCoords, setEmojiPickerCoords] = useState(null);
   const [showInstructionPopup, setShowInstructionPopup] = useState(false);
   const [aiPromptText, setAiPromptText] = useState('');
   const [isAiGenerating, setIsAiGenerating] = useState(false);
   const [aiProgressText, setAiProgressText] = useState('');
+  const [draggedSlideIndex, setDraggedSlideIndex] = useState(null);
 
 
   const handleToggleEmojiPicker = (e, optId) => {
@@ -257,6 +258,18 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
     if (activeSlideId === slideId) {
       setActiveSlideId(filteredSlides[0].id);
     }
+  };
+
+  const handleReorderSlides = (fromIndex, toIndex) => {
+    if (fromIndex === null || toIndex === null || fromIndex === toIndex) return;
+    const reordered = [...slides];
+    const [moved] = reordered.splice(fromIndex, 1);
+    reordered.splice(toIndex, 0, moved);
+    savePresentation({
+      ...presentation,
+      slides: reordered,
+      updatedAt: new Date().toLocaleDateString()
+    });
   };
 
   const handleAiGenerate = async (e) => {
@@ -497,6 +510,14 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
           className="input-text"
           value={opt.text}
           onChange={(e) => handleOptionChange(opt.id, e.target.value)}
+          onFocus={(e) => {
+            if (e.target.value.startsWith('Item') || e.target.value.startsWith('Option')) {
+              handleOptionChange(opt.id, '');
+            } else {
+              e.target.select();
+            }
+            e.target.style.borderBottomColor = 'var(--primary)';
+          }}
           placeholder={`Item ${index + 1}`}
           style={{
             background: 'transparent',
@@ -509,7 +530,6 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
             padding: '2px',
             transition: 'border-color 0.2s'
           }}
-          onFocus={(e) => e.target.style.borderBottomColor = 'var(--primary)'}
           onBlur={(e) => e.target.style.borderBottomColor = 'transparent'}
         />
 
@@ -578,8 +598,23 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
           {slides.map((slide, index) => (
             <div 
               key={slide.id} 
-              className={`slide-thumbnail ${slide.id === activeSlideId ? 'active' : ''}`}
+              draggable={true}
+              onDragStart={(e) => {
+                setDraggedSlideIndex(index);
+                e.dataTransfer.effectAllowed = 'move';
+              }}
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                handleReorderSlides(draggedSlideIndex, index);
+                setDraggedSlideIndex(null);
+              }}
+              className={`slide-thumbnail ${slide.id === activeSlideId ? 'active' : ''} ${draggedSlideIndex === index ? 'dragging' : ''}`}
               onClick={() => setActiveSlideId(slide.id)}
+              title="Drag up/down to reorder slides"
             >
               <span className="thumbnail-number">{index + 1}</span>
               <div className="thumbnail-type">{slide.type}</div>
@@ -607,8 +642,14 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
         {/* Center: Slide Preview Mockup */}
         <div className="editor-center" style={{ position: 'relative' }}>
           <div className={`glass-card slide-preview-container theme-${presentation?.theme || 'corporate'}`} style={{ position: 'relative' }}>
-            {/* Quick Access Help Badge */}
-            <div style={{ position: 'absolute', top: '15px', right: '15px', zIndex: 10 }}>
+            {/* Top Bar: Slide Counter Badge & Help Badge */}
+            <div style={{ position: 'absolute', top: '15px', left: '15px', right: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10 }}>
+              <span style={{ 
+                background: 'rgba(6, 182, 212, 0.15)', border: '1px solid rgba(6, 182, 212, 0.3)',
+                color: 'var(--primary)', padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800
+              }}>
+                Slide {slides.findIndex(s => s.id === activeSlideId) + 1} of {slides.length}
+              </span>
               <button 
                 className="btn btn-secondary" 
                 style={{ fontSize: '0.75rem', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px', border: '1px solid var(--border-glass)' }}
@@ -677,23 +718,35 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
               className="preview-question-input"
               value={activeSlide.question}
               onChange={(e) => handleUpdateActiveSlide({ question: e.target.value })}
-              placeholder="Edit slide question text..."
+              onFocus={(e) => {
+                if (e.target.value.startsWith('Edit your') || e.target.value.startsWith('New Question') || e.target.value.startsWith('First Slide:')) {
+                  handleUpdateActiveSlide({ question: '' });
+                } else {
+                  e.target.select();
+                }
+                e.target.style.borderBottomColor = 'var(--primary)';
+              }}
+              placeholder="Type your slide question here..."
               style={{
                 background: 'transparent',
                 border: 'none',
                 borderBottom: '1px dashed transparent',
                 color: 'var(--text-primary)',
                 fontFamily: 'Outfit, sans-serif',
-                fontSize: '1.8rem',
+                fontSize: (activeSlide.question || '').length > 60 ? '1.25rem' : (activeSlide.question || '').length > 35 ? '1.5rem' : '1.85rem',
                 fontWeight: 800,
                 textAlign: 'center',
                 width: '100%',
+                maxWidth: '100%',
+                wordWrap: 'break-word',
+                overflowWrap: 'break-word',
+                whiteSpace: 'pre-wrap',
                 outline: 'none',
                 padding: '6px',
+                marginTop: '1.5rem',
                 marginBottom: '1rem',
                 transition: 'var(--transition-smooth)'
               }}
-              onFocus={(e) => e.target.style.borderBottomColor = 'var(--primary)'}
               onBlur={(e) => e.target.style.borderBottomColor = 'transparent'}
             />
 
@@ -897,6 +950,35 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Bottom Slide Navigation Controls */}
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px', marginTop: '16px' }}>
+            <button 
+              className="btn btn-secondary" 
+              disabled={slides.findIndex(s => s.id === activeSlideId) <= 0}
+              onClick={() => {
+                const idx = slides.findIndex(s => s.id === activeSlideId);
+                if (idx > 0) setActiveSlideId(slides[idx - 1].id);
+              }}
+              style={{ fontSize: '0.8rem', padding: '6px 14px', borderRadius: '8px' }}
+            >
+              ◄ Previous Slide
+            </button>
+            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-secondary)' }}>
+              Slide {slides.findIndex(s => s.id === activeSlideId) + 1} of {slides.length}
+            </span>
+            <button 
+              className="btn btn-secondary" 
+              disabled={slides.findIndex(s => s.id === activeSlideId) >= slides.length - 1}
+              onClick={() => {
+                const idx = slides.findIndex(s => s.id === activeSlideId);
+                if (idx < slides.length - 1) setActiveSlideId(slides[idx + 1].id);
+              }}
+              style={{ fontSize: '0.8rem', padding: '6px 14px', borderRadius: '8px' }}
+            >
+              Next Slide ►
+            </button>
           </div>
         </div>
 
@@ -1236,6 +1318,34 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
           {/* 3. DESIGN / CUSTOMIZE TAB */}
           {activeSidebarTab === 'design' && (
             <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {/* 5 Countdown Audio Themes (Paid Feature) */}
+              <div className="settings-group">
+                <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>Countdown Audio Theme</span>
+                  <span style={{ fontSize: '0.7rem', color: '#f59e0b', fontWeight: 800 }}>🔒 Paid Feature</span>
+                </label>
+                <select 
+                  value={activeSlide.audioTheme || presentation.audioTheme || 'classic'}
+                  onChange={(e) => {
+                    if (user?.tier === 'free') {
+                      onRequestUpgrade('audio_theme');
+                      return;
+                    }
+                    handleUpdateActiveSlide({ audioTheme: e.target.value });
+                  }}
+                  style={{
+                    width: '100%', padding: '10px 12px', background: '#0f172a',
+                    border: '1px solid var(--border-glass)', borderRadius: '8px',
+                    color: '#ffffff', fontSize: '0.85rem', fontWeight: 600, outline: 'none'
+                  }}
+                >
+                  <option value="classic">⏱️ Classic Ticking Clock</option>
+                  <option value="synth">⚡ Synthesizer Energy Beat</option>
+                  <option value="gameshow">🎺 Game Show Fanfare</option>
+                  <option value="chill">🌊 Ambient Deep Chill</option>
+                  <option value="arcade">🚀 Space Arcade Rush</option>
+                </select>
+              </div>
               {/* Customizable Time Limit */}
               <div className="settings-group">
                 <label>Question Time Limit (0 to disable)</label>

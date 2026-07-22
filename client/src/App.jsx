@@ -1412,7 +1412,7 @@ export default function App() {
               style={{ background: 'linear-gradient(135deg, #06b6d4, #3b82f6)', fontWeight: 800, display: 'flex', gap: '6px', alignItems: 'center', boxShadow: '0 0 15px rgba(6, 182, 212, 0.3)', border: '1px solid rgba(255,255,255,0.3)' }}
               onClick={() => handleTriggerContextualSlide('AI quiz generator', true)}
             >
-              <span>🤖 PulseAI Generator</span>
+              <span>🤖 PulseAI</span>
               <span>⚡</span>
             </button>
             <button className="btn btn-secondary" onClick={() => setView('pricing')}>
@@ -1434,8 +1434,8 @@ export default function App() {
               <span>Admin settings</span>
             </button>
             {user?.email === 'pradeepvarkala@gmail.com' && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.05)', padding: '4px 12px', borderRadius: '10px', border: '1px solid var(--border-glass)' }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)' }}>Plan Switch:</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#0f172a', padding: '6px 12px', borderRadius: '10px', border: '1px solid rgba(6, 182, 212, 0.4)', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#06b6d4' }}>Plan Switch:</span>
                 <select 
                   value={user.tier}
                   onChange={async (e) => {
@@ -1461,18 +1461,20 @@ export default function App() {
                     }
                   }}
                   style={{
-                    background: 'transparent',
-                    border: 'none',
-                    color: 'var(--text-primary)',
-                    fontSize: '0.8rem',
+                    background: '#1e293b',
+                    border: '1px solid #334155',
+                    color: '#ffffff',
+                    fontSize: '0.85rem',
                     fontWeight: 700,
                     cursor: 'pointer',
+                    padding: '4px 8px',
+                    borderRadius: '6px',
                     outline: 'none'
                   }}
                 >
-                  <option value="admin" style={{ background: '#0b0f19' }}>Admin (Full)</option>
-                  <option value="pro" style={{ background: '#0b0f19' }}>Pro / Premium</option>
-                  <option value="free" style={{ background: '#0b0f19' }}>Free Tier</option>
+                  <option value="admin" style={{ background: '#0f172a', color: '#ffffff' }}>Admin (Full)</option>
+                  <option value="pro" style={{ background: '#0f172a', color: '#ffffff' }}>Pro / Premium</option>
+                  <option value="free" style={{ background: '#0f172a', color: '#ffffff' }}>Free Tier</option>
                 </select>
               </div>
             )}
