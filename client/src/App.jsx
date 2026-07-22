@@ -747,9 +747,16 @@ export default function App() {
   useEffect(() => {
     const savedUser = localStorage.getItem('pulse-poll-user');
     if (savedUser) {
-      const parsed = JSON.parse(savedUser);
-      setUser(parsed);
-      refreshUserProfile(parsed.email);
+      try {
+        const parsed = JSON.parse(savedUser);
+        if (parsed && typeof parsed === 'object' && parsed.email) {
+          setUser(parsed);
+          refreshUserProfile(parsed.email);
+        }
+      } catch (e) {
+        console.warn('Corrupted session cleared:', e);
+        localStorage.removeItem('pulse-poll-user');
+      }
     }
 
     const path = window.location.pathname;
