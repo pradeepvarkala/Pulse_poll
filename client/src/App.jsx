@@ -1518,7 +1518,7 @@ export default function App() {
           {view === 'remote' && (
             <InstructorRemote 
               user={user}
-              presentations={userPresentations}
+              presentations={CATEGORY_TEMPLATES}
               onBack={handleNavigateToDashboard}
             />
           )}
