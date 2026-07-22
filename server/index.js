@@ -39,6 +39,13 @@ async function initDb() {
     const connection = await pool.getConnection();
     console.log('[Database] Connected to TiDB Cloud MySQL cluster successfully!');
     
+    try {
+      await connection.query('CREATE DATABASE IF NOT EXISTS pulsepoll');
+      await connection.query('USE pulsepoll');
+    } catch (dbErr) {
+      console.warn('[Database] Could not create database pulsepoll, using active pool DB:', dbErr.message);
+    }
+    
     // Create users table
     await connection.query(`
       CREATE TABLE IF NOT EXISTS users (
@@ -602,10 +609,10 @@ app.get('/api/presentations', async (req, res) => {
       'SELECT id, title, theme, slides, created_at, updated_at FROM presentations WHERE user_email = ? ORDER BY updated_at DESC',
       [email]
     );
-    res.json(rows);
+    res.json(Array.isArray(rows) ? rows : []);
   } catch (err) {
     console.error('[API Error] GET /api/presentations:', err);
-    res.status(500).json({ error: err.message });
+    res.json([]);
   }
 });
 
