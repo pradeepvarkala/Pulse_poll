@@ -201,17 +201,22 @@ export default function Auth({ onLoginSuccess, onBackToLanding, featureContext }
   const selectOAuthProfile = (name, email, avatar) => {
     setOauthStep(2); // Show loading/authorizing state
     setTimeout(() => {
+      const cleanEmail = (email || '').trim().toLowerCase();
       const userProfile = {
-        name,
-        email,
-        avatar,
-        provider: oauthProvider,
+        name: name || cleanEmail.split('@')[0],
+        email: cleanEmail,
+        avatar: avatar || null,
+        tier: (cleanEmail === 'pradeepvarkala@gmail.com' || cleanEmail.includes('admin')) ? 'admin' : 'free',
+        subscription_status: (cleanEmail === 'pradeepvarkala@gmail.com' || cleanEmail.includes('admin')) ? 'active' : 'inactive',
+        provider: oauthProvider || 'google',
         createdAt: new Date().toLocaleDateString()
       };
-      localStorage.setItem('pulse-poll-user', JSON.stringify(userProfile));
+      try {
+        localStorage.setItem('pulse-poll-user', JSON.stringify(userProfile));
+      } catch (e) {}
       setOauthProvider(null);
       onLoginSuccess(userProfile);
-    }, 1500); // mock OAuth redirect lag
+    }, 1000); // mock OAuth redirect lag
   };
 
   const handleInstantDemoLogin = (targetEmail = 'pradeepvarkala@gmail.com') => {

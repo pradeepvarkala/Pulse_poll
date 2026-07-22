@@ -975,9 +975,17 @@ export default function App() {
       };
 
       // Save to local storage
-      const saved = localStorage.getItem('pulse-poll-presentations');
-      let presentations = saved ? JSON.parse(saved) : [];
-      presentations = presentations.filter(p => p.id !== 'demo-learning-sandbox');
+      let presentations = [];
+      try {
+        const saved = localStorage.getItem('pulse-poll-presentations');
+        if (saved && saved !== 'undefined') {
+          presentations = JSON.parse(saved);
+        }
+      } catch (e) {
+        console.warn('Corrupted local presentations cleared:', e);
+        localStorage.removeItem('pulse-poll-presentations');
+      }
+      presentations = Array.isArray(presentations) ? presentations.filter(p => p.id !== 'demo-learning-sandbox') : [];
       presentations.unshift(contextualPres);
       localStorage.setItem('pulse-poll-presentations', JSON.stringify(presentations));
 
