@@ -5,192 +5,32 @@ export default function Dashboard({ user, onViewCreator, onViewPresenter, onJoin
   const [presentations, setPresentations] = useState([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newTitle, setNewTitle] = useState('');
-
-  // 11 distinct slide types seeded across 2 templates
-  const defaultPresentations = [
-    {
-      id: 'kids-template-1',
-      title: '🦖 Dinosaur Riddle Adventure',
-      updatedAt: new Date().toLocaleDateString(),
-      theme: 'playroom',
-      slides: [
-        {
-          id: 'k1-s1',
-          type: 'quiz',
-          question: 'I have a tiny brain, plates on my back, and a spiked tail. Who am I? 🦕',
-          options: [
-            { id: 'k1-o1', text: 'Stegosaurus (Correct)' },
-            { id: 'k1-o2', text: 'T-Rex' },
-            { id: 'k1-o3', text: 'Triceratops' }
-          ],
-          timeLimit: 15
-        },
-        {
-          id: 'k1-s2',
-          type: 'wordcloud',
-          question: 'Describe a dinosaur roar sound in one funny word! 📣',
-          options: []
-        },
-        {
-          id: 'k1-s3',
-          type: 'scales',
-          question: 'Rate these prehistoric dinosaurs from cool to scary (1-5):',
-          options: [
-            { id: 'k1-sc1', text: 'Tyrannosaurus Rex' },
-            { id: 'k1-sc2', text: 'Brachiosaurus' },
-            { id: 'k1-sc3', text: 'Velociraptor' }
-          ]
-        }
-      ]
-    },
-    {
-      id: 'kids-template-2',
-      title: '🪐 Space Explorer Quest',
-      updatedAt: new Date().toLocaleDateString(),
-      theme: 'ocean',
-      slides: [
-        {
-          id: 'k2-s1',
-          type: 'quiz',
-          question: 'True or False: A day on Venus is longer than a year on Venus! 🌌',
-          options: [
-            { id: 'k2-o1', text: 'True (Correct)' },
-            { id: 'k2-o2', text: 'False' }
-          ],
-          timeLimit: 15
-        },
-        {
-          id: 'k2-s2',
-          type: 'wordcloud',
-          question: 'If you discovered a new star, what would you name it? ⭐',
-          options: []
-        },
-        {
-          id: 'k2-s3',
-          type: 'poll',
-          question: 'Which place in the solar system would you explore first?',
-          options: [
-            { id: 'k2-p1', text: 'The Crimson Mars 🔴' },
-            { id: 'k2-p2', text: 'Saturn\'s Icy Rings 🪐' },
-            { id: 'k2-p3', text: 'Dark Side of the Moon 🌕' }
-          ]
-        }
-      ]
-    },
-    {
-      id: 'kids-template-3',
-      title: '🐙 Deep Ocean Secrets & Grid Classifiers',
-      updatedAt: new Date().toLocaleDateString(),
-      theme: 'cyber-mint',
-      slides: [
-        {
-          id: 'k3-s1',
-          type: 'quiz',
-          question: 'Where is a shrimp\'s heart located? 🦐',
-          options: [
-            { id: 'k3-o1', text: 'In its head (Correct)' },
-            { id: 'k3-o2', text: 'In its tail' },
-            { id: 'k3-o3', text: 'In its stomach' }
-          ],
-          timeLimit: 15
-        },
-        {
-          id: 'k3-s2',
-          type: 'brainstorm',
-          question: 'Brainstorm 2 deep ocean creatures that glow in the dark! 🌟',
-          category1: 'Glowing Fish 🐟',
-          category2: 'Lantern Squid 🦑',
-          category3: 'Jellyfish 🪼',
-          category4: 'Microbes / Plankton 🦠',
-          options: []
-        },
-        {
-          id: 'k3-s3',
-          type: 'poll',
-          question: 'Which ocean zone receives absolutely zero sunlight?',
-          options: [
-            { id: 'k3-p1', text: 'Sunlight Zone' },
-            { id: 'k3-p2', text: 'Twilight Zone' },
-            { id: 'k3-p3', text: 'Midnight Zone (Correct)' }
-          ]
-        }
-      ]
-    },
-    {
-      id: 'kids-template-4',
-      title: '🦁 Wild Animal Safari & Puzzles',
-      updatedAt: new Date().toLocaleDateString(),
-      theme: 'sunset',
-      slides: [
-        {
-          id: 'k4-s1',
-          type: 'quiz',
-          question: 'What animal produces pink sweat to stay cool? 🦛',
-          options: [
-            { id: 'k4-o1', text: 'Hippopotamus (Correct)' },
-            { id: 'k4-o2', text: 'Zebra' },
-            { id: 'k4-o3', text: 'Cheetah' }
-          ],
-          timeLimit: 20
-        },
-        {
-          id: 'k4-s2',
-          type: 'wordcloud',
-          question: 'What sound does a sleeping koala make? 🐨',
-          options: []
-        },
-        {
-          id: 'k4-s3',
-          type: 'grid',
-          question: 'Plot these wild animals on a speed vs weight coordinate matrix:',
-          options: [
-            { id: 'k4-g1', text: 'Lion' },
-            { id: 'k4-g2', text: 'Grizzly Bear' }
-          ],
-          xAxisLabel: 'Running Speed',
-          yAxisLabel: 'Body Weight'
-        }
-      ]
-    },
-    {
-      id: 'kids-template-5',
-      title: '🧪 Science Riddles & Millisecond Countdown',
-      updatedAt: new Date().toLocaleDateString(),
-      theme: 'classic-slate',
-      slides: [
-        {
-          id: 'k5-s1',
-          type: 'quiz',
-          question: 'What is the only rock that is light enough to float on water? 🪨',
-          options: [
-            { id: 'k5-o1', text: 'Pumice (Correct)' },
-            { id: 'k5-o2', text: 'Granite' },
-            { id: 'k5-o3', text: 'Basalt' }
-          ],
-          timeLimit: 15
-        },
-        {
-          id: 'k5-s2',
-          type: 'stopwatch',
-          question: '🎹 Riddle Countdown: I have keys but no locks. What am I?',
-          options: [],
-          timeLimit: 30
-        },
-        {
-          id: 'k5-s3',
-          type: 'poll',
-          question: 'Which science experiment is most fun to watch?',
-          options: [
-            { id: 'k5-p1', text: 'Mentos in Soda Volcanoes 🌋' },
-            { id: 'k5-p2', text: 'Tesla Coil Lightning Bolts ⚡' },
-            { id: 'k5-p3', text: 'Glow-in-the-dark Slime 🧪' }
-          ]
-        }
-      ]
-    }
-  ];
+  const [dashboardTab, setDashboardTab] = useState('presentations');
+  const [referralData, setReferralData] = useState({ coins: 0, referralCode: '', referredBy: null, unlockedModules: [], referrals: [] });
 
   const userEmail = user?.email || 'guest@pulsepoll.com';
+
+  const fetchReferralDetails = async () => {
+    try {
+      const res = await fetch('/api/user/referrals', {
+        headers: { 'x-user-email': userEmail }
+      });
+      const data = await res.json();
+      if (data && data.success) {
+        setReferralData(data);
+      }
+    } catch (err) {
+      console.error('Error fetching referrals:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (userEmail) {
+      fetchReferralDetails();
+    }
+  }, [userEmail]);
+
+
 
   useEffect(() => {
     const fetchPresentations = async () => {
@@ -201,24 +41,13 @@ export default function Dashboard({ user, onViewCreator, onViewPresenter, onJoin
         const data = await res.json();
         
         if (data && data.length > 0) {
-          // MySQL returns slides as parsed JSON objects in mysql2
           const parsed = data.map(p => ({
             ...p,
             slides: typeof p.slides === 'string' ? JSON.parse(p.slides) : p.slides
           }));
           setPresentations(parsed);
         } else {
-          setPresentations(defaultPresentations);
-          for (const pres of defaultPresentations) {
-            await fetch('/api/presentations', {
-              method: 'POST',
-              headers: { 
-                'Content-Type': 'application/json',
-                'x-user-email': userEmail
-              },
-              body: JSON.stringify(pres)
-            });
-          }
+          setPresentations([]);
         }
       } catch (err) {
         console.error('Error fetching presentations:', err);
@@ -226,14 +55,33 @@ export default function Dashboard({ user, onViewCreator, onViewPresenter, onJoin
         if (saved) {
           setPresentations(JSON.parse(saved));
         } else {
-          localStorage.setItem('pulse-poll-presentations', JSON.stringify(defaultPresentations));
-          setPresentations(defaultPresentations);
+          setPresentations([]);
         }
       }
     };
 
     fetchPresentations();
   }, []);
+
+  const handleRedeemModule = async (moduleName, days) => {
+    try {
+      const res = await fetch('/api/user/redeem', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: userEmail, moduleName, days })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message);
+        fetchReferralDetails();
+      } else {
+        alert(data.error || 'Failed to redeem module.');
+      }
+    } catch(err) {
+      console.error(err);
+      alert('Error connecting to redemption server.');
+    }
+  };
 
   const handleCreatePresentation = async (e) => {
     e.preventDefault();
@@ -275,6 +123,41 @@ export default function Dashboard({ user, onViewCreator, onViewPresenter, onJoin
     } catch (err) {
       console.error('Error saving presentation:', err);
     }
+
+    onViewCreator(newPres.id);
+  };
+
+  const handleCreateQuickPresentation = (title, slideType) => {
+    const newPres = {
+      id: `pres-${Math.random().toString(36).substr(2, 6)}`,
+      title: title,
+      updatedAt: new Date().toLocaleDateString(),
+      theme: slideType === 'quiz' ? 'classic-slate' : slideType === 'brainstorm' ? 'forest-sage' : slideType === 'wordcloud' ? 'playroom' : 'neon',
+      slides: [
+        {
+          id: `s-${Math.random().toString(36).substr(2, 4)}`,
+          type: slideType,
+          question: `Edit your ${slideType.toUpperCase()} question here...`,
+          options: slideType === 'quiz' || slideType === 'poll' ? [
+            { id: 'opt-1', text: 'Option A (Correct)' },
+            { id: 'opt-2', text: 'Option B' }
+          ] : []
+        }
+      ]
+    };
+
+    const updated = [newPres, ...presentations];
+    setPresentations(updated);
+    localStorage.setItem('pulse-poll-presentations', JSON.stringify(updated));
+
+    fetch('/api/presentations', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-user-email': userEmail
+      },
+      body: JSON.stringify(newPres)
+    }).catch(err => console.error(err));
 
     onViewCreator(newPres.id);
   };
@@ -387,10 +270,31 @@ export default function Dashboard({ user, onViewCreator, onViewPresenter, onJoin
             className="btn" 
             style={{ 
               width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', justifyContent: 'flex-start', fontSize: '0.9rem',
-              background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)', border: '1px solid rgba(99, 102, 241, 0.2)', fontWeight: 700
+              background: dashboardTab === 'presentations' ? 'rgba(6, 182, 212, 0.1)' : 'transparent', 
+              color: dashboardTab === 'presentations' ? 'var(--primary)' : 'var(--text-secondary)', 
+              border: dashboardTab === 'presentations' ? '1px solid rgba(6, 182, 212, 0.2)' : 'none', 
+              fontWeight: 700
             }}
+            onClick={() => setDashboardTab('presentations')}
           >
             📂 My Presentations
+          </button>
+
+          <button 
+            className="btn" 
+            style={{ 
+              width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', justifyContent: 'flex-start', fontSize: '0.9rem',
+              background: dashboardTab === 'referrals' ? 'rgba(6, 182, 212, 0.1)' : 'transparent', 
+              color: dashboardTab === 'referrals' ? 'var(--primary)' : 'var(--text-secondary)', 
+              border: dashboardTab === 'referrals' ? '1px solid rgba(6, 182, 212, 0.2)' : 'none', 
+              fontWeight: 700
+            }}
+            onClick={() => {
+              setDashboardTab('referrals');
+              fetchReferralDetails();
+            }}
+          >
+            🎁 Refer & Earn (Coins)
           </button>
           
           <button 
@@ -421,83 +325,362 @@ export default function Dashboard({ user, onViewCreator, onViewPresenter, onJoin
 
       {/* 2. Main Content Dashboard */}
       <div style={{ flex: 1 }}>
-        {/* Tier Custom Differentiated Dashboard Header */}
-        <div style={getBannerStyle()}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <h1 style={{ fontSize: '2.2rem', margin: 0 }}>Welcome back, {user?.name || 'Presenter'}</h1>
-              <span style={getBadgeStyle()}>{getBadgeText()}</span>
-            </div>
-            <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
-              {user?.tier === 'admin' 
-                ? 'You have complete administrative root permissions. Manage presentations, system settings, and core databases.' 
-                : 'Create interactive slides, collect live audience feedback, and run timed tests.'}
-            </p>
-          </div>
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <button className="btn btn-primary" onClick={() => setIsCreateModalOpen(true)}>
-              <Plus size={18} /> New Presentation
-            </button>
-          </div>
-        </div>
-
-        <div className="dashboard-grid">
-          {presentations.map((pres) => (
-            <div 
-              key={pres.id} 
-              className="glass-card presentation-card"
-              onClick={() => onViewCreator(pres.id)}
-            >
+        {dashboardTab === 'presentations' ? (
+          <>
+            {/* Tier Custom Differentiated Dashboard Header */}
+            <div style={getBannerStyle()}>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                  <div className="logo-icon" style={{ width: '28px', height: '28px' }}>
-                    <PresentationIcon size={14} color="white" />
-                  </div>
-                  <h3 style={{ fontSize: '1.2rem', fontWeight: 600 }}>{pres.title}</h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                  <h1 style={{ fontSize: '2.2rem', margin: 0 }}>Welcome back, {user?.name || 'Presenter'}</h1>
+                  <span style={getBadgeStyle()}>{getBadgeText()}</span>
                 </div>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-                  {pres.slides.length} {pres.slides.length === 1 ? 'slide' : 'slides'} • Theme: <span style={{ textTransform: 'capitalize', color: 'var(--primary)', fontWeight: '700' }}>{pres.theme || 'neon'}</span>
+                <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
+                  {user?.tier === 'admin' 
+                    ? 'You have complete administrative root permissions. Manage presentations, system settings, and core databases.' 
+                    : 'Create interactive slides, collect live audience feedback, and run timed tests.'}
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                {onOpenAiGenerator && (
+                  <button 
+                    className="btn btn-primary animate-pulse" 
+                    style={{ background: 'linear-gradient(135deg, #06b6d4, #3b82f6)', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 0 15px rgba(6,182,212,0.3)', border: '1px solid rgba(255,255,255,0.3)' }}
+                    onClick={onOpenAiGenerator}
+                  >
+                    <span>🤖 PulseAI Quiz Generator</span>
+                    <span>⚡</span>
+                  </button>
+                )}
+                <button className="btn btn-primary" onClick={() => setIsCreateModalOpen(true)}>
+                  <Plus size={18} /> New Presentation
+                </button>
+              </div>
+            </div>
+
+            <div className="dashboard-grid">
+              {presentations.map((pres) => (
+                <div 
+                  key={pres.id} 
+                  className="glass-card presentation-card"
+                  onClick={() => onViewCreator(pres.id)}
+                >
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+                      <div className="logo-icon" style={{ width: '28px', height: '28px' }}>
+                        <PresentationIcon size={14} color="white" />
+                      </div>
+                      <h3 style={{ fontSize: '1.2rem', fontWeight: 600 }}>{pres.title}</h3>
+                    </div>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                      {pres.slides.length} {pres.slides.length === 1 ? 'slide' : 'slides'} • Theme: <span style={{ textTransform: 'capitalize', color: 'var(--primary)', fontWeight: '700' }}>{pres.theme || 'neon'}</span>
+                    </p>
+                  </div>
+
+                  <div className="card-meta">
+                    <span>Updated {pres.updatedAt}</span>
+                    <div style={{ display: 'flex', gap: '8px' }} onClick={(e) => e.stopPropagation()}>
+                      <button 
+                        className="btn btn-secondary btn-icon" 
+                        style={{ width: '32px', height: '32px' }}
+                        onClick={() => onViewCreator(pres.id)}
+                        title="Edit"
+                      >
+                        <Edit3 size={14} />
+                      </button>
+                      <button 
+                        className="btn btn-primary btn-icon" 
+                        style={{ width: '32px', height: '32px' }}
+                        onClick={() => onViewPresenter(pres.id)}
+                        title="Present Live"
+                      >
+                        <Play size={14} />
+                      </button>
+                      <button 
+                        className="btn btn-secondary btn-icon" 
+                        style={{ width: '32px', height: '32px', color: 'var(--accent-red)' }}
+                        onClick={(e) => handleDelete(pres.id, e)}
+                        title="Delete"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {presentations.length === 0 && (
+              <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.01)', borderRadius: '16px', border: '1px solid var(--border-glass)', marginBottom: '30px' }}>
+                <PresentationIcon size={36} style={{ marginBottom: '10px', opacity: 0.5 }} />
+                <h3 style={{ margin: '0 0 6px 0', fontSize: '1.1rem' }}>No custom presentations created yet</h3>
+                <p style={{ margin: 0, fontSize: '0.85rem' }}>Build a deck from scratch above, explore 60+ prebuilt templates in the navigation submenus, or click any capability below to launch!</p>
+              </div>
+            )}
+
+            {/* Site Capabilities & What You Can Do on PulsePoll */}
+            <div style={{ marginTop: '30px' }}>
+              <div style={{ marginBottom: '20px' }}>
+                <h3 style={{ fontSize: '1.4rem', fontWeight: 800, margin: '0 0 6px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>⚡</span> Platform Capabilities & Site Functionalities
+                </h3>
+                <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.9rem' }}>
+                  Discover interactive modules, real-time audience engagement tools, anti-cheat security, and customized theme presets.
                 </p>
               </div>
 
-              <div className="card-meta">
-                <span>Updated {pres.updatedAt}</span>
-                <div style={{ display: 'flex', gap: '8px' }} onClick={(e) => e.stopPropagation()}>
-                  <button 
-                    className="btn btn-secondary btn-icon" 
-                    style={{ width: '32px', height: '32px' }}
-                    onClick={() => onViewCreator(pres.id)}
-                    title="Edit"
-                  >
-                    <Edit3 size={14} />
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+                <div className="glass-card" style={{ padding: '20px', borderRadius: '16px', border: '1px solid var(--border-glass)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <div>
+                    <span style={{ fontSize: '2rem', display: 'block', marginBottom: '10px' }}>📊</span>
+                    <h4 style={{ fontSize: '1.1rem', fontWeight: 800, margin: '0 0 6px 0' }}>Real-Time Live Polling</h4>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', lineHeight: 1.4, marginBottom: '16px' }}>
+                      Gather instant audience votes with dynamic bar charts and real-time sentiment tracking.
+                    </p>
+                  </div>
+                  <button className="btn btn-secondary" style={{ width: '100%', fontSize: '0.8rem', fontWeight: 700 }} onClick={() => handleCreateQuickPresentation('Live Polling Session', 'poll')}>
+                    Launch Poll Module 🚀
                   </button>
-                  <button 
-                    className="btn btn-primary btn-icon" 
-                    style={{ width: '32px', height: '32px' }}
-                    onClick={() => onViewPresenter(pres.id)}
-                    title="Present Live"
-                  >
-                    <Play size={14} />
+                </div>
+
+                <div className="glass-card" style={{ padding: '20px', borderRadius: '16px', border: '1px solid var(--border-glass)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <div>
+                    <span style={{ fontSize: '2rem', display: 'block', marginBottom: '10px' }}>☁️</span>
+                    <h4 style={{ fontSize: '1.1rem', fontWeight: 800, margin: '0 0 6px 0' }}>Interactive Word Clouds</h4>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', lineHeight: 1.4, marginBottom: '16px' }}>
+                      Collect freeform text ideas! Popular audience words swell in size with vibrant color themes.
+                    </p>
+                  </div>
+                  <button className="btn btn-secondary" style={{ width: '100%', fontSize: '0.8rem', fontWeight: 700 }} onClick={() => handleCreateQuickPresentation('Word Cloud Workshop', 'wordcloud')}>
+                    Launch Word Cloud 🚀
                   </button>
-                  <button 
-                    className="btn btn-secondary btn-icon" 
-                    style={{ width: '32px', height: '32px', color: 'var(--accent-red)' }}
-                    onClick={(e) => handleDelete(pres.id, e)}
-                    title="Delete"
-                  >
-                    <Trash2 size={14} />
+                </div>
+
+                <div className="glass-card" style={{ padding: '20px', borderRadius: '16px', border: '1px solid var(--border-glass)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <div>
+                    <span style={{ fontSize: '2rem', display: 'block', marginBottom: '10px' }}>⏱️</span>
+                    <h4 style={{ fontSize: '1.1rem', fontWeight: 800, margin: '0 0 6px 0' }}>Millisecond Trivia Stopwatch</h4>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', lineHeight: 1.4, marginBottom: '16px' }}>
+                      Host competitive trivia battles with millisecond precision timers & live scoreboards.
+                    </p>
+                  </div>
+                  <button className="btn btn-secondary" style={{ width: '100%', fontSize: '0.8rem', fontWeight: 700 }} onClick={() => handleCreateQuickPresentation('Timed Trivia Quiz', 'stopwatch')}>
+                    Launch Timer Quiz 🚀
+                  </button>
+                </div>
+
+                <div className="glass-card" style={{ padding: '20px', borderRadius: '16px', border: '1px solid var(--border-glass)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <div>
+                    <span style={{ fontSize: '2rem', display: 'block', marginBottom: '10px' }}>🧠</span>
+                    <h4 style={{ fontSize: '1.1rem', fontWeight: 800, margin: '0 0 6px 0' }}>Sticky Notes Brainstorming</h4>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', lineHeight: 1.4, marginBottom: '16px' }}>
+                      Collect 2-word sticky notes from participants & drag-and-drop sort into 4 category grids.
+                    </p>
+                  </div>
+                  <button className="btn btn-secondary" style={{ width: '100%', fontSize: '0.8rem', fontWeight: 700 }} onClick={() => handleCreateQuickPresentation('Brainstorm Workshop', 'brainstorm')}>
+                    Launch Sticky Board 🚀
+                  </button>
+                </div>
+
+                <div className="glass-card" style={{ padding: '20px', borderRadius: '16px', border: '1px solid var(--border-glass)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <div>
+                    <span style={{ fontSize: '2rem', display: 'block', marginBottom: '10px' }}>📏</span>
+                    <h4 style={{ fontSize: '1.1rem', fontWeight: 800, margin: '0 0 6px 0' }}>Rating Scale Surveys</h4>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', lineHeight: 1.4, marginBottom: '16px' }}>
+                      Collect multi-metric ratings on 1 to 5 sliders for OKR alignment & course evaluations.
+                    </p>
+                  </div>
+                  <button className="btn btn-secondary" style={{ width: '100%', fontSize: '0.8rem', fontWeight: 700 }} onClick={() => handleCreateQuickPresentation('Scale Rating Survey', 'scales')}>
+                    Launch Rating Survey 🚀
+                  </button>
+                </div>
+
+                <div className="glass-card" style={{ padding: '20px', borderRadius: '16px', border: '1px solid var(--border-glass)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <div>
+                    <span style={{ fontSize: '2rem', display: 'block', marginBottom: '10px' }}>🔒</span>
+                    <h4 style={{ fontSize: '1.1rem', fontWeight: 800, margin: '0 0 6px 0' }}>Anti-Cheat Focus Mode</h4>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', lineHeight: 1.4, marginBottom: '16px' }}>
+                      Enforce strict focus monitoring during live exams with tab-switch detection & security alerts.
+                    </p>
+                  </div>
+                  <button className="btn btn-secondary" style={{ width: '100%', fontSize: '0.8rem', fontWeight: 700 }} onClick={() => handleCreateQuickPresentation('Secure Exam Session', 'quiz')}>
+                    Launch Secure Deck 🚀
                   </button>
                 </div>
               </div>
             </div>
-          ))}
-        </div>
+          </>
+        ) : (
+          /* REFERRAL & COIN GAMIFICATION TAB */
+          <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+            <div className="glass-card" style={{
+              background: 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(37,99,235,0.15))',
+              border: '1px solid var(--primary)', padding: '30px', borderRadius: '20px',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px'
+            }}>
+              <div>
+                <h2 style={{ fontSize: '1.8rem', fontWeight: 800, margin: '0 0 10px 0', color: 'var(--text-primary)' }}>🎁 Refer Friends, Earn Coin Rewards</h2>
+                <p style={{ color: 'var(--text-secondary)', margin: 0, maxWidth: '600px', fontSize: '0.95rem', lineHeight: 1.5 }}>
+                  Share your referral link! When a friend registers, they receive a starter bonus of <strong>20 coins</strong>. Once they upgrade to any paid tier, you receive <strong>100 coins</strong>! Use coins to temporarily unlock premium modules.
+                </p>
+              </div>
+              <div style={{
+                background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-glass)',
+                padding: '15px 25px', borderRadius: '15px', textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Your Balance</div>
+                <div style={{ fontSize: '2.5rem', fontWeight: 900, color: 'var(--accent-green)', margin: '5px 0' }}>🪙 {referralData.coins}</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Referral Coins</div>
+              </div>
+            </div>
 
-        {presentations.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '4rem 2rem', color: 'var(--text-secondary)' }}>
-            <PresentationIcon size={48} style={{ marginBottom: '16px', opacity: 0.5 }} />
-            <h3>No presentations yet</h3>
-            <p>Click "New Presentation" above to build your first interactive deck.</p>
+            {/* Link Sharing Widget */}
+            <div className="glass-card" style={{ padding: '24px', borderRadius: '16px', border: '1px solid var(--border-glass)' }}>
+              <label style={{ display: 'block', fontWeight: 700, marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+                Your Unique Referral Link
+              </label>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <input 
+                  type="text" 
+                  readOnly 
+                  value={`${window.location.origin}?ref=${referralData.referralCode || 'REF-CODE'}`}
+                  style={{
+                    flex: 1, background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-glass)',
+                    borderRadius: '8px', padding: '10px 14px', color: 'var(--text-primary)',
+                    fontFamily: 'monospace', fontSize: '0.9rem'
+                  }}
+                  onClick={(e) => e.target.select()}
+                />
+                <button 
+                  className="btn btn-primary"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}?ref=${referralData.referralCode || 'REF-CODE'}`);
+                    alert('Copied referral link to clipboard! Share it with friends to earn coins.');
+                  }}
+                >
+                  Copy Link
+                </button>
+              </div>
+            </div>
+
+            {/* Unlocks shop */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+              
+              {/* Card 1: Focus Mode */}
+              <div className="glass-card" style={{ padding: '24px', borderRadius: '16px', border: '1px solid var(--border-glass)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div>
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    🔒 Focus Mode (Anti-Cheat)
+                  </h3>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '10px', lineHeight: 1.4 }}>
+                    Locks users into the active presenting tab. Lockouts are triggered if they open other tabs during a live session.
+                  </p>
+                  
+                  {/* Status indicator */}
+                  <div style={{ margin: '15px 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    Status: {referralData.unlockedModules?.some(m => m.module === 'focus_mode' && new Date(m.expiresAt) > new Date()) ? (
+                      <span style={{ color: 'var(--accent-green)', fontWeight: 700 }}>🔓 Unlocked until {new Date(referralData.unlockedModules.find(m => m.module === 'focus_mode').expiresAt).toLocaleDateString()}</span>
+                    ) : (
+                      <span style={{ color: 'var(--accent-red)', fontWeight: 700 }}>🔒 Locked</span>
+                    )}
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <button className="btn btn-secondary" style={{ fontSize: '0.8rem' }} onClick={() => handleRedeemModule('focus_mode', 7)}>7 Days (100 Coins)</button>
+                  <button className="btn btn-secondary" style={{ fontSize: '0.8rem' }} onClick={() => handleRedeemModule('focus_mode', 30)}>30 Days (200 Coins)</button>
+                </div>
+              </div>
+
+              {/* Card 2: Stopwatch Slide */}
+              <div className="glass-card" style={{ padding: '24px', borderRadius: '16px', border: '1px solid var(--border-glass)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div>
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    ⏱️ Stopwatch / Timer Slide
+                  </h3>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '10px', lineHeight: 1.4 }}>
+                    Introduce interactive countdowns, countups, and timed activities with milli-second tick precision and arpeggios.
+                  </p>
+                  
+                  <div style={{ margin: '15px 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    Status: {referralData.unlockedModules?.some(m => m.module === 'stopwatch' && new Date(m.expiresAt) > new Date()) ? (
+                      <span style={{ color: 'var(--accent-green)', fontWeight: 700 }}>🔓 Unlocked until {new Date(referralData.unlockedModules.find(m => m.module === 'stopwatch').expiresAt).toLocaleDateString()}</span>
+                    ) : (
+                      <span style={{ color: 'var(--accent-red)', fontWeight: 700 }}>🔒 Locked</span>
+                    )}
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <button className="btn btn-secondary" style={{ fontSize: '0.8rem' }} onClick={() => handleRedeemModule('stopwatch', 7)}>7 Days (100 Coins)</button>
+                  <button className="btn btn-secondary" style={{ fontSize: '0.8rem' }} onClick={() => handleRedeemModule('stopwatch', 30)}>30 Days (200 Coins)</button>
+                </div>
+              </div>
+
+              {/* Card 3: Brainstorm sticky notes */}
+              <div className="glass-card" style={{ padding: '24px', borderRadius: '16px', border: '1px solid var(--border-glass)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div>
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    📌 Brainstorm Sticky Notes
+                  </h3>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '10px', lineHeight: 1.4 }}>
+                    Let users submit words/opinions to categorised grids. Presenter can sort and drag-drop columns dynamically.
+                  </p>
+                  
+                  <div style={{ margin: '15px 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    Status: {referralData.unlockedModules?.some(m => m.module === 'brainstorm' && new Date(m.expiresAt) > new Date()) ? (
+                      <span style={{ color: 'var(--accent-green)', fontWeight: 700 }}>🔓 Unlocked until {new Date(referralData.unlockedModules.find(m => m.module === 'brainstorm').expiresAt).toLocaleDateString()}</span>
+                    ) : (
+                      <span style={{ color: 'var(--accent-red)', fontWeight: 700 }}>🔒 Locked</span>
+                    )}
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <button className="btn btn-secondary" style={{ fontSize: '0.8rem' }} onClick={() => handleRedeemModule('brainstorm', 7)}>7 Days (100 Coins)</button>
+                  <button className="btn btn-secondary" style={{ fontSize: '0.8rem' }} onClick={() => handleRedeemModule('brainstorm', 30)}>30 Days (200 Coins)</button>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Referral Registry table */}
+            <div className="glass-card" style={{ padding: '24px', borderRadius: '16px', border: '1px solid var(--border-glass)' }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '15px' }}>👥 Referred Signups Registry</h3>
+              {referralData.referrals?.length === 0 ? (
+                <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', textAlign: 'center', padding: '20px 0' }}>
+                  No referrals recorded yet. Share your unique code to invite users!
+                </div>
+              ) : (
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', textAlign: 'left' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid var(--border-glass)', color: 'var(--text-muted)' }}>
+                      <th style={{ padding: '10px' }}>Name</th>
+                      <th style={{ padding: '10px' }}>Email</th>
+                      <th style={{ padding: '10px' }}>Plan Status</th>
+                      <th style={{ padding: '10px' }}>Signup Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {referralData.referrals?.map((ref, idx) => (
+                      <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
+                        <td style={{ padding: '12px 10px', fontWeight: 600 }}>{ref.name}</td>
+                        <td style={{ padding: '12px 10px', color: 'var(--text-secondary)' }}>{ref.email}</td>
+                        <td style={{ padding: '12px 10px' }}>
+                          <span style={{
+                            padding: '3px 8px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 800,
+                            background: ref.tier === 'free' ? 'rgba(255,255,255,0.05)' : 'rgba(16, 185, 129, 0.15)',
+                            color: ref.tier === 'free' ? 'var(--text-secondary)' : '#34d399'
+                          }}>
+                            {ref.tier.toUpperCase()}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 10px', color: 'var(--text-muted)' }}>{new Date(ref.created_at).toLocaleDateString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
           </div>
         )}
       </div>

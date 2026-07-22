@@ -77,17 +77,17 @@ const INSTRUCTIONS = {
   }
 };
 
-export default function Creator({ presentationId, onBack, onPresent }) {
+export default function Creator({ presentationId, onBack, onPresent, user, onRequestUpgrade }) {
   const [presentation, setPresentation] = useState(null);
   const [activeSlideId, setActiveSlideId] = useState(null);
   const [activeEmojiPickerId, setActiveEmojiPickerId] = useState(null);
-  const [activeSidebarTab, setActiveSidebarTab] = useState('content'); // type, content, design
+  const [activeSidebarTab, setActiveSidebarTab] = useState('content'); // type, content, design, ai
   const [emojiPickerCoords, setEmojiPickerCoords] = useState(null);
-  const [showInstructionPopup, setShowInstructionPopup] = useState(true);
+  const [showInstructionPopup, setShowInstructionPopup] = useState(false);
+  const [aiPromptText, setAiPromptText] = useState('');
+  const [isAiGenerating, setIsAiGenerating] = useState(false);
+  const [aiProgressText, setAiProgressText] = useState('');
 
-  useEffect(() => {
-    setShowInstructionPopup(true);
-  }, [activeSlideId]);
 
   const handleToggleEmojiPicker = (e, optId) => {
     if (activeEmojiPickerId === optId) {
@@ -110,8 +110,7 @@ export default function Creator({ presentationId, onBack, onPresent }) {
     setEmojiPickerCoords(null);
   };
 
-  const user = JSON.parse(localStorage.getItem('pulse-poll-user') || '{}');
-  const userEmail = user.email || 'guest@pulsepoll.com';
+  const userEmail = user?.email || 'guest@pulsepoll.com';
 
   useEffect(() => {
     const fetchPresentation = async () => {
@@ -260,7 +259,91 @@ export default function Creator({ presentationId, onBack, onPresent }) {
     }
   };
 
+  const handleAiGenerate = async (e) => {
+    e.preventDefault();
+    if (!aiPromptText.trim()) return;
+
+    if (user?.tier === 'free') {
+      onRequestUpgrade('ai_generator');
+      return;
+    }
+
+    setIsAiGenerating(true);
+    const steps = [
+      "🤖 Connecting PulseAI Engine...",
+      `🔍 Scoping topic: "${aiPromptText.trim()}"...`,
+      "✍️ Drafting Quiz, Word Cloud, and coordinate matrix slides...",
+      "🎨 Injecting interactive options & options configuration...",
+      "✨ Saving presentation slides..."
+    ];
+
+    for (let i = 0; i < steps.length; i++) {
+      setAiProgressText(steps[i]);
+      await new Promise(res => setTimeout(res, 500));
+    }
+
+    const topic = aiPromptText.trim();
+    const generatedSlides = [
+      {
+        id: `ai-s1-${Math.random().toString(36).substr(2, 5)}`,
+        type: 'quiz',
+        question: `Which of the following is the most fundamental concept of ${topic}? 🌟`,
+        timeLimit: 20,
+        correctAnswerIndex: 0,
+        options: [
+          { id: Math.random().toString(36).substr(2, 9), text: `Empirical practice of ${topic}` },
+          { id: Math.random().toString(36).substr(2, 9), text: `Purely random assumptions` },
+          { id: Math.random().toString(36).substr(2, 9), text: `Standard generic status quo` }
+        ]
+      },
+      {
+        id: `ai-s2-${Math.random().toString(36).substr(2, 5)}`,
+        type: 'wordcloud',
+        question: `In one word, what is the most exciting breakthrough or benefit of ${topic}? 📣`
+      },
+      {
+        id: `ai-s3-${Math.random().toString(36).substr(2, 5)}`,
+        type: 'grid',
+        question: `Plot the components of ${topic} on speed of execution vs global value:`,
+        xAxisLabel: 'Speed of Execution',
+        yAxisLabel: 'Global Value / Impact',
+        options: [
+          { id: Math.random().toString(36).substr(2, 9), text: `Basic ${topic} Study` },
+          { id: Math.random().toString(36).substr(2, 9), text: `Advanced ${topic} Implementation` }
+        ]
+      }
+    ];
+
+    const updatedPres = {
+      ...presentation,
+      title: `AI Workspace: ${topic.length > 25 ? topic.slice(0, 25) + '...' : topic}`,
+      slides: generatedSlides,
+      updatedAt: new Date().toLocaleDateString()
+    };
+
+    savePresentation(updatedPres);
+    setActiveSlideId(generatedSlides[0].id);
+    setIsAiGenerating(false);
+    setAiPromptText('');
+    setActiveSidebarTab('content');
+    alert(`Successfully generated slides on topic: ${topic}!`);
+  };
+
   const handleChangeSlideType = (type) => {
+    if (['stopwatch', 'brainstorm'].includes(type) && user?.tier === 'free') {
+      let unlocks = [];
+      try {
+        unlocks = typeof user.unlocked_modules === 'string' 
+          ? JSON.parse(user.unlocked_modules || '[]') 
+          : (user.unlocked_modules || []);
+      } catch(err) { unlocks = []; }
+      const isTypeUnlocked = unlocks.some(i => i.module === type && new Date(i.expiresAt) > new Date());
+      if (!isTypeUnlocked) {
+        onRequestUpgrade(type);
+        return;
+      }
+    }
+
     const updated = { type };
     
     // Seed fields appropriate for the slide type
@@ -523,7 +606,7 @@ export default function Creator({ presentationId, onBack, onPresent }) {
 
         {/* Center: Slide Preview Mockup */}
         <div className="editor-center" style={{ position: 'relative' }}>
-          <div className="glass-card slide-preview-container" style={{ position: 'relative' }}>
+          <div className={`glass-card slide-preview-container theme-${presentation?.theme || 'corporate'}`} style={{ position: 'relative' }}>
             {/* Quick Access Help Badge */}
             <div style={{ position: 'absolute', top: '15px', right: '15px', zIndex: 10 }}>
               <button 
@@ -844,6 +927,14 @@ export default function Creator({ presentationId, onBack, onPresent }) {
               onClick={() => setActiveSidebarTab('design')}
             >
               Customize
+            </button>
+            <button 
+              type="button"
+              className={`sidebar-tab-btn ${activeSidebarTab === 'ai' ? 'active' : ''}`}
+              style={{ flex: 1, background: 'transparent', border: 'none', borderBottom: activeSidebarTab === 'ai' ? '2px solid var(--primary)' : '2px solid transparent', padding: '10px 4px', color: activeSidebarTab === 'ai' ? 'var(--primary)' : 'var(--text-secondary)', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', transition: 'all 0.15s ease', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
+              onClick={() => setActiveSidebarTab('ai')}
+            >
+              🤖 AI
             </button>
           </div>
 
@@ -1178,7 +1269,22 @@ export default function Creator({ presentationId, onBack, onPresent }) {
                   type="checkbox"
                   id="sidebar-focus-mode"
                   checked={activeSlide.focusMode === true}
-                  onChange={(e) => handleUpdateActiveSlide({ focusMode: e.target.checked })}
+                  onChange={(e) => {
+                    if (e.target.checked && user?.tier === 'free') {
+                      let unlocks = [];
+                      try {
+                        unlocks = typeof user.unlocked_modules === 'string' 
+                          ? JSON.parse(user.unlocked_modules || '[]') 
+                          : (user.unlocked_modules || []);
+                      } catch(err) { unlocks = []; }
+                      const isFocusUnlocked = unlocks.some(i => i.module === 'focus_mode' && new Date(i.expiresAt) > new Date());
+                      if (!isFocusUnlocked) {
+                        onRequestUpgrade('focus_mode');
+                        return;
+                      }
+                    }
+                    handleUpdateActiveSlide({ focusMode: e.target.checked });
+                  }}
                   style={{ accentColor: 'var(--primary)', cursor: 'pointer', width: '16px', height: '16px' }}
                 />
                 <label htmlFor="sidebar-focus-mode" style={{ cursor: 'pointer', userSelect: 'none', margin: 0, fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -1241,6 +1347,49 @@ export default function Creator({ presentationId, onBack, onPresent }) {
                   </div>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* 4. AI TAB PANEL */}
+          {activeSidebarTab === 'ai' && (
+            <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {!isAiGenerating ? (
+                <form onSubmit={handleAiGenerate} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                  <div style={{ padding: '12px', background: 'rgba(6,182,212,0.05)', border: '1px solid var(--border-glass)', borderRadius: '10px', fontSize: '0.8rem', color: 'var(--primary)', lineHeight: 1.4 }}>
+                    🤖 <strong>PulseAI slide generator:</strong> Type any topic below and hit generate. We will dynamically rewrite this presentation with custom interactive slides.
+                  </div>
+
+                  <div className="settings-group">
+                    <label>Generate Slides for Topic:</label>
+                    <input 
+                      type="text" 
+                      className="input-text" 
+                      placeholder="e.g. World War II history, Basic Algebra, Python syntax"
+                      value={aiPromptText}
+                      onChange={(e) => setAiPromptText(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <button 
+                    type="submit" 
+                    className="btn btn-primary" 
+                    style={{ width: '100%', padding: '12px', fontWeight: 800, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                  >
+                    Generate with AI ⚡
+                  </button>
+                </form>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '30px 10px' }}>
+                  <div style={{ display: 'inline-block', width: '36px', height: '36px', border: '3px solid rgba(6,182,212,0.1)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: '15px' }} />
+                  <h4 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px' }}>
+                    Generating AI Slides...
+                  </h4>
+                  <div style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: 'var(--primary)', background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '6px' }}>
+                    {aiProgressText}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

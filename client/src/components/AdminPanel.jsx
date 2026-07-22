@@ -18,6 +18,23 @@ export default function AdminPanel({ user, onLogout, onBackToDashboard }) {
   const [defaultTheme, setDefaultTheme] = useState('corporate');
   const [analytics, setAnalytics] = useState({ presentations: 0, slides: 0 });
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
+  const [adminStats, setAdminStats] = useState({ users: [], referrals: [] });
+
+  const fetchAdminStats = async () => {
+    if (user?.email === 'pradeepvarkala@gmail.com') {
+      try {
+        const res = await fetch('/api/admin/stats', {
+          headers: { 'x-user-email': user.email }
+        });
+        const data = await res.json();
+        if (data.success) {
+          setAdminStats(data);
+        }
+      } catch (err) {
+        console.error('Failed to load admin stats:', err);
+      }
+    }
+  };
 
   useEffect(() => {
     // Load default theme settings
@@ -39,6 +56,8 @@ export default function AdminPanel({ user, onLogout, onBackToDashboard }) {
         slides: slideCount
       });
     }
+
+    fetchAdminStats();
   }, []);
 
   const handleSaveSettings = (e) => {
@@ -200,6 +219,91 @@ export default function AdminPanel({ user, onLogout, onBackToDashboard }) {
               </button>
             </form>
           </div>
+
+          {/* Admin registries for pradeepvarkala@gmail.com */}
+          {user?.email === 'pradeepvarkala@gmail.com' && (
+            <div className="glass-card animate-fade" style={{ padding: '30px' }}>
+              <h3 style={{ fontSize: '1.25rem', marginBottom: '20px', borderBottom: '1px solid var(--border-glass)', paddingBottom: '10px' }}>
+                🛡️ Administrator Registry & Coin Ledgers
+              </h3>
+              
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', textAlign: 'left' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid var(--border-glass)', color: 'var(--text-muted)' }}>
+                      <th style={{ padding: '12px 8px' }}>User Email</th>
+                      <th style={{ padding: '12px 8px' }}>Display Name</th>
+                      <th style={{ padding: '12px 8px' }}>Plan Tier</th>
+                      <th style={{ padding: '12px 8px' }}>Sub Status</th>
+                      <th style={{ padding: '12px 8px' }}>Coins</th>
+                      <th style={{ padding: '12px 8px' }}>Referral Code</th>
+                      <th style={{ padding: '12px 8px' }}>Referred By</th>
+                      <th style={{ padding: '12px 8px' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {adminStats.users?.map((u, index) => (
+                      <tr key={index} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
+                        <td style={{ padding: '12px 8px', fontWeight: 600 }}>{u.email}</td>
+                        <td style={{ padding: '12px 8px', color: 'var(--text-secondary)' }}>{u.name}</td>
+                        <td style={{ padding: '12px 8px' }}>
+                          <span style={{
+                            padding: '3px 8px', borderRadius: '10px', fontSize: '0.7rem', fontWeight: 800,
+                            background: u.tier === 'admin' ? 'rgba(239,68,68,0.15)' : u.tier === 'free' ? 'rgba(255,255,255,0.05)' : 'rgba(16, 185, 129, 0.15)',
+                            color: u.tier === 'admin' ? '#f87171' : u.tier === 'free' ? 'var(--text-secondary)' : '#34d399'
+                          }}>
+                            {u.tier.toUpperCase()}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 8px', color: 'var(--text-muted)' }}>{u.subscription_status}</td>
+                        <td style={{ padding: '12px 8px', color: 'var(--accent-green)', fontWeight: 700 }}>🪙 {u.coins}</td>
+                        <td style={{ padding: '12px 8px', fontFamily: 'monospace' }}>{u.referral_code}</td>
+                        <td style={{ padding: '12px 8px', color: 'var(--text-muted)' }}>{u.referred_by || 'Direct'}</td>
+                        <td style={{ padding: '12px 8px' }}>
+                          <select 
+                            value={u.tier}
+                            onChange={async (e) => {
+                              const targetTier = e.target.value;
+                              try {
+                                const res = await fetch('/api/admin/update-tier', {
+                                  method: 'POST',
+                                  headers: { 
+                                    'Content-Type': 'application/json',
+                                    'x-user-email': user.email
+                                  },
+                                  body: JSON.stringify({ targetEmail: u.email, tier: targetTier })
+                                });
+                                const resData = await res.json();
+                                if (resData.success) {
+                                  alert(`Successfully updated user ${u.email} to tier ${targetTier}`);
+                                  fetchAdminStats();
+                                }
+                              } catch(err) {
+                                console.error(err);
+                              }
+                            }}
+                            style={{
+                              background: 'rgba(0,0,0,0.3)',
+                              border: '1px solid var(--border-glass)',
+                              borderRadius: '6px',
+                              color: 'var(--text-primary)',
+                              fontSize: '0.75rem',
+                              padding: '2px 4px',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            <option value="admin">Admin</option>
+                            <option value="pro">Pro</option>
+                            <option value="free">Free</option>
+                          </select>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

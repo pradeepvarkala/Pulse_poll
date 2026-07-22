@@ -1,9 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Check, Sparkles, User, Users, Upload, Download, Palette, Shield, Settings, HelpCircle, PhoneCall, Plus } from 'lucide-react';
 
 export default function Pricing({ onBack }) {
   const [billingPeriod, setBillingPeriod] = useState('monthly'); // monthly, three_month, six_month
   const [extraParticipants, setExtraParticipants] = useState(0); // in multiples of 50
+
+  const [timeRemaining, setTimeRemaining] = useState(() => {
+    const saved = localStorage.getItem('pulse-poll-promo-timer');
+    return saved ? parseInt(saved, 10) : 599; // 10 minutes
+  });
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeRemaining((prev) => {
+        const next = prev <= 0 ? 599 : prev - 1;
+        localStorage.setItem('pulse-poll-promo-timer', next.toString());
+        return next;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const formatTime = (secs) => {
+    const m = Math.floor(secs / 60).toString().padStart(2, '0');
+    const s = (secs % 60).toString().padStart(2, '0');
+    return `${m}m ${s}s`;
+  };
 
   const handleUpgrade = async (planName) => {
     if (planName === 'Free') {
@@ -145,6 +167,42 @@ export default function Pricing({ onBack }) {
         </button>
         <div style={{ fontSize: '0.85rem', fontFamily: 'var(--mono)', color: 'var(--text-secondary)' }}>
           UPGRADE PLATFORM // PLANS
+        </div>
+      </div>
+
+      {/* FLASH SALE COUNTDOWN BANNER */}
+      <div className="glass-card animate-fade" style={{
+        background: 'linear-gradient(90deg, rgba(6,182,212,0.15), rgba(37,99,235,0.15))',
+        border: '1px solid var(--primary)',
+        padding: '16px 20px',
+        borderRadius: '16px',
+        marginBottom: '40px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: '15px',
+        boxShadow: '0 8px 32px 0 rgba(6, 182, 212, 0.1)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', textAlign: 'left' }}>
+          <span style={{ fontSize: '1.4rem' }}>⚡</span>
+          <div>
+            <span style={{ fontWeight: 800, color: 'var(--primary)', marginRight: '6px' }}>LIMITED TIME OFFER:</span>
+            <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Get 50% off any premium subscription tier! Use coupon code <code style={{ background: 'rgba(255,255,255,0.15)', padding: '2px 8px', borderRadius: '6px', color: 'var(--accent-green)', fontWeight: 800 }}>REFER50</code>.</span>
+          </div>
+        </div>
+        <div style={{ 
+          background: 'rgba(239, 68, 68, 0.15)', 
+          border: '1px solid #ef4444', 
+          color: '#f87171', 
+          padding: '8px 16px', 
+          borderRadius: '10px', 
+          fontWeight: 900, 
+          fontFamily: 'monospace', 
+          fontSize: '1rem',
+          boxShadow: '0 0 10px rgba(239, 68, 68, 0.2)'
+        }}>
+          ⏱️ EXPIRES IN: {formatTime(timeRemaining)}
         </div>
       </div>
 

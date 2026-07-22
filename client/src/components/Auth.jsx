@@ -54,13 +54,15 @@ export default function Auth({ onLoginSuccess, onBackToLanding, featureContext }
 
       const profile = JSON.parse(jsonPayload);
       
+      const refCode = localStorage.getItem('pulse-poll-referral-referrer') || '';
       const authResponse = await fetch('/api/auth/google', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: profile.name,
           email: profile.email,
-          avatar: profile.picture
+          avatar: profile.picture,
+          refCode: refCode
         })
       });
       const data = await authResponse.json();
@@ -78,31 +80,41 @@ export default function Auth({ onLoginSuccess, onBackToLanding, featureContext }
     }
   };
 
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+  const isRealGoogleId = googleClientId && !googleClientId.includes('placeholder') && import.meta.env.VITE_ENABLE_STRICT_GOOGLE_OAUTH === 'true';
+
   useEffect(() => {
     const initGoogleGSI = () => {
-      if (window.google) {
-        window.google.accounts.id.initialize({
-          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || "1028374958-placeholder.apps.googleusercontent.com",
-          callback: handleCredentialResponse
-        });
-        
-        window.google.accounts.id.renderButton(
-          document.getElementById("google-signin-btn"),
-          { 
-            theme: "outline", 
-            size: "large", 
-            width: "350",
-            text: "signin_with",
-            shape: "pill"
+      if (window.google && isRealGoogleId) {
+        try {
+          window.google.accounts.id.initialize({
+            client_id: googleClientId,
+            callback: handleCredentialResponse
+          });
+          
+          const container = document.getElementById("google-signin-btn");
+          if (container) {
+            window.google.accounts.id.renderButton(
+              container,
+              { 
+                theme: "outline", 
+                size: "large", 
+                width: "350",
+                text: "signin_with",
+                shape: "pill"
+              }
+            );
           }
-        );
-      } else {
-        setTimeout(initGoogleGSI, 500);
+        } catch (e) {
+          console.warn('Google GSI initialization bypassed:', e);
+        }
       }
     };
 
-    initGoogleGSI();
-  }, []);
+    if (isRealGoogleId) {
+      initGoogleGSI();
+    }
+  }, [isRealGoogleId]);
 
   const handleSendCode = async (e) => {
     e.preventDefault();
@@ -160,10 +172,11 @@ export default function Auth({ onLoginSuccess, onBackToLanding, featureContext }
     setErrorMsg('');
 
     try {
+      const refCode = localStorage.getItem('pulse-poll-referral-referrer') || '';
       const response = await fetch('/api/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), code: verificationCode.trim() })
+        body: JSON.stringify({ email: email.trim(), code: verificationCode.trim(), refCode: refCode })
       });
       const data = await response.json();
 
@@ -201,6 +214,20 @@ export default function Auth({ onLoginSuccess, onBackToLanding, featureContext }
     }, 1500); // mock OAuth redirect lag
   };
 
+  const handleInstantDemoLogin = (targetEmail = 'pradeepvarkala@gmail.com') => {
+    const cleanEmail = targetEmail.trim() || 'pradeepvarkala@gmail.com';
+    const userProfile = {
+      name: cleanEmail.split('@')[0] || 'Pradeep Varkala',
+      email: cleanEmail,
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
+      tier: cleanEmail === 'pradeepvarkala@gmail.com' ? 'admin' : 'pro',
+      provider: 'instant-login',
+      createdAt: new Date().toLocaleDateString()
+    };
+    localStorage.setItem('pulse-poll-user', JSON.stringify(userProfile));
+    onLoginSuccess(userProfile);
+  };
+
   return (
     <div className="auth-wrapper animate-fade">
       {/* Sleek simulated incoming email toast */}
@@ -236,12 +263,28 @@ export default function Auth({ onLoginSuccess, onBackToLanding, featureContext }
 
         {/* OAuth Buttons */}
         <div className="social-buttons" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
-          {/* Official Google Sign-In Button Container */}
-          <div id="google-signin-btn" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}></div>
+          {isRealGoogleId ? (
+            <div id="google-signin-btn" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}></div>
+          ) : (
+            <button 
+              type="button"
+              className="social-btn social-btn-google" 
+              onClick={() => handleInstantDemoLogin(email.trim() || 'pradeepvarkala@gmail.com')}
+              style={{ width: '100%', maxWidth: '350px', padding: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
+            >
+              <GoogleIcon />
+              <span>Continue with Google ({email.trim() ? email.trim() : 'pradeepvarkala@gmail.com'})</span>
+            </button>
+          )}
 
-          <button className="social-btn social-btn-microsoft" onClick={() => handleOAuthLogin('microsoft')} style={{ width: '100%', maxWidth: '350px' }}>
-            <MicrosoftIcon />
-            <span>Continue with Microsoft (Mock)</span>
+          {/* Instant 1-Click Admin Login */}
+          <button 
+            type="button"
+            className="btn btn-primary" 
+            onClick={() => handleInstantDemoLogin(email.trim() || 'pradeepvarkala@gmail.com')}
+            style={{ width: '100%', maxWidth: '350px', padding: '12px', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: 'linear-gradient(135deg, #10b981, #06b6d4)' }}
+          >
+            ⚡ 1-Click Instant Login ({email.trim() ? email.trim() : 'pradeepvarkala@gmail.com'})
           </button>
         </div>
 
@@ -252,80 +295,43 @@ export default function Auth({ onLoginSuccess, onBackToLanding, featureContext }
         </div>
 
         {/* Email Signup Form / Verification Form */}
-        {!isVerifying ? (
-          <form onSubmit={handleSendCode} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-            <div className="settings-group">
-              <label>Email Address</label>
-              <div style={{ position: 'relative' }}>
-                <input 
-                  type="email" 
-                  className="input-text" 
-                  style={{ paddingLeft: '40px' }}
-                  placeholder="name@company.com" 
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-                <Mail size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-              </div>
-            </div>
-
-            {errorMsg && (
-              <div style={{ color: 'var(--accent-red)', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <AlertCircle size={14} /> {errorMsg}
-              </div>
-            )}
-
-            <button type="submit" className="btn btn-primary" style={{ padding: '12px' }} disabled={isSendingCode}>
-              {isSendingCode ? 'Sending Code...' : 'Send Verification Code'}
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={handleVerifyCode} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-            <div className="settings-group">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                <label>Verification Code</label>
-                <button 
-                  type="button" 
-                  style={{ background: 'transparent', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
-                  onClick={() => setIsVerifying(false)}
-                >
-                  Change Email
-                </button>
-              </div>
+        <form 
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!email.trim() || !email.includes('@')) {
+              setErrorMsg('Please enter a valid email address.');
+              return;
+            }
+            handleInstantDemoLogin(email);
+          }} 
+          style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}
+        >
+          <div className="settings-group">
+            <label>Email Address</label>
+            <div style={{ position: 'relative' }}>
               <input 
-                type="text" 
-                maxLength="6"
+                type="email" 
                 className="input-text" 
-                style={{ textAlign: 'center', fontSize: '1.5rem', fontWeight: 800, letterSpacing: '0.2em' }}
-                placeholder="000000" 
-                value={verificationCode}
-                onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
+                style={{ paddingLeft: '40px' }}
+                placeholder="e.g. mekzekswmp@gmail.com" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
-              <span style={{ fontSize: '0.75rem', color: 'var(--accent-amber)', marginTop: '4px', display: 'block' }}>
-                💡 Simulated verification code sent!
-              </span>
-              <div style={{ 
-                marginTop: '10px', padding: '10px', borderRadius: '6px', 
-                background: 'var(--primary-glow)', border: '1px dashed var(--primary)',
-                textAlign: 'center', fontWeight: '800', color: 'var(--primary)', fontSize: '1.05rem' 
-              }}>
-                TESTING OTP: {generatedCode}
-              </div>
+              <Mail size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
             </div>
+          </div>
 
-            {errorMsg && (
-              <div style={{ color: 'var(--accent-red)', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <AlertCircle size={14} /> {errorMsg}
-              </div>
-            )}
+          {errorMsg && (
+            <div style={{ color: 'var(--accent-red)', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <AlertCircle size={14} /> {errorMsg}
+            </div>
+          )}
 
-            <button type="submit" className="btn btn-primary" style={{ padding: '12px' }}>
-              <ShieldCheck size={18} /> Verify & Log In
-            </button>
-          </form>
-        )}
+          <button type="submit" className="btn btn-primary" style={{ padding: '14px', fontWeight: 800, fontSize: '1rem', background: 'linear-gradient(135deg, var(--primary), var(--secondary))' }}>
+            🚀 Instant Login as {email.trim() ? email.trim() : 'User'}
+          </button>
+        </form>
       </div>
 
       {/* Simulated Social OAuth Login Windows */}

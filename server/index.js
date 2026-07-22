@@ -53,6 +53,23 @@ async function initDb() {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
 
+    // Schema migrations for referrals and gamification
+    try {
+      await connection.query('ALTER TABLE users ADD COLUMN referral_code VARCHAR(255) DEFAULT NULL');
+    } catch (e) {}
+    try {
+      await connection.query('ALTER TABLE users ADD COLUMN referred_by VARCHAR(255) DEFAULT NULL');
+    } catch (e) {}
+    try {
+      await connection.query('ALTER TABLE users ADD COLUMN coins INT DEFAULT 0');
+    } catch (e) {}
+    try {
+      await connection.query('ALTER TABLE users ADD COLUMN unlocked_modules TEXT DEFAULT NULL');
+    } catch (e) {}
+    try {
+      await connection.query('ALTER TABLE users ADD UNIQUE INDEX idx_ref_code (referral_code)');
+    } catch (e) {}
+
     // Create presentations table
     await connection.query(`
       CREATE TABLE IF NOT EXISTS presentations (
@@ -67,7 +84,7 @@ async function initDb() {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
     
-    console.log('[Database] Database schema initialized.');
+    console.log('[Database] Database schema initialized and migrated.');
     connection.release();
   } catch (err) {
     console.error('[Database Error] Failed to initialize database tables:', err);
@@ -171,16 +188,36 @@ app.post('/api/verify-otp', async (req, res) => {
       const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [emailKey]);
       if (rows.length > 0) {
         user = rows[0];
+        if (!user.referral_code) {
+          const myRefCode = `ref-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+          await pool.query('UPDATE users SET referral_code = ? WHERE email = ?', [myRefCode, emailKey]);
+          user.referral_code = myRefCode;
+        }
         if (isAdmin && user.tier !== 'admin') {
           user.tier = 'admin';
           user.subscription_status = 'active';
           await pool.query('UPDATE users SET tier = "admin", subscription_status = "active" WHERE email = ?', [emailKey]);
         }
       } else {
+        const refCode = req.body.refCode || null;
+        let referrerEmail = null;
+        let startCoins = 0;
+        if (refCode) {
+          const [refRows] = await pool.query('SELECT email FROM users WHERE referral_code = ?', [refCode]);
+          if (refRows.length > 0) {
+            referrerEmail = refRows[0].email;
+            startCoins = 20;
+          }
+        }
+        const myRefCode = `ref-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
         await pool.query(
-          'INSERT INTO users (email, name, avatar, tier, subscription_status) VALUES (?, ?, ?, ?, ?)',
-          [user.email, user.name, user.avatar, user.tier, user.subscription_status]
+          'INSERT INTO users (email, name, avatar, tier, subscription_status, referral_code, referred_by, coins, unlocked_modules) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          [user.email, user.name, user.avatar, user.tier, user.subscription_status, myRefCode, referrerEmail, startCoins, '[]']
         );
+        user.referral_code = myRefCode;
+        user.referred_by = referrerEmail;
+        user.coins = startCoins;
+        user.unlocked_modules = '[]';
       }
     } catch (err) {
       console.error('[Verify OTP DB Error]:', err);
@@ -214,16 +251,37 @@ app.post('/api/auth/google', async (req, res) => {
         user = rows[0];
         const targetTier = isAdmin ? 'admin' : user.tier;
         const targetStatus = isAdmin ? 'active' : user.subscription_status;
-        await pool.query('UPDATE users SET name = ?, avatar = ?, tier = ?, subscription_status = ? WHERE email = ?', [name, avatar, targetTier, targetStatus, emailKey]);
+        if (!user.referral_code) {
+          const myRefCode = `ref-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+          await pool.query('UPDATE users SET name = ?, avatar = ?, tier = ?, subscription_status = ?, referral_code = ? WHERE email = ?', [name, avatar, targetTier, targetStatus, myRefCode, emailKey]);
+          user.referral_code = myRefCode;
+        } else {
+          await pool.query('UPDATE users SET name = ?, avatar = ?, tier = ?, subscription_status = ? WHERE email = ?', [name, avatar, targetTier, targetStatus, emailKey]);
+        }
         user.name = name;
         user.avatar = avatar;
         user.tier = targetTier;
         user.subscription_status = targetStatus;
       } else {
+        const refCode = req.body.refCode || null;
+        let referrerEmail = null;
+        let startCoins = 0;
+        if (refCode) {
+          const [refRows] = await pool.query('SELECT email FROM users WHERE referral_code = ?', [refCode]);
+          if (refRows.length > 0) {
+            referrerEmail = refRows[0].email;
+            startCoins = 20;
+          }
+        }
+        const myRefCode = `ref-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
         await pool.query(
-          'INSERT INTO users (email, name, avatar, tier, subscription_status) VALUES (?, ?, ?, ?, ?)',
-          [user.email, user.name, user.avatar, user.tier, user.subscription_status]
+          'INSERT INTO users (email, name, avatar, tier, subscription_status, referral_code, referred_by, coins, unlocked_modules) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          [user.email, user.name, user.avatar, user.tier, user.subscription_status, myRefCode, referrerEmail, startCoins, '[]']
         );
+        user.referral_code = myRefCode;
+        user.referred_by = referrerEmail;
+        user.coins = startCoins;
+        user.unlocked_modules = '[]';
       }
     } catch (err) {
       console.error('[Google Auth DB Error]:', err);
@@ -240,8 +298,23 @@ app.post('/api/create-checkout-session', async (req, res) => {
     return res.status(400).json({ error: 'Email is required.' });
   }
 
+  const emailKey = email.trim().toLowerCase();
   if (!stripe) {
-    return res.status(500).json({ error: 'Stripe is not configured on this server.' });
+    if (pool) {
+      try {
+        const [userRows] = await pool.query('SELECT referred_by, tier FROM users WHERE email = ?', [emailKey]);
+        if (userRows.length > 0) {
+          const userObj = userRows[0];
+          if (userObj.tier === 'free' && userObj.referred_by) {
+            await pool.query('UPDATE users SET coins = coins + 100 WHERE email = ?', [userObj.referred_by]);
+          }
+        }
+        await pool.query('UPDATE users SET tier = "pro", subscription_status = "active" WHERE email = ?', [emailKey]);
+      } catch (dbErr) {
+        console.error('[Mock Upgrade DB Error]:', dbErr);
+      }
+    }
+    return res.json({ url: `${req.headers.origin}/dashboard?payment=success` });
   }
 
   try {
@@ -321,6 +394,196 @@ app.post('/api/webhooks/stripe', async (req, res) => {
   }
 
   res.json({ received: true });
+});
+
+// Get User Profile (reload/refresh)
+app.get('/api/user/profile', async (req, res) => {
+  const email = req.headers['x-user-email'];
+  if (!email) {
+    return res.status(400).json({ error: 'User email header is required.' });
+  }
+
+  const emailKey = email.trim().toLowerCase();
+  if (pool) {
+    try {
+      const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [emailKey]);
+      if (rows.length > 0) {
+        return res.json({ success: true, user: rows[0] });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  // Fallback
+  const isAdmin = emailKey === 'pradeepvarkala@gmail.com';
+  return res.json({
+    success: true,
+    user: {
+      email: emailKey,
+      name: emailKey.split('@')[0],
+      avatar: null,
+      tier: isAdmin ? 'admin' : 'free',
+      subscription_status: isAdmin ? 'active' : 'inactive',
+      coins: 0,
+      referral_code: `ref-${emailKey.split('@')[0].toUpperCase()}`,
+      unlocked_modules: '[]'
+    }
+  });
+});
+
+// Fetch Referral & Coin stats
+app.get('/api/user/referrals', async (req, res) => {
+  const email = req.headers['x-user-email'];
+  if (!email) return res.status(400).json({ error: 'User email header is required.' });
+
+  const emailKey = email.trim().toLowerCase();
+  let coins = 0;
+  let referralCode = '';
+  let referredBy = null;
+  let unlockedModules = [];
+  let referrals = [];
+
+  if (pool) {
+    try {
+      const [rows] = await pool.query('SELECT coins, referral_code, referred_by, unlocked_modules FROM users WHERE email = ?', [emailKey]);
+      if (rows.length > 0) {
+        coins = rows[0].coins;
+        referralCode = rows[0].referral_code;
+        referredBy = rows[0].referred_by;
+        try {
+          unlockedModules = JSON.parse(rows[0].unlocked_modules || '[]');
+        } catch(e) { unlockedModules = []; }
+      }
+
+      // Get list of users referred by this user
+      const [refRows] = await pool.query('SELECT email, name, tier, created_at FROM users WHERE referred_by = ?', [emailKey]);
+      referrals = refRows;
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  res.json({
+    success: true,
+    coins,
+    referralCode,
+    referredBy,
+    unlockedModules,
+    referrals
+  });
+});
+
+// Redeem Coins to unlock modules
+app.post('/api/user/redeem', async (req, res) => {
+  const { email, moduleName, days } = req.body;
+  if (!email || !moduleName || !days) {
+    return res.status(400).json({ error: 'Missing required parameters: email, moduleName, days.' });
+  }
+
+  const emailKey = email.trim().toLowerCase();
+  let cost = 100;
+  if (days === 14) cost = 150;
+  if (days === 30) cost = 200;
+
+  if (pool) {
+    try {
+      const [rows] = await pool.query('SELECT coins, unlocked_modules FROM users WHERE email = ?', [emailKey]);
+      if (rows.length === 0) return res.status(404).json({ error: 'User not found.' });
+
+      const userObj = rows[0];
+      if (userObj.coins < cost) {
+        return res.status(400).json({ error: `Insufficient coins. Unlocking requires ${cost} coins, you have ${userObj.coins}.` });
+      }
+
+      let unlocks = [];
+      try {
+        unlocks = JSON.parse(userObj.unlocked_modules || '[]');
+      } catch(e) { unlocks = []; }
+
+      // Calculate expiration date
+      const expirationDate = new Date();
+      expirationDate.setDate(expirationDate.getDate() + days);
+
+      // Remove existing unlock for same module if any, then push new one
+      unlocks = unlocks.filter(item => item.module !== moduleName);
+      unlocks.push({
+        module: moduleName,
+        expiresAt: expirationDate.toISOString()
+      });
+
+      await pool.query(
+        'UPDATE users SET coins = coins - ?, unlocked_modules = ? WHERE email = ?',
+        [cost, JSON.stringify(unlocks), emailKey]
+      );
+
+      res.json({
+        success: true,
+        message: `Successfully unlocked ${moduleName} for ${days} days!`,
+        coins: userObj.coins - cost,
+        unlockedModules: unlocks
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Database error occurred during redemption.' });
+    }
+  } else {
+    res.json({ success: true, message: 'Running in sandbox mode. Module unlocked temporarily!' });
+  }
+});
+
+// Admin Stats
+app.get('/api/admin/stats', async (req, res) => {
+  const email = req.headers['x-user-email'];
+  if (!email || email.trim().toLowerCase() !== 'pradeepvarkala@gmail.com') {
+    return res.status(403).json({ error: 'Access denied. Administrator only.' });
+  }
+
+  if (pool) {
+    try {
+      const [users] = await pool.query('SELECT email, name, tier, subscription_status, coins, referral_code, referred_by, created_at FROM users ORDER BY created_at DESC');
+      const [referrals] = await pool.query('SELECT referred_by, COUNT(*) as count FROM users WHERE referred_by IS NOT NULL GROUP BY referred_by');
+      res.json({
+        success: true,
+        users,
+        referrals
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Failed to query database stats.' });
+    }
+  } else {
+    res.json({
+      success: true,
+      users: [
+        { email: 'pradeepvarkala@gmail.com', name: 'Pradeep Varkala', tier: 'admin', subscription_status: 'active', coins: 1500, referral_code: 'REF-PRADEEP', referred_by: null, created_at: new Date() }
+      ],
+      referrals: []
+    });
+  }
+});
+
+// Admin Manual Plan Toggle
+app.post('/api/admin/update-tier', async (req, res) => {
+  const adminEmail = req.headers['x-user-email'];
+  if (!adminEmail || adminEmail.trim().toLowerCase() !== 'pradeepvarkala@gmail.com') {
+    return res.status(403).json({ error: 'Access denied.' });
+  }
+
+  const { targetEmail, tier } = req.body;
+  if (!targetEmail || !tier) return res.status(400).json({ error: 'Missing parameters.' });
+
+  if (pool) {
+    try {
+      const status = tier === 'free' ? 'inactive' : 'active';
+      await pool.query('UPDATE users SET tier = ?, subscription_status = ? WHERE email = ?', [tier, status, targetEmail.trim().toLowerCase()]);
+      res.json({ success: true, message: `Successfully updated ${targetEmail} to tier ${tier}` });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  } else {
+    res.json({ success: true, message: 'Updated local status in memory.' });
+  }
 });
 
 // Database REST APIs for Presentations
