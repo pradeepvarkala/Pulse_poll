@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import io from 'socket.io-client';
 import { 
   ChevronLeft, ChevronRight, Lock, Unlock, Eye, EyeOff, RotateCcw, 
-  Users, Trophy, Presentation as PresIcon, HelpCircle, ArrowLeft, CheckCircle2, QrCode, Edit3 
+  Users, Trophy, Presentation as PresIcon, HelpCircle, ArrowLeft, CheckCircle2, QrCode, Edit3, MessageSquare 
 } from 'lucide-react';
 
 const OPTION_COLORS = ['#4ecdc4', '#cbe86b', '#9adefa', '#ff6b6b', '#6b7c85', '#1e90ff', '#1dd1a1', '#ffb936', '#ffb8b8', '#8e44ad'];
@@ -423,6 +423,13 @@ export default function Presenter({ presentationId, onBack }) {
   const [penColor, setPenColor] = useState('#06b6d4');
   const [penSize, setPenSize] = useState(4);
   const [penStrokes, setPenStrokes] = useState([]);
+
+  // Admin <-> Participant Direct Chat State
+  const [showAdminChatDrawer, setShowAdminChatDrawer] = useState(false);
+  const [adminChatText, setAdminChatText] = useState('');
+  const [adminChatMessages, setAdminChatMessages] = useState([
+    { id: '1', sender: 'Participant (Alex)', text: 'Hello host, I submitted my answer!', timestamp: '11:22 AM' }
+  ]);
 
   // New Reveal/Results States
   const [correctRevealed, setCorrectRevealed] = useState(false);
@@ -1186,7 +1193,7 @@ export default function Presenter({ presentationId, onBack }) {
             })}
           </div>
         )}
-        <h1 className="presenter-question">{activeSlide.question}</h1>
+        <h1 className="presenter-question" style={{ color: '#ffffff', textShadow: '0 2px 12px rgba(0,0,0,0.95)' }}>{activeSlide.question}</h1>
 
         {/* Universal Time Limit display */}
         {quizTimer > 0 && (
@@ -2274,6 +2281,15 @@ export default function Presenter({ presentationId, onBack }) {
 
           <button 
             className="btn btn-secondary btn-icon" 
+            style={{ border: 'none', color: showAdminChatDrawer ? '#06b6d4' : 'white', background: showAdminChatDrawer ? 'rgba(6,182,212,0.2)' : 'transparent' }}
+            onClick={() => setShowAdminChatDrawer(!showAdminChatDrawer)}
+            title="Direct Chat with Participants"
+          >
+            <MessageSquare size={20} />
+          </button>
+
+          <button 
+            className="btn btn-secondary btn-icon" 
             style={{ border: 'none' }}
             onClick={clearResponses}
             title="Clear Responses"
@@ -2282,6 +2298,101 @@ export default function Presenter({ presentationId, onBack }) {
           </button>
         </div>
       </div>
+
+      {/* Admin <-> Participant Direct Chat Modal Drawer */}
+      {showAdminChatDrawer && (
+        <div 
+          className="glass-card animate-fade"
+          style={{
+            position: 'fixed',
+            bottom: '80px',
+            right: '25px',
+            width: '360px',
+            maxHeight: '480px',
+            background: '#0b0f19',
+            border: '1px solid rgba(6, 182, 212, 0.4)',
+            borderRadius: '20px',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
+            zIndex: 100001,
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden'
+          }}
+        >
+          <div style={{ background: '#0f172a', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-glass)' }}>
+            <div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#06b6d4', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              💬 Direct Messages & Broadcast
+            </div>
+            <button 
+              type="button"
+              style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '1.1rem', cursor: 'pointer' }}
+              onClick={() => setShowAdminChatDrawer(false)}
+            >
+              ✕
+            </button>
+          </div>
+
+          <div style={{ flex: 1, padding: '14px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ fontSize: '0.7rem', color: '#64748b', textAlign: 'center', background: 'rgba(255,255,255,0.03)', padding: '4px 8px', borderRadius: '6px' }}>
+              🔒 Restricted Channel (Admin ↔ Participant Only)
+            </div>
+            {adminChatMessages.map((msg) => (
+              <div 
+                key={msg.id}
+                style={{
+                  alignSelf: msg.sender.includes('Admin') ? 'flex-end' : 'flex-start',
+                  maxWidth: '82%',
+                  background: msg.sender.includes('Admin') ? 'rgba(6, 182, 212, 0.2)' : 'rgba(37, 99, 235, 0.15)',
+                  border: `1px solid ${msg.sender.includes('Admin') ? 'rgba(6, 182, 212, 0.4)' : 'rgba(37, 99, 235, 0.3)'}`,
+                  borderRadius: '12px',
+                  padding: '8px 12px',
+                  fontSize: '0.82rem',
+                  color: '#f8fafc'
+                }}
+              >
+                <div style={{ fontSize: '0.65rem', fontWeight: 800, color: msg.sender.includes('Admin') ? '#06b6d4' : '#60a5fa', marginBottom: '2px' }}>
+                  {msg.sender}
+                </div>
+                <div>{msg.text}</div>
+                <div style={{ fontSize: '0.6rem', color: '#94a3b8', textAlign: 'right', marginTop: '3px' }}>
+                  {msg.timestamp}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!adminChatText.trim()) return;
+              const newMsg = {
+                id: Math.random().toString(36).substr(2, 9),
+                sender: 'Admin (Host Broadcast)',
+                text: adminChatText,
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+              };
+              setAdminChatMessages([...adminChatMessages, newMsg]);
+              if (socketRef.current) {
+                socketRef.current.emit('admin-broadcast-chat', { roomCode, message: newMsg });
+              }
+              setAdminChatText('');
+            }}
+            style={{ padding: '10px', background: '#090d16', borderTop: '1px solid var(--border-glass)', display: 'flex', gap: '6px' }}
+          >
+            <input 
+              type="text"
+              className="input-text"
+              placeholder="Type broadcast message..."
+              value={adminChatText}
+              onChange={(e) => setAdminChatText(e.target.value)}
+              style={{ fontSize: '0.8rem', padding: '8px 10px' }}
+            />
+            <button type="submit" className="btn btn-primary" style={{ padding: '8px 12px', fontSize: '0.8rem' }}>
+              Send
+            </button>
+          </form>
+        </div>
+      )}
 
       {/* Live Touchpen / Stencil Canvas Overlay */}
       <PenCanvasOverlay 

@@ -54,6 +54,13 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
   const [participantVideoOn, setParticipantVideoOn] = useState(true);
   const mobileVideoRef = useRef(null);
 
+  // Admin <-> Participant Direct Chat State
+  const [showHostChatDrawer, setShowHostChatDrawer] = useState(false);
+  const [participantChatText, setParticipantChatText] = useState('');
+  const [directChatMessages, setDirectChatMessages] = useState([
+    { id: '1', sender: 'Admin (Host)', text: 'Welcome to the session! You can send direct questions to the host here.', timestamp: '11:20 AM' }
+  ]);
+
   useEffect(() => {
     if (participantVideoOn && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices.getUserMedia({ video: true, audio: !participantMicMuted })
@@ -1358,6 +1365,124 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
               I Understand, Resume Test
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Floating Host Chat Button */}
+      <button
+        type="button"
+        className="btn btn-primary"
+        onClick={() => setShowHostChatDrawer(!showHostChatDrawer)}
+        style={{
+          position: 'fixed',
+          bottom: '20px',
+          right: '20px',
+          zIndex: 10000,
+          borderRadius: '30px',
+          padding: '10px 18px',
+          boxShadow: '0 8px 25px rgba(6, 182, 212, 0.4)',
+          fontWeight: 800,
+          fontSize: '0.85rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}
+      >
+        💬 Message Host
+      </button>
+
+      {/* Admin <-> Participant Direct Chat Drawer Modal */}
+      {showHostChatDrawer && (
+        <div 
+          className="glass-card animate-fade"
+          style={{
+            position: 'fixed',
+            bottom: '75px',
+            right: '20px',
+            width: '340px',
+            maxHeight: '450px',
+            background: '#0b0f19',
+            border: '1px solid rgba(6, 182, 212, 0.4)',
+            borderRadius: '20px',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
+            zIndex: 10001,
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden'
+          }}
+        >
+          <div style={{ background: '#0f172a', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-glass)' }}>
+            <div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#06b6d4', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              💬 Direct Chat with Host
+            </div>
+            <button 
+              type="button"
+              style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '1.1rem', cursor: 'pointer' }}
+              onClick={() => setShowHostChatDrawer(false)}
+            >
+              ✕
+            </button>
+          </div>
+
+          <div style={{ flex: 1, padding: '14px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ fontSize: '0.7rem', color: '#64748b', textAlign: 'center', background: 'rgba(255,255,255,0.03)', padding: '4px 8px', borderRadius: '6px' }}>
+              🔒 Private Channel (Admin ↔ You Only)
+            </div>
+            {directChatMessages.map((msg) => (
+              <div 
+                key={msg.id}
+                style={{
+                  alignSelf: msg.sender.includes('Admin') ? 'flex-start' : 'flex-end',
+                  maxWidth: '82%',
+                  background: msg.sender.includes('Admin') ? 'rgba(6, 182, 212, 0.12)' : 'rgba(37, 99, 235, 0.25)',
+                  border: `1px solid ${msg.sender.includes('Admin') ? 'rgba(6, 182, 212, 0.3)' : 'rgba(37, 99, 235, 0.4)'}`,
+                  borderRadius: '12px',
+                  padding: '8px 12px',
+                  fontSize: '0.82rem',
+                  color: '#f8fafc'
+                }}
+              >
+                <div style={{ fontSize: '0.65rem', fontWeight: 800, color: msg.sender.includes('Admin') ? '#06b6d4' : '#60a5fa', marginBottom: '2px' }}>
+                  {msg.sender}
+                </div>
+                <div>{msg.text}</div>
+                <div style={{ fontSize: '0.6rem', color: '#94a3b8', textAlign: 'right', marginTop: '3px' }}>
+                  {msg.timestamp}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!participantChatText.trim()) return;
+              const newMsg = {
+                id: Math.random().toString(36).substr(2, 9),
+                sender: nickname || 'Participant',
+                text: participantChatText,
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+              };
+              setDirectChatMessages([...directChatMessages, newMsg]);
+              if (socketRef.current) {
+                socketRef.current.emit('participant-direct-chat', { roomCode, message: newMsg });
+              }
+              setParticipantChatText('');
+            }}
+            style={{ padding: '10px', background: '#090d16', borderTop: '1px solid var(--border-glass)', display: 'flex', gap: '6px' }}
+          >
+            <input 
+              type="text"
+              className="input-text"
+              placeholder="Type message to host..."
+              value={participantChatText}
+              onChange={(e) => setParticipantChatText(e.target.value)}
+              style={{ fontSize: '0.8rem', padding: '8px 10px' }}
+            />
+            <button type="submit" className="btn btn-primary" style={{ padding: '8px 12px', fontSize: '0.8rem' }}>
+              Send
+            </button>
+          </form>
         </div>
       )}
     </div>
