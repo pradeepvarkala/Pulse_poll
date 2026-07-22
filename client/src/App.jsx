@@ -1770,9 +1770,10 @@ export default function App() {
                       required
                       autoFocus
                       style={{
-                        width: '100%', padding: '12px 16px', background: 'rgba(0,0,0,0.3)',
-                        border: '1px solid var(--border-glass)', borderRadius: '12px',
-                        color: 'var(--text-primary)', fontSize: '0.95rem'
+                        width: '100%', padding: '14px 18px', background: '#0f172a',
+                        border: '2px solid var(--primary)', borderRadius: '12px',
+                        color: '#ffffff', fontSize: '1rem', fontWeight: 600,
+                        outline: 'none', boxShadow: '0 0 15px rgba(6,182,212,0.2)'
                       }}
                     />
                   </div>
