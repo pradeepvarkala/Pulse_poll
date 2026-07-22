@@ -46,6 +46,11 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
   const [focusWarnings, setFocusWarnings] = useState(2);
   const [showFocusWarningModal, setShowFocusWarningModal] = useState(false);
 
+  // Escape Room Breakout solving states
+  const [escapeRoomKeyInput, setEscapeRoomKeyInput] = useState('');
+  const [escapeRoomUnlocked, setEscapeRoomUnlocked] = useState(false);
+  const [assignedBreakoutRoom, setAssignedBreakoutRoom] = useState('Room Alpha (Cyber Vault)');
+
   // Quiz timer
   const [quizTimeRemaining, setQuizTimeRemaining] = useState(0);
   const [timerStarted, setTimerStarted] = useState(true);
@@ -1205,6 +1210,50 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
                         </button>
                       );
                     })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Escape Room Participant Breakout Solve Interface */}
+            {slide?.type === 'escaperoom' && (
+              <div className="glass-card animate-fade" style={{ width: '100%', maxWidth: '500px', padding: '24px', background: '#0b0f19', border: '1px solid rgba(6, 182, 212, 0.4)', borderRadius: '20px', textAlign: 'center' }}>
+                <div style={{ background: 'rgba(6, 182, 212, 0.15)', color: '#06b6d4', padding: '6px 14px', borderRadius: '20px', fontWeight: 800, fontSize: '0.8rem', display: 'inline-block', marginBottom: '15px' }}>
+                  👥 {assignedBreakoutRoom}
+                </div>
+
+                <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#f8fafc', marginBottom: '10px' }}>
+                  🧩 Escape Room Cipher Puzzle
+                </h2>
+                <p style={{ color: '#cbd5e1', fontSize: '0.9rem', lineHeight: 1.5, marginBottom: '20px' }}>
+                  {slide.question || 'Decipher the secret code with your team to unlock the breakout room!'}
+                </p>
+
+                {!escapeRoomUnlocked ? (
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    if (escapeRoomKeyInput.trim().toUpperCase() === (slide.secretKey || 'PUZZLE-904')) {
+                      setEscapeRoomUnlocked(true);
+                    } else {
+                      alert('❌ Incorrect key code! Discuss with your team and try again.');
+                    }
+                  }} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <input 
+                      type="text" 
+                      className="input-text"
+                      placeholder="Enter Secret Key Code (e.g. PUZZLE-904)"
+                      value={escapeRoomKeyInput}
+                      onChange={(e) => setEscapeRoomKeyInput(e.target.value)}
+                      style={{ padding: '12px', textAlign: 'center', fontSize: '1rem', fontWeight: 800, letterSpacing: '2px', textTransform: 'uppercase' }}
+                      required
+                    />
+                    <button type="submit" className="btn btn-primary" style={{ padding: '12px', fontWeight: 800, fontSize: '0.95rem' }}>
+                      🔓 Submit Unlock Key
+                    </button>
+                  </form>
+                ) : (
+                  <div style={{ padding: '20px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid #10b981', borderRadius: '12px', color: '#10b981', fontWeight: 800, fontSize: '1.1rem' }}>
+                    🎉 Vault Unlocked! Your team escaped successfully! 🏆
                   </div>
                 )}
               </div>
