@@ -10,6 +10,7 @@ import LandingPage from './components/LandingPage';
 import InstructorRemote from './components/InstructorRemote';
 import AnalyticsReport from './components/AnalyticsReport';
 import EscapeRoomBuilder from './components/EscapeRoomBuilder';
+import VirtualMeetingScheduler from './components/VirtualMeetingScheduler';
 import { Presentation as PresIcon, User as UserIcon, Settings } from 'lucide-react';
 
 const CATEGORY_TEMPLATES = [
@@ -1519,6 +1520,10 @@ export default function App() {
                 if (pres) setSelectedPresentationId(pres.id);
                 setView('escaperoom');
               }}
+              onViewMeetingScheduler={(pres) => {
+                if (pres) setSelectedPresentationId(pres.id);
+                setView('meeting');
+              }}
             />
           )}
 
@@ -1546,6 +1551,14 @@ export default function App() {
               onBack={handleNavigateToDashboard}
               user={user}
               onRequestUpgrade={() => setShowUpgradeModal(true)}
+            />
+          )}
+
+          {view === 'meeting' && (
+            <VirtualMeetingScheduler 
+              presentation={CATEGORY_TEMPLATES[0]}
+              onBack={handleNavigateToDashboard}
+              user={user}
             />
           )}
 
