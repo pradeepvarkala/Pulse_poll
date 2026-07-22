@@ -961,6 +961,10 @@ export default function App() {
 
   const handleLoginSuccess = (profile) => {
     setUser(profile);
+    setAuthMode(null);
+    try {
+      localStorage.setItem('pulse-poll-user', JSON.stringify(profile));
+    } catch (e) {}
     
     if (selectedFeature) {
       const targetTheme = getThemeForFeature(selectedFeature);
