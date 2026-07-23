@@ -197,10 +197,10 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
           slides: [
             { 
               type: 'poll', 
-              question: 'Which concept best explains the primary core fundamentals of interactive polling?', 
+              question: '', 
               options: [
-                { id: 'opt-1', text: 'Real-Time Audience Engagement', emoji: '🚀' },
-                { id: 'opt-2', text: 'Visual Analytics & Charts', emoji: '📊' }
+                { id: 'opt-1', text: '' },
+                { id: 'opt-2', text: '' }
               ] 
             }
           ]
@@ -278,12 +278,12 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
     const newSlide = {
       id: Math.random().toString(36).substr(2, 9),
       type: 'poll',
-      question: 'New Question',
+      question: '',
       timeLimit: 15,
       timerAutoStart: false, // Default to manual start!
       options: [
-        { id: Math.random().toString(36).substr(2, 9), text: 'Option 1' },
-        { id: Math.random().toString(36).substr(2, 9), text: 'Option 2' }
+        { id: Math.random().toString(36).substr(2, 9), text: '' },
+        { id: Math.random().toString(36).substr(2, 9), text: '' }
       ]
     };
     const updatedPres = {

@@ -109,10 +109,10 @@ export default function Dashboard({
         {
           id: Math.random().toString(36).substr(2, 9),
           type: 'poll',
-          question: 'First Slide: Edit your question here',
+          question: '',
           options: [
-            { id: 'opt-1', text: 'Option A' },
-            { id: 'opt-2', text: 'Option B' }
+            { id: 'opt-1', text: '' },
+            { id: 'opt-2', text: '' }
           ]
         }
       ]
@@ -150,10 +150,10 @@ export default function Dashboard({
         {
           id: `s-${Math.random().toString(36).substr(2, 4)}`,
           type: slideType,
-          question: `Edit your ${slideType.toUpperCase()} question here...`,
+          question: '',
           options: slideType === 'quiz' || slideType === 'poll' ? [
-            { id: 'opt-1', text: 'Option A (Correct)' },
-            { id: 'opt-2', text: 'Option B' }
+            { id: 'opt-1', text: '' },
+            { id: 'opt-2', text: '' }
           ] : []
         }
       ]
