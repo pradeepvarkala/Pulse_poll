@@ -5,7 +5,11 @@ import {
 } from 'lucide-react';
 
 const AVAILABLE_THEMES = [
-  { id: 'playroom', name: 'Playroom (Kids)', bg: '#fffdf0', colors: ['#ff477e', '#4ea8de', '#fbbf24'], type: 'light' },
+  { id: 'cyber-neon', name: 'Cyber Neon (Generated Artwork)', bg: '/assets/theme_cyber_neon.jpg', colors: ['#06b6d4', '#8b5cf6', '#3b82f6'], type: 'art', imageBg: true },
+  { id: 'midnight-gold', name: 'Midnight Gold (Executive Art)', bg: '/assets/theme_midnight_gold.jpg', colors: ['#f59e0b', '#d97706', '#eab308'], type: 'art', imageBg: true },
+  { id: 'cosmic-nebula', name: 'Cosmic Nebula (Galaxy Art)', bg: '/assets/theme_cosmic_nebula.jpg', colors: ['#a855f7', '#3b82f6', '#ec4899'], type: 'art', imageBg: true },
+  { id: 'playroom-magic', name: 'Playroom Magic (Kids Art)', bg: '/assets/theme_playroom_magic.jpg', colors: ['#ec4899', '#06b6d4', '#fbbf24'], type: 'art', imageBg: true },
+  { id: 'playroom', name: 'Playroom (Pastel)', bg: '#fffdf0', colors: ['#ff477e', '#4ea8de', '#fbbf24'], type: 'light' },
   { id: 'light-luxe', name: 'Light Luxe', bg: '#f8fafc', colors: ['#6366f1', '#ec4899', '#8b5cf6'], type: 'light' },
   { id: 'cyber-mint', name: 'Cyber Mint', bg: '#f0fdf4', colors: ['#10b981', '#06b6d4', '#059669'], type: 'light' },
   { id: 'forest-sage', name: 'Forest Sage', bg: '#f4f8f6', colors: ['#166534', '#9a3412', '#0f766e'], type: 'light' },
@@ -641,7 +645,15 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
 
         {/* Center: Slide Preview Mockup */}
         <div className="editor-center" style={{ position: 'relative' }}>
-          <div className={`glass-card slide-preview-container theme-${presentation?.theme || 'corporate'}`} style={{ position: 'relative' }}>
+          <div 
+            className={`glass-card slide-preview-container theme-${presentation?.theme || 'corporate'}`} 
+            style={{ 
+              position: 'relative',
+              backgroundImage: activeSlide?.bgImage ? `linear-gradient(rgba(11, 15, 25, 0.65), rgba(11, 15, 25, 0.85)), url(${activeSlide.bgImage})` : undefined,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }}
+          >
             {/* Top Bar: Slide Counter Badge & Help Badge */}
             <div style={{ position: 'absolute', top: '15px', left: '15px', right: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10 }}>
               <span style={{ 
@@ -961,21 +973,21 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                 const idx = slides.findIndex(s => s.id === activeSlideId);
                 if (idx > 0) setActiveSlideId(slides[idx - 1].id);
               }}
-              style={{ fontSize: '0.8rem', padding: '6px 14px', borderRadius: '8px' }}
+              style={{ fontSize: '0.85rem', fontWeight: 800, padding: '8px 16px', borderRadius: '10px', background: '#1e293b', color: '#ffffff', border: '1px solid rgba(255,255,255,0.2)' }}
             >
               ◄ Previous Slide
             </button>
-            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-secondary)' }}>
+            <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-primary)' }}>
               Slide {slides.findIndex(s => s.id === activeSlideId) + 1} of {slides.length}
             </span>
             <button 
-              className="btn btn-secondary" 
+              className="btn btn-primary" 
               disabled={slides.findIndex(s => s.id === activeSlideId) >= slides.length - 1}
               onClick={() => {
                 const idx = slides.findIndex(s => s.id === activeSlideId);
                 if (idx < slides.length - 1) setActiveSlideId(slides[idx + 1].id);
               }}
-              style={{ fontSize: '0.8rem', padding: '6px 14px', borderRadius: '8px' }}
+              style={{ fontSize: '0.85rem', fontWeight: 800, padding: '8px 16px', borderRadius: '10px', background: 'linear-gradient(135deg, #0284c7, #2563eb)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)' }}
             >
               Next Slide ►
             </button>
@@ -1416,10 +1428,54 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                 </div>
               )}
 
+              {/* Slide Background Artwork Image Picker */}
+              <div className="settings-group">
+                <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>Slide Background Artwork</span>
+                  <span style={{ fontSize: '0.7rem', color: '#06b6d4', fontWeight: 800 }}>🎨 AI Generated</span>
+                </label>
+                <select 
+                  value={activeSlide.bgImage || ''}
+                  onChange={(e) => handleUpdateActiveSlide({ bgImage: e.target.value })}
+                  style={{
+                    width: '100%', padding: '10px 12px', background: '#0f172a',
+                    border: '1px solid var(--border-glass)', borderRadius: '8px',
+                    color: '#ffffff', fontSize: '0.85rem', fontWeight: 600, outline: 'none'
+                  }}
+                >
+                  <option value="">Default Theme Wallpaper</option>
+                  <option value="/assets/theme_cyber_neon.jpg">🌌 Cyber Neon Artwork</option>
+                  <option value="/assets/theme_midnight_gold.jpg">👑 Midnight Gold Executive</option>
+                  <option value="/assets/theme_cosmic_nebula.jpg">✨ Cosmic Nebula Stardust</option>
+                  <option value="/assets/theme_playroom_magic.jpg">🎨 Playroom Magic Pastel</option>
+                </select>
+              </div>
+
               {/* Theme Settings (Global for presentation) */}
               <div className="settings-group">
                 <label>Presentation Theme</label>
                 <div className="theme-picker-section">
+                  <div className="theme-picker-category-title" style={{ color: '#06b6d4', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    🎨 Generated Artwork Themes
+                  </div>
+                  <div className="theme-picker-grid" style={{ gridTemplateColumns: '1fr 1fr', marginBottom: '16px' }}>
+                    {AVAILABLE_THEMES.filter(t => t.type === 'art').map(t => (
+                      <div 
+                        key={t.id} 
+                        className={`theme-picker-item ${(presentation.theme || 'corporate') === t.id ? 'active' : ''}`}
+                        onClick={() => handleUpdateTheme(t.id)}
+                        style={{ overflow: 'hidden' }}
+                      >
+                        <div className="theme-palette-preview" style={{ backgroundImage: `url(${t.bg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+                          {t.colors.map((c, i) => (
+                            <div key={i} className="theme-color-dot" style={{ backgroundColor: c }} />
+                          ))}
+                        </div>
+                        <div className="theme-picker-name">{t.name}</div>
+                      </div>
+                    ))}
+                  </div>
+
                   <div className="theme-picker-category-title">Light Themes</div>
                   <div className="theme-picker-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
                     {AVAILABLE_THEMES.filter(t => t.type === 'light').map(t => (
@@ -1438,7 +1494,7 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                     ))}
                   </div>
 
-                  <div className="theme-picker-category-title">Dark Themes</div>
+                  <div className="theme-picker-category-title" style={{ marginTop: '12px' }}>Dark Themes</div>
                   <div className="theme-picker-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
                     {AVAILABLE_THEMES.filter(t => t.type === 'dark').map(t => (
                       <div 

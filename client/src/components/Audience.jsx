@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import io from 'socket.io-client';
-import { Send, ThumbsUp, Lock, Trophy, Award, CheckCircle, XCircle, ArrowUp, ArrowDown, HelpCircle, Mic, MicOff, Video, VideoOff, Volume2 } from 'lucide-react';
+import { Send, ThumbsUp, Lock, Trophy, Award, CheckCircle, XCircle, ArrowUp, ArrowDown, HelpCircle, Mic, MicOff, Video, VideoOff, Volume2, VolumeX, Sun, Moon } from 'lucide-react';
+import { playHoverSound, playClickSound, playCorrectSound, playWrongSound, playThemeToggleSound, toggleMuteAudio, getMuteState } from '../utils/soundEffects';
 
 export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
   // Join states
@@ -10,6 +11,20 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
   const [needNickname, setNeedNickname] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [theme, setTheme] = useState('neon');
+  const [isProTheme, setIsProTheme] = useState(false);
+  const [audioMuted, setAudioMuted] = useState(false);
+
+  const handleToggleThemeMode = () => {
+    const nextPro = !isProTheme;
+    setIsProTheme(nextPro);
+    setTheme(nextPro ? 'light-pro' : 'neon');
+    playThemeToggleSound(!nextPro);
+  };
+
+  const handleToggleMute = () => {
+    const muted = toggleMuteAudio();
+    setAudioMuted(muted);
+  };
 
   // Active slide state
   const [slide, setSlide] = useState(null);
@@ -389,6 +404,7 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
 
   // 1. Multiple Choice
   const handleVotePoll = (optionId) => {
+    playClickSound(isProTheme);
     setSelectedOptionId(optionId);
     handleSubmitResponse({ optionId });
   };
@@ -398,6 +414,7 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
     e.preventDefault();
     const validWords = wordCloudInputs.filter(w => w.trim().length > 0);
     if (validWords.length === 0) return;
+    playClickSound(isProTheme);
     handleSubmitResponse({ words: validWords });
   };
 
@@ -409,6 +426,7 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
       alert("Please enter exactly 2 words/opinions to submit!");
       return;
     }
+    playClickSound(isProTheme);
     handleSubmitResponse({ words: validWords });
   };
 
@@ -416,12 +434,14 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
   const handleOpenEndedSubmit = (e) => {
     e.preventDefault();
     if (!openEndedText.trim()) return;
+    playClickSound(isProTheme);
     handleSubmitResponse({ text: openEndedText.trim() });
   };
 
   // 4. Scales
   const handleScalesSubmit = (e) => {
     e.preventDefault();
+    playClickSound(isProTheme);
     handleSubmitResponse({ ratings: scaleRatings });
   };
 
@@ -431,6 +451,7 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
     const targetIdx = index + direction;
     if (targetIdx < 0 || targetIdx >= list.length) return;
     
+    playHoverSound(isProTheme);
     // Swap
     const temp = list[index];
     list[index] = list[targetIdx];
@@ -438,6 +459,7 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
     setRankedItems(list);
   };
   const handleRankingSubmit = () => {
+    playClickSound(isProTheme);
     handleSubmitResponse({ ranking: rankedItems.map(item => item.id) });
   };
 
@@ -445,6 +467,7 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
   const handleQaSubmit = (e) => {
     e.preventDefault();
     if (!qaText.trim()) return;
+    playClickSound(isProTheme);
     socketRef.current.emit('submit_response', {
       roomCode: roomCode.trim(),
       response: { text: qaText }
@@ -452,6 +475,7 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
     setQaText('');
   };
   const handleUpvoteQa = (qId) => {
+    playClickSound(isProTheme);
     socketRef.current.emit('upvote_question', { roomCode: roomCode.trim(), questionId: qId });
   };
 
@@ -459,6 +483,7 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
   const handleGuessSubmit = (e) => {
     e.preventDefault();
     if (guessValue === '') return;
+    playClickSound(isProTheme);
     handleSubmitResponse({ guess: Number(guessValue) });
   };
 
@@ -467,24 +492,28 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
   const handlePointsSubmit = (e) => {
     e.preventDefault();
     if (getPointsSum() !== 100) return;
+    playClickSound(isProTheme);
     handleSubmitResponse({ points: pointsAllocations });
   };
 
   // 9. 2x2 Grid
   const handleGridSubmit = (e) => {
     e.preventDefault();
+    playClickSound(isProTheme);
     handleSubmitResponse({ grid: gridCoords });
   };
 
   // 10. Quick Form
   const handleFormSubmit = (e) => {
     e.preventDefault();
+    playClickSound(isProTheme);
     handleSubmitResponse({ form: formData });
   };
 
   // 11. Pin on Image (Click canvas)
   const handlePinClick = (e) => {
     if (hasVoted || votingLocked) return;
+    playHoverSound(isProTheme);
     const rect = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
@@ -492,12 +521,14 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
   };
   const handlePinSubmit = () => {
     if (!localPin) return;
+    playClickSound(isProTheme);
     handleSubmitResponse(localPin);
   };
 
   // 12. Quiz Choice
   const handleQuizAnswer = (optIndex) => {
     if (hasVoted || votingLocked) return;
+    playClickSound(isProTheme);
     setSelectedQuizIndex(optIndex);
     handleSubmitResponse({
       answerIndex: optIndex,
@@ -628,13 +659,57 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
   }
 
   return (
-    <div className={`audience-mobile-container theme-${theme}`} style={{ padding: '16px 8px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 8px 12px 8px', borderBottom: '1px solid var(--border-glass)', marginBottom: '16px', gap: '12px' }}>
-        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Room: {roomCode}</span>
-        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{nickname || 'Anonymous'}</span>
-        <button className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: '0.75rem' }} onClick={handleExit}>
-          Leave
-        </button>
+    <div 
+      className={`audience-mobile-container theme-${theme}`} 
+      style={{ 
+        padding: '16px 8px',
+        backgroundImage: slide?.bgImage ? `linear-gradient(rgba(11, 15, 25, 0.8), rgba(11, 15, 25, 0.9)), url(${slide.bgImage})` : undefined,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center'
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 8px 12px 8px', borderBottom: '1px solid var(--border-glass)', marginBottom: '16px', gap: '8px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-primary)' }}>PIN: {roomCode}</span>
+          <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>• {nickname || 'Anonymous'}</span>
+        </div>
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* Audio Mute Toggle Button */}
+          <button 
+            className="btn btn-secondary" 
+            onClick={handleToggleMute} 
+            title={audioMuted ? "Unmute Sound Effects" : "Mute Sound Effects"}
+            style={{ padding: '6px 10px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px' }}
+          >
+            {audioMuted ? <VolumeX size={14} color="#ef4444" /> : <Volume2 size={14} color="#06b6d4" />}
+          </button>
+
+          {/* Theme Mode Switcher (Dark Arcade vs Light Professional) */}
+          <button 
+            className="btn btn-secondary" 
+            onClick={handleToggleThemeMode} 
+            title="Switch Theme Mode"
+            style={{ 
+              padding: '6px 12px', 
+              fontSize: '0.78rem', 
+              fontWeight: 800, 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '6px',
+              background: isProTheme ? '#ffffff' : '#0f172a',
+              color: isProTheme ? '#0f172a' : '#06b6d4',
+              border: isProTheme ? '1px solid #2563eb' : '1px solid #06b6d4'
+            }}
+          >
+            {isProTheme ? <Sun size={14} color="#2563eb" /> : <Moon size={14} color="#06b6d4" />}
+            <span>{isProTheme ? '💼 Light Pro' : '🎮 Arcade Dark'}</span>
+          </button>
+
+          <button className="btn btn-secondary" style={{ padding: '6px 10px', fontSize: '0.75rem' }} onClick={handleExit}>
+            Leave
+          </button>
+        </div>
       </div>
 
       <div className="glass-card audience-card animate-fade" style={{ flex: 1, justifyContent: 'flex-start', minHeight: '420px' }}>
@@ -756,30 +831,26 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
                       return (
                         <button 
                           key={opt.id} 
-                          className="audience-poll-choice-btn animate-fade" 
+                          className={`audience-poll-choice-btn animate-fade ${isProTheme ? 'btn-game-pro' : 'btn-game-arcade'}`}
                           style={{
-                            background: current.bg,
-                            border: `2px solid ${current.border}`,
-                            color: 'white',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '14px',
                             padding: '16px 20px',
-                            borderRadius: '12px',
+                            borderRadius: '14px',
                             fontSize: '1.05rem',
-                            fontWeight: 700,
-                            boxShadow: '0 4px 15px rgba(0,0,0,0.15)',
-                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                            fontWeight: 800,
                             cursor: 'pointer'
                           }}
                           onClick={() => handleVotePoll(opt.id)}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-3px)';
-                            e.currentTarget.style.boxShadow = `0 8px 25px ${current.border.replace('0.4', '0.25')}`;
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.15)';
-                          }}
+                          onMouseEnter={() => playHoverSound(isProTheme)}
                         >
-                          {theme === 'playroom' ? `${['🍎', '🍌', '🍇', '🍉', '🍓', '🍒'][i % 6] || '⭐'} ${opt.text}` : opt.text}
+                          <span className={isProTheme ? 'option-badge-pro' : 'option-badge-arcade'}>
+                            {String.fromCharCode(65 + i)}
+                          </span>
+                          <span style={{ flex: 1, textAlign: 'left' }}>
+                            {theme === 'playroom' ? `${['🍎', '🍌', '🍇', '🍉', '🍓', '🍒'][i % 6] || '⭐'} ${opt.text}` : opt.text}
+                          </span>
                         </button>
                       );
                     })}
@@ -1205,34 +1276,29 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
                         { bg: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0.05))', border: 'rgba(139, 92, 246, 0.4)' },
                         { bg: 'linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(6, 182, 212, 0.05))', border: 'rgba(6, 182, 212, 0.4)' }
                       ];
-                      const current = colors[i % colors.length] || colors[0];
                       return (
                         <button 
                           key={opt.id} 
-                          className="audience-poll-choice-btn animate-fade" 
+                          className={`audience-poll-choice-btn animate-fade ${isProTheme ? 'btn-game-pro' : 'btn-game-arcade'}`}
                           style={{
-                            background: current.bg,
-                            border: `2px solid ${current.border}`,
-                            color: 'white',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '14px',
                             padding: '16px 20px',
-                            borderRadius: '12px',
+                            borderRadius: '14px',
                             fontSize: '1.05rem',
-                            fontWeight: 700,
-                            boxShadow: '0 4px 15px rgba(0,0,0,0.15)',
-                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                            fontWeight: 800,
                             cursor: 'pointer'
                           }}
                           onClick={() => handleQuizAnswer(i)}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-3px)';
-                            e.currentTarget.style.boxShadow = `0 8px 25px ${current.border.replace('0.4', '0.25')}`;
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.15)';
-                          }}
+                          onMouseEnter={() => playHoverSound(isProTheme)}
                         >
-                          {theme === 'playroom' ? `${['🍎', '🍌', '🍇', '🍉', '🍓', '🍒'][i % 6] || '⭐'} ${opt.text}` : opt.text}
+                          <span className={isProTheme ? 'option-badge-pro' : 'option-badge-arcade'}>
+                            {String.fromCharCode(65 + i)}
+                          </span>
+                          <span style={{ flex: 1, textAlign: 'left' }}>
+                            {opt.text}
+                          </span>
                         </button>
                       );
                     })}

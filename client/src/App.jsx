@@ -11,20 +11,21 @@ import InstructorRemote from './components/InstructorRemote';
 import AnalyticsReport from './components/AnalyticsReport';
 import EscapeRoomBuilder from './components/EscapeRoomBuilder';
 import VirtualMeetingScheduler from './components/VirtualMeetingScheduler';
-import { Presentation as PresIcon, User as UserIcon, Settings } from 'lucide-react';
+import { Presentation as PresIcon, User as UserIcon, Settings, Menu, Volume2, VolumeX, Sun, Moon } from 'lucide-react';
+import { playThemeToggleSound, toggleMuteAudio } from './utils/soundEffects';
 
 const CATEGORY_TEMPLATES = [
-  // 1. K-12 EDUCATION (Younger Kids, Ages 5-12) -> Playroom, Ocean, Sunset, Cyber-Mint
+  // 1. K-12 EDUCATION (STEM & Foundational Sciences) -> Playroom, Ocean, Sunset, Cyber-Mint
   {
     id: 'k12-tpl-1',
-    title: '🦖 Dinosaur World & Dino Riddles',
+    title: '📊 STEM Science & Environmental Ecosystems',
     category: 'Education',
     subcategory: 'K-12 Education',
     theme: 'playroom',
     slides: [
-      { type: 'quiz', question: 'I have a tiny brain, plates on my back, and a spiked tail. Who am I? 🦕', options: [{ id: 'opt-1', text: 'Stegosaurus (Correct)' }, { id: 'opt-2', text: 'T-Rex' }, { id: 'opt-3', text: 'Triceratops' }] },
-      { type: 'wordcloud', question: 'Describe a dinosaur roar sound in one funny word! 📣' },
-      { type: 'scales', question: 'Rate these prehistoric dinosaurs from cool to scary (1-5):', options: [{ id: 'opt-4', text: 'Tyrannosaurus Rex' }, { id: 'opt-5', text: 'Brachiosaurus' }, { id: 'opt-6', text: 'Velociraptor' }] }
+      { type: 'quiz', question: 'Which biological process converts sunlight and carbon dioxide into oxygen? 🌿', options: [{ id: 'opt-1', text: 'Photosynthesis (Correct)' }, { id: 'opt-2', text: 'Cellular Respiration' }, { id: 'opt-3', text: 'Evaporation' }] },
+      { type: 'wordcloud', question: 'In one word, what renewable energy source holds the most promise? ☀️' },
+      { type: 'scales', question: 'Rate your interest level across key scientific fields (1-5):', options: [{ id: 'opt-4', text: 'Environmental Science' }, { id: 'opt-5', text: 'Robotics & Automation' }, { id: 'opt-6', text: 'Astronomy & Physics' }] }
     ]
   },
   {
@@ -34,33 +35,33 @@ const CATEGORY_TEMPLATES = [
     subcategory: 'K-12 Education',
     theme: 'ocean',
     slides: [
-      { type: 'quiz', question: 'True or False: A day on Venus is longer than a year on Venus! 🌌', options: [{ id: 'opt-1', text: 'True (Correct)' }, { id: 'opt-2', text: 'False' }] },
-      { type: 'wordcloud', question: 'If you discovered a new star, what would you name it? ⭐' },
-      { type: 'poll', question: 'Which place in the solar system would you explore first?', options: [{ id: 'opt-3', text: 'The Crimson Mars 🔴' }, { id: 'opt-4', text: 'Saturn\'s Rings 🪐' }, { id: 'opt-5', text: 'The Moon 🌕' }] }
+      { type: 'quiz', question: 'True or False: A single day on Venus is longer than one solar year on Venus! 🌌', options: [{ id: 'opt-1', text: 'True (Correct)' }, { id: 'opt-2', text: 'False' }] },
+      { type: 'wordcloud', question: 'If you discovered a new exoplanet, what single word would describe it? ⭐' },
+      { type: 'poll', question: 'Which destination in the solar system should deep space probes prioritize?', options: [{ id: 'opt-3', text: 'Mars Polar Ice Caps 🔴' }, { id: 'opt-4', text: 'Saturn\'s Moons 🪐' }, { id: 'opt-5', text: 'Jupiter\'s Atmosphere 🌕' }] }
     ]
   },
   {
     id: 'k12-tpl-3',
-    title: '🦁 Jungle Safari & Wildlife Sound Puzzles',
+    title: '🌍 Global Geography & Biodiversity Exploration',
     category: 'Education',
     subcategory: 'K-12 Education',
     theme: 'sunset',
     slides: [
-      { type: 'quiz', question: 'What animal produces pink sweat to stay cool? 🦛', options: [{ id: 'opt-1', text: 'Hippopotamus (Correct)' }, { id: 'opt-2', text: 'Zebra' }, { id: 'opt-3', text: 'Cheetah' }] },
-      { type: 'wordcloud', question: 'What sound does a sleeping koala make? 🐨' },
-      { type: 'grid', question: 'Plot these wild animals on a speed vs weight coordinate matrix:', options: [{ id: 'opt-4', text: 'Lion' }, { id: 'opt-5', text: 'Grizzly Bear' }], xAxisLabel: 'Running Speed', yAxisLabel: 'Body Weight' }
+      { type: 'quiz', question: 'Which continent contains the world\'s largest tropical rainforest system? 🌍', options: [{ id: 'opt-1', text: 'South America (Correct)' }, { id: 'opt-2', text: 'Africa' }, { id: 'opt-3', text: 'Asia' }] },
+      { type: 'wordcloud', question: 'What is the most critical conservation strategy for endangered habitats? 🌿' },
+      { type: 'grid', question: 'Plot global ecosystems on Biodiversity Density vs Climate Vulnerability:', options: [{ id: 'opt-4', text: 'Coral Reefs' }, { id: 'opt-5', text: 'Boreal Forests' }], xAxisLabel: 'Biodiversity Density', yAxisLabel: 'Climate Vulnerability' }
     ]
   },
   {
     id: 'k12-tpl-4',
-    title: '🧪 Junior Science Lab & Bubbling Mixes',
+    title: '🧪 Fundamental Physical Sciences & Chemistry',
     category: 'Education',
     subcategory: 'K-12 Education',
     theme: 'cyber-mint',
     slides: [
-      { type: 'quiz', question: 'What is the only rock that is light enough to float on water? 🪨', options: [{ id: 'opt-1', text: 'Pumice (Correct)' }, { id: 'opt-2', text: 'Granite' }, { id: 'opt-3', text: 'Basalt' }] },
-      { type: 'stopwatch', question: '🎹 Riddle Countdown: I have keys but no locks. What am I?', timeLimit: 30 },
-      { type: 'poll', question: 'Which science experiment is most fun to watch?', options: [{ id: 'opt-4', text: 'Mentos in Soda Volcanoes 🌋' }, { id: 'opt-5', text: 'Tesla Coil Lightning Bolts ⚡' }, { id: 'opt-6', text: 'Glow-in-the-dark Slime 🧪' }] }
+      { type: 'quiz', question: 'What is the standard chemical formula for pure water molecules? 🧪', options: [{ id: 'opt-1', text: 'H2O (Correct)' }, { id: 'opt-2', text: 'CO2' }, { id: 'opt-3', text: 'NaCl' }] },
+      { type: 'stopwatch', question: '⏱️ Science Challenge: Name as many elements on the periodic table as you can!', timeLimit: 30 },
+      { type: 'poll', question: 'Which physics topic is most fascinating to demonstrate live?', options: [{ id: 'opt-4', text: 'Electromagnetic Induction ⚡' }, { id: 'opt-5', text: 'Fluid Dynamics & Hydraulics 🌊' }, { id: 'opt-6', text: 'Optics & Light Diffraction 🌈' }] }
     ]
   },
 
@@ -723,6 +724,30 @@ export default function App() {
   
   // Authentication state
   const [user, setUser] = useState(null);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true); // Minimized on load by default
+  const [isProTheme, setIsProTheme] = useState(false);
+  const [audioMuted, setAudioMuted] = useState(false);
+
+  useEffect(() => {
+    if (isProTheme) {
+      document.body.classList.add('theme-light-pro');
+      document.body.classList.remove('theme-neon');
+    } else {
+      document.body.classList.add('theme-neon');
+      document.body.classList.remove('theme-light-pro');
+    }
+  }, [isProTheme]);
+
+  const handleGlobalToggleTheme = () => {
+    const nextPro = !isProTheme;
+    setIsProTheme(nextPro);
+    playThemeToggleSound(!nextPro);
+  };
+
+  const handleGlobalToggleMute = () => {
+    const muted = toggleMuteAudio();
+    setAudioMuted(muted);
+  };
   const [activeSubmenuTemplateCategory, setActiveSubmenuTemplateCategory] = useState(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showAiGeneratorModal, setShowAiGeneratorModal] = useState(false);
@@ -1292,8 +1317,17 @@ export default function App() {
       {/* Header (hidden in presenter & audience fullscreen views) */}
       {view !== 'presenter' && view !== 'audience' && (
         <header className="app-header" style={{ position: 'relative', zIndex: 1000 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
-            <div className="logo" onClick={handleNavigateToDashboard} style={{ marginRight: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <button 
+              className="btn btn-secondary btn-icon"
+              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+              title={isSidebarCollapsed ? "Expand Navigation Menu" : "Collapse Navigation Menu"}
+              style={{ width: '38px', height: '38px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Menu size={20} />
+            </button>
+
+            <div className="logo" onClick={() => { setIsSidebarCollapsed(!isSidebarCollapsed); handleNavigateToDashboard(); }} style={{ marginRight: '10px', cursor: 'pointer' }}>
               <div className="logo-icon">
                 <PresIcon size={18} color="white" />
               </div>
@@ -1409,7 +1443,39 @@ export default function App() {
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {/* Audio Mute Toggle */}
+            <button 
+              className="btn btn-secondary" 
+              onClick={handleGlobalToggleMute}
+              title={audioMuted ? "Unmute Audio Themes" : "Mute Audio Themes"}
+              style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              {audioMuted ? <VolumeX size={16} color="#ef4444" /> : <Volume2 size={16} color="#06b6d4" />}
+            </button>
+
+            {/* Global Theme Mode Switcher (Dark Arcade vs Light Professional) */}
+            <button 
+              className="btn btn-secondary" 
+              onClick={handleGlobalToggleTheme}
+              title="Switch Platform Theme Mode"
+              style={{ 
+                padding: '8px 14px', 
+                fontSize: '0.85rem', 
+                fontWeight: 800, 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '6px',
+                background: isProTheme ? '#ffffff' : '#0f172a',
+                color: isProTheme ? '#0f172a' : '#06b6d4',
+                border: isProTheme ? '1px solid #2563eb' : '1px solid #06b6d4',
+                boxShadow: isProTheme ? '0 2px 10px rgba(37,99,235,0.15)' : '0 0 12px rgba(6,182,212,0.3)'
+              }}
+            >
+              {isProTheme ? <Sun size={15} color="#2563eb" /> : <Moon size={15} color="#06b6d4" />}
+              <span>{isProTheme ? '💼 Light Pro' : '🎮 Arcade Dark'}</span>
+            </button>
+
             <button 
               className="btn btn-primary animate-pulse" 
               style={{ background: 'linear-gradient(135deg, #06b6d4, #3b82f6)', fontWeight: 800, display: 'flex', gap: '6px', alignItems: 'center', boxShadow: '0 0 15px rgba(6, 182, 212, 0.3)', border: '1px solid rgba(255,255,255,0.3)' }}
@@ -1524,6 +1590,8 @@ export default function App() {
                 if (pres) setSelectedPresentationId(pres.id);
                 setView('meeting');
               }}
+              isSidebarCollapsed={isSidebarCollapsed}
+              onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
             />
           )}
 

@@ -28,10 +28,10 @@ export default function InstructorRemote({ user, presentations = [], onBack }) {
   ]);
 
   const currentPres = presentations.find(p => p.id === selectedPresId) || presentations[0] || {
-    title: 'Sample Presentation',
+    title: 'Q3 Strategic Growth & Market Analysis',
     slides: [
-      { type: 'quiz', question: 'Dinosaur Anatomy Quiz' },
-      { type: 'poll', question: 'Course Feedback Poll' }
+      { type: 'quiz', question: 'Which market segment generated the highest YoY revenue growth?' },
+      { type: 'poll', question: 'Rate your alignment with Q3 enterprise objectives' }
     ]
   };
 
@@ -216,22 +216,34 @@ export default function InstructorRemote({ user, presentations = [], onBack }) {
       {/* Main Touch Controls (Large Ergonomic Buttons for Trainers) */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
         <button 
-          className="btn btn-secondary"
+          className="btn"
           onClick={handlePrevSlide}
           disabled={currentSlideIndex === 0}
-          style={{ padding: '20px', fontSize: '1rem', fontWeight: 800, borderRadius: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', opacity: currentSlideIndex === 0 ? 0.5 : 1 }}
+          style={{ 
+            padding: '18px', fontSize: '0.95rem', fontWeight: 800, borderRadius: '16px', 
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', 
+            background: '#1e293b', color: '#ffffff', border: '1px solid rgba(255,255,255,0.2)',
+            opacity: currentSlideIndex === 0 ? 0.45 : 1, cursor: currentSlideIndex === 0 ? 'not-allowed' : 'pointer'
+          }}
         >
-          <ChevronLeft size={28} />
+          <ChevronLeft size={28} color="#38bdf8" />
           <span>PREVIOUS SLIDE</span>
         </button>
 
         <button 
-          className="btn btn-primary"
+          className="btn"
           onClick={handleNextSlide}
           disabled={currentSlideIndex >= (currentPres.slides?.length || 1) - 1}
-          style={{ padding: '20px', fontSize: '1rem', fontWeight: 800, borderRadius: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', background: 'linear-gradient(135deg, var(--primary), var(--secondary))' }}
+          style={{ 
+            padding: '18px', fontSize: '0.95rem', fontWeight: 800, borderRadius: '16px', 
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', 
+            background: 'linear-gradient(135deg, #0284c7, #2563eb)', color: '#ffffff',
+            border: '1px solid rgba(255,255,255,0.3)', boxShadow: '0 4px 14px rgba(2,132,199,0.4)',
+            opacity: currentSlideIndex >= (currentPres.slides?.length || 1) - 1 ? 0.45 : 1,
+            cursor: currentSlideIndex >= (currentPres.slides?.length || 1) - 1 ? 'not-allowed' : 'pointer'
+          }}
         >
-          <ChevronRight size={28} />
+          <ChevronRight size={28} color="#ffffff" />
           <span>NEXT SLIDE</span>
         </button>
       </div>
@@ -239,35 +251,50 @@ export default function InstructorRemote({ user, presentations = [], onBack }) {
       {/* Room Utility Action Bar */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '16px' }}>
         <button 
-          className={`btn ${isTimerRunning ? 'btn-secondary' : 'btn-primary'}`}
+          className="btn"
           onClick={() => {
             setIsTimerRunning(!isTimerRunning);
             triggerHaptic();
           }}
-          style={{ padding: '12px', fontSize: '0.8rem', fontWeight: 800, borderRadius: '14px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}
+          style={{ 
+            padding: '12px', fontSize: '0.82rem', fontWeight: 800, borderRadius: '14px', 
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
+            background: isTimerRunning ? '#0f172a' : '#0284c7', color: '#ffffff',
+            border: '1px solid rgba(255,255,255,0.2)'
+          }}
         >
-          {isTimerRunning ? <Pause size={18} /> : <Play size={18} />}
+          {isTimerRunning ? <Pause size={20} color="#fbbf24" /> : <Play size={20} color="#ffffff" />}
           <span>{isTimerRunning ? 'PAUSE TIMER' : 'START TIMER'}</span>
         </button>
 
         <button 
-          className={`btn ${isRoomLocked ? 'btn-primary' : 'btn-secondary'}`}
+          className="btn"
           onClick={() => {
             setIsRoomLocked(!isRoomLocked);
             triggerHaptic();
           }}
-          style={{ padding: '12px', fontSize: '0.8rem', fontWeight: 800, borderRadius: '14px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', background: isRoomLocked ? 'rgba(239,68,68,0.2)' : undefined, color: isRoomLocked ? '#f87171' : undefined }}
+          style={{ 
+            padding: '12px', fontSize: '0.82rem', fontWeight: 800, borderRadius: '14px', 
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
+            background: isRoomLocked ? '#dc2626' : '#0f172a', color: '#ffffff',
+            border: isRoomLocked ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.2)',
+            boxShadow: isRoomLocked ? '0 0 15px rgba(220,38,38,0.5)' : 'none'
+          }}
         >
-          {isRoomLocked ? <Lock size={18} /> : <Unlock size={18} />}
+          {isRoomLocked ? <Lock size={20} color="#ffffff" /> : <Unlock size={20} color="#38bdf8" />}
           <span>{isRoomLocked ? 'ROOM LOCKED' : 'LOCK VOTING'}</span>
         </button>
 
         <button 
-          className="btn btn-secondary"
+          className="btn"
           onClick={() => setShowQrModal(true)}
-          style={{ padding: '12px', fontSize: '0.8rem', fontWeight: 800, borderRadius: '14px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}
+          style={{ 
+            padding: '12px', fontSize: '0.82rem', fontWeight: 800, borderRadius: '14px', 
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
+            background: '#0f172a', color: '#ffffff', border: '1px solid rgba(255,255,255,0.2)'
+          }}
         >
-          <QrCode size={18} />
+          <QrCode size={20} color="#34d399" />
           <span>SHOW QR CODE</span>
         </button>
       </div>

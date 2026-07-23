@@ -253,188 +253,236 @@ export default function LandingPage({ onStartAuth, onJoinRoom, onStartDemo }) {
           </div>
         </div>
 
-        {/* Alternate Detailed Modules Showcase */}
-        <h2 style={{ textAlign: 'center', fontSize: '2.5rem', fontWeight: 800, marginBottom: '60px', letterSpacing: '-0.02em' }}>
-          Explore Our Core Interactive Modules
-        </h2>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '80px', marginBottom: '100px' }}>
-          
-          {/* Module 1: Live Polling */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '40px' }}>
-            <div style={{ flex: 1, minWidth: '300px' }}>
-              <div style={{ color: 'var(--primary)', fontWeight: 800, fontSize: '0.9rem', textTransform: 'uppercase', marginBottom: '10px' }}>01 / LIVE POLLING & SURVEYS</div>
-              <h3 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '16px' }}>Collect opinions instantly. Make decisions together.</h3>
-              <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '20px' }}>
-                Break the barrier between the stage and the audience. Run real-time multiple-choice polls, scales, and surveys that populate instantly as attendees submit votes from their smartphones.
-              </p>
-              <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '10px', color: 'var(--text-secondary)' }}>
-                <li>🚀 <strong>Icebreaker questions:</strong> Warm up your audience at the beginning of meetings.</li>
-                <li>🎯 <strong>Check alignment:</strong> Vote on priorities or designs during workshops.</li>
-                <li>🔒 <strong>Anonymous feedback:</strong> Encourage honest, unfiltered audience insights.</li>
-              </ul>
+        {/* Comprehensive Sub-Functions & Facilities Showcase */}
+        <div style={{ marginTop: '80px', marginBottom: '100px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+            <div className="eyebrow" style={{ color: 'var(--primary)', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '12px' }}>
+              ⚡ COMPLETE PLATFORM CAPABILITIES
             </div>
-            <div style={{ flex: 1, minWidth: '300px', background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border-glass)', borderRadius: '24px', padding: '30px' }}>
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-                <span style={{ background: 'var(--primary-glow)', color: 'var(--primary)', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700 }}>POLL PREVIEW</span>
+            <h2 style={{ fontSize: '2.8rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '16px' }}>
+              Sub-Functions & Facilities Showcase
+            </h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '1.15rem', maxWidth: '750px', margin: '0 auto', lineHeight: 1.6 }}>
+              Everything you need to author interactive slide decks, run real-time audience competitions, visualize sentiment, and maintain strict academic focus.
+            </p>
+          </div>
+
+          {/* Feature Grid & Alternate Cards */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '70px' }}>
+
+            {/* 1. Multiple Choice Polls */}
+            <div className="glass-card" style={{ padding: '40px', borderRadius: '24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', alignItems: 'center', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(6, 182, 212, 0.2)' }}>
+              <div>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(6, 182, 212, 0.15)', color: '#06b6d4', padding: '6px 14px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 800, marginBottom: '16px' }}>
+                  📊 INTERACTIVE SLIDE TYPE
+                </div>
+                <h3 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '16px', color: '#ffffff' }}>
+                  Multiple Choice Polls
+                </h3>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', lineHeight: 1.6, marginBottom: '24px' }}>
+                  Live single-select and multi-select voting with instant percentage breakdown bar charts. Capture room sentiment in seconds with zero latency.
+                </p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                  <span style={{ background: 'rgba(255,255,255,0.06)', padding: '6px 12px', borderRadius: '8px', fontSize: '0.85rem', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.1)' }}>⚡ Instant Bar Charts</span>
+                  <span style={{ background: 'rgba(255,255,255,0.06)', padding: '6px 12px', borderRadius: '8px', fontSize: '0.85rem', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.1)' }}>🎯 Multi-Select Options</span>
+                  <span style={{ background: 'rgba(255,255,255,0.06)', padding: '6px 12px', borderRadius: '8px', fontSize: '0.85rem', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.1)' }}>🔒 Anonymous Voting</span>
+                </div>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div style={{ padding: '12px', background: 'rgba(37,99,235,0.1)', border: '1px solid var(--primary)', borderRadius: '8px' }}>
-                  <span>Option A: Deploy to Production (72 votes)</span>
-                  <div style={{ width: '100%', height: '6px', background: 'var(--border-glass)', borderRadius: '3px', marginTop: '8px' }}>
-                    <div style={{ width: '72%', height: '100%', background: 'var(--primary)' }}></div>
+              <div style={{ borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
+                <img src="/assets/polls_showcase.jpg" alt="Multiple Choice Polls Showcase" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'cover' }} />
+              </div>
+            </div>
+
+            {/* 2. Knowledge Quizzes */}
+            <div className="glass-card" style={{ padding: '40px', borderRadius: '24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', alignItems: 'center', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+              <div style={{ borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
+                <img src="/assets/quiz_showcase.jpg" alt="Knowledge Quizzes Showcase" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'cover' }} />
+              </div>
+              <div>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', padding: '6px 14px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 800, marginBottom: '16px' }}>
+                  🏆 GAMIFIED EVALUATION
+                </div>
+                <h3 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '16px', color: '#ffffff' }}>
+                  Knowledge Quizzes
+                </h3>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', lineHeight: 1.6, marginBottom: '24px' }}>
+                  Timed competitive questions with correct answer designations, auto-scoring, speed streak multipliers, and instant countdown timers.
+                </p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                  <span style={{ background: 'rgba(255,255,255,0.06)', padding: '6px 12px', borderRadius: '8px', fontSize: '0.85rem', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.1)' }}>⏱️ Speed Multipliers</span>
+                  <span style={{ background: 'rgba(255,255,255,0.06)', padding: '6px 12px', borderRadius: '8px', fontSize: '0.85rem', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.1)' }}>🥇 Leaderboard Podium</span>
+                  <span style={{ background: 'rgba(255,255,255,0.06)', padding: '6px 12px', borderRadius: '8px', fontSize: '0.85rem', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.1)' }}>✨ Auto-Scoring</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. Word Clouds */}
+            <div className="glass-card" style={{ padding: '40px', borderRadius: '24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', alignItems: 'center', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
+              <div>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24', padding: '6px 14px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 800, marginBottom: '16px' }}>
+                  📣 VISUAL SENTIMENT CLUSTERS
+                </div>
+                <h3 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '16px', color: '#ffffff' }}>
+                  Dynamic Word Clouds
+                </h3>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', lineHeight: 1.6, marginBottom: '24px' }}>
+                  Real-time freeform text submission automatically clustered into dynamic animated word clouds. Repeated terms automatically scale in size to reveal group trends.
+                </p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                  <span style={{ background: 'rgba(255,255,255,0.06)', padding: '6px 12px', borderRadius: '8px', fontSize: '0.85rem', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.1)' }}>💡 Brainstorming</span>
+                  <span style={{ background: 'rgba(255,255,255,0.06)', padding: '6px 12px', borderRadius: '8px', fontSize: '0.85rem', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.1)' }}>🎨 Dynamic Animations</span>
+                  <span style={{ background: 'rgba(255,255,255,0.06)', padding: '6px 12px', borderRadius: '8px', fontSize: '0.85rem', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.1)' }}>🔥 Keyword Density</span>
+                </div>
+              </div>
+              <div style={{ borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
+                <img src="/assets/wordcloud_showcase.jpg" alt="Dynamic Word Clouds Showcase" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'cover' }} />
+              </div>
+            </div>
+
+            {/* 4. Coordinate Matrix Grids */}
+            <div className="glass-card" style={{ padding: '40px', borderRadius: '24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', alignItems: 'center', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+              <div style={{ borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
+                <img src="/assets/grid_showcase.jpg" alt="Coordinate Matrix Grids Showcase" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'cover' }} />
+              </div>
+              <div>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', padding: '6px 14px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 800, marginBottom: '16px' }}>
+                  🎯 2D SCATTER CLASSIFIER
+                </div>
+                <h3 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '16px', color: '#ffffff' }}>
+                  Coordinate Matrix Grids
+                </h3>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', lineHeight: 1.6, marginBottom: '24px' }}>
+                  2D scatter matrix plotting audience responses across customizable X and Y axes. Evaluate product features on Impact vs Effort or Speed vs Quality.
+                </p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                  <span style={{ background: 'rgba(255,255,255,0.06)', padding: '6px 12px', borderRadius: '8px', fontSize: '0.85rem', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.1)' }}>📈 Custom X/Y Labels</span>
+                  <span style={{ background: 'rgba(255,255,255,0.06)', padding: '6px 12px', borderRadius: '8px', fontSize: '0.85rem', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.1)' }}>📍 Live Scatter Plots</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 5, 6, 7 Grid Cards: Rating Scales, Q&A Boards, Timers */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+              
+              {/* 5. Rating Scales */}
+              <div className="glass-card" style={{ padding: '28px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div style={{ fontSize: '2rem', marginBottom: '12px' }}>⭐</div>
+                <h4 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#ffffff', marginBottom: '10px' }}>Rating Scales & Likert Audits</h4>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: 1.5, marginBottom: '16px' }}>
+                  Multi-metric numerical rating sliders (1-5) for feedback and evaluation.
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: 'rgba(0,0,0,0.3)', padding: '12px', borderRadius: '10px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#cbd5e1' }}>
+                    <span>Ease of Use:</span>
+                    <strong style={{ color: '#38bdf8' }}>4.8 / 5.0</strong>
+                  </div>
+                  <div style={{ width: '100%', height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px' }}>
+                    <div style={{ width: '96%', height: '100%', background: 'linear-gradient(90deg, #06b6d4, #3b82f6)', borderRadius: '3px' }}></div>
                   </div>
                 </div>
-                <div style={{ padding: '12px', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-glass)', borderRadius: '8px' }}>
-                  <span>Option B: More QA Testing (28 votes)</span>
-                  <div style={{ width: '100%', height: '6px', background: 'var(--border-glass)', borderRadius: '3px', marginTop: '8px' }}>
-                    <div style={{ width: '28%', height: '100%', background: 'var(--text-muted)' }}></div>
-                  </div>
+              </div>
+
+              {/* 6. Audience Q&A Boards */}
+              <div className="glass-card" style={{ padding: '28px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div style={{ fontSize: '2rem', marginBottom: '12px' }}>🎤</div>
+                <h4 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#ffffff', marginBottom: '10px' }}>Audience Q&A Boards</h4>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: 1.5, marginBottom: '16px' }}>
+                  Upvotable live question feeds allowing attendees to ask and prioritize questions.
+                </p>
+                <div style={{ background: 'rgba(0,0,0,0.3)', padding: '12px', borderRadius: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.82rem', color: '#e2e8f0' }}>Will the API support webhooks?</span>
+                  <button style={{ background: '#2563eb', border: 'none', color: 'white', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 800 }}>▲ 184</button>
+                </div>
+              </div>
+
+              {/* 7. Stopwatch & Millisecond Timers */}
+              <div className="glass-card" style={{ padding: '28px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div style={{ fontSize: '2rem', marginBottom: '12px' }}>⏱️</div>
+                <h4 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#ffffff', marginBottom: '10px' }}>Stopwatch & Timers</h4>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: 1.5, marginBottom: '16px' }}>
+                  Countdown timers with auto-lock capabilities when time expires.
+                </p>
+                <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', padding: '10px', borderRadius: '10px', textAlign: 'center', color: '#fca5a5', fontWeight: 800, fontSize: '0.9rem' }}>
+                  🔒 AUTO-LOCK AT 00:00 SECONDS
+                </div>
+              </div>
+
+            </div>
+
+            {/* 8. Gamified Brainstorming Boards */}
+            <div className="glass-card" style={{ padding: '40px', borderRadius: '24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', alignItems: 'center', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(168, 85, 247, 0.2)' }}>
+              <div>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(168, 85, 247, 0.15)', color: '#c084fc', padding: '6px 14px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 800, marginBottom: '16px' }}>
+                  🤝 COLLABORATIVE KANBAN
+                </div>
+                <h3 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '16px', color: '#ffffff' }}>
+                  Gamified Brainstorming Boards
+                </h3>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', lineHeight: 1.6, marginBottom: '24px' }}>
+                  Categorized sticky-note boards with multi-column sorting. Enable teams to submit ideas into customizable categories in real time.
+                </p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                  <span style={{ background: 'rgba(255,255,255,0.06)', padding: '6px 12px', borderRadius: '8px', fontSize: '0.85rem', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.1)' }}>📌 Multi-Column Sorting</span>
+                  <span style={{ background: 'rgba(255,255,255,0.06)', padding: '6px 12px', borderRadius: '8px', fontSize: '0.85rem', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.1)' }}>🎨 Color-Coded Cards</span>
+                </div>
+              </div>
+              <div style={{ borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
+                <img src="/assets/brainstorm_showcase.jpg" alt="Gamified Brainstorming Boards Showcase" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'cover' }} />
+              </div>
+            </div>
+
+            {/* 9. Visual Theme & Typography Engine */}
+            <div className="glass-card" style={{ padding: '40px', borderRadius: '24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', alignItems: 'center', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(236, 72, 153, 0.2)' }}>
+              <div style={{ borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
+                <img src="/assets/themes_showcase.jpg" alt="Visual Theme Engine Showcase" style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'cover' }} />
+              </div>
+              <div>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', padding: '6px 14px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 800, marginBottom: '16px' }}>
+                  🎨 STUNNING VISUAL SYSTEM
+                </div>
+                <h3 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '16px', color: '#ffffff' }}>
+                  Visual Theme & Typography Engine
+                </h3>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', lineHeight: 1.6, marginBottom: '24px' }}>
+                  10+ dynamic themes including <strong>Neon Dark</strong>, <strong>Corporate Slate</strong>, <strong>Cyber Mint</strong>, <strong>Forest Sage</strong>, <strong>Playroom</strong>, and <strong>Light Luxe</strong>.
+                </p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                  <span style={{ background: 'rgba(255,255,255,0.06)', padding: '6px 12px', borderRadius: '8px', fontSize: '0.85rem', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.1)' }}>✨ Custom Typography</span>
+                  <span style={{ background: 'rgba(255,255,255,0.06)', padding: '6px 12px', borderRadius: '8px', fontSize: '0.85rem', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.1)' }}>🌈 Smooth Gradients</span>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Module 2: Timed Quizzes */}
-          <div style={{ display: 'flex', flexWrap: 'wrap-reverse', alignItems: 'center', gap: '40px' }}>
-            <div style={{ flex: 1, minWidth: '300px', background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border-glass)', borderRadius: '24px', padding: '30px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <span style={{ background: '#fbbf24-glow', color: '#fbbf24', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700 }}>LEADERBOARD</span>
-                <span style={{ fontSize: '1.2rem' }}>🏆</span>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: 'rgba(251, 191, 36, 0.1)', borderRadius: '8px', border: '1px solid #fbbf24' }}>
-                  <span>🥇 1. Sarah Connor</span>
-                  <strong>9,450 pts</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
-                  <span>🥈 2. John Doe</span>
-                  <strong>8,210 pts</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
-                  <span>🥉 3. Alex Mercer</span>
-                  <strong>7,980 pts</strong>
+            {/* 10 & 11 Cards: Drag-and-Drop Reordering & Auto-Save & Versioning */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+              
+              {/* 10. Drag-and-Drop Reordering */}
+              <div className="glass-card" style={{ padding: '32px', borderRadius: '20px', border: '1px solid rgba(6, 182, 212, 0.2)' }}>
+                <div style={{ fontSize: '2rem', marginBottom: '12px' }}>🖐️</div>
+                <h4 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#ffffff', marginBottom: '10px' }}>Drag-and-Drop Reordering</h4>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.98rem', lineHeight: 1.6, marginBottom: '16px' }}>
+                  Interactive slide thumbnail navigation bar supporting drag-and-drop slide sorting with instant ghost highlights.
+                </p>
+                <div style={{ padding: '12px', background: 'rgba(6, 182, 212, 0.1)', border: '1px dashed #06b6d4', borderRadius: '10px', color: '#06b6d4', fontWeight: 700, fontSize: '0.85rem' }}>
+                  ⇄ Drag slide thumbnail to reorder deck position
                 </div>
               </div>
-            </div>
-            <div style={{ flex: 1, minWidth: '300px' }}>
-              <div style={{ color: 'var(--secondary)', fontWeight: 800, fontSize: '0.9rem', textTransform: 'uppercase', marginBottom: '10px' }}>02 / TIMED QUIZZES & LEADERBOARDS</div>
-              <h3 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '16px' }}>Turn learning into a game. Fuel healthy competition.</h3>
-              <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '20px' }}>
-                Inject energy into your presentation slides! Host interactive trivia or reviews with points, fast-answer multipliers, countdown sound effects, and a dynamic ranking leaderboard.
-              </p>
-              <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '10px', color: 'var(--text-secondary)' }}>
-                <li>🎓 <strong>Classroom reviews:</strong> Test knowledge retention prior to grading.</li>
-                <li>🏢 <strong>Employee onboarding:</strong> Make company compliance policies memorable.</li>
-                <li>🎉 <strong>Team social events:</strong> Host customized trivia during happy hours.</li>
-              </ul>
-            </div>
-          </div>
 
-          {/* Module 3: Word Clouds */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '40px' }}>
-            <div style={{ flex: 1, minWidth: '300px' }}>
-              <div style={{ color: 'var(--primary)', fontWeight: 800, fontSize: '0.9rem', textTransform: 'uppercase', marginBottom: '10px' }}>03 / DYNAMIC WORD CLOUDS</div>
-              <h3 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '16px' }}>Visualize audience ideas in beautiful growing clusters.</h3>
-              <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '20px' }}>
-                Ask open questions and watch the input morph into a live word cloud. Words submitted multiple times automatically scale larger, establishing a clear visual weight of thoughts.
-              </p>
-              <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '10px', color: 'var(--text-secondary)' }}>
-                <li>💡 <strong>Brainstorming:</strong> Quickly discover trending keywords or ideas.</li>
-                <li>😊 <strong>Sentiment checks:</strong> Ask "How are you feeling today?" for immediate mood checks.</li>
-                <li>🎯 <strong>Keyword association:</strong> Align teams on core brand values.</li>
-              </ul>
-            </div>
-            <div style={{ flex: 1, minWidth: '300px', background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border-glass)', borderRadius: '24px', padding: '40px', display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center', alignItems: 'center' }}>
-              <span style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--primary)' }}>Innovative</span>
-              <span style={{ fontSize: '1.1rem', color: 'var(--text-secondary)' }}>fast</span>
-              <span style={{ fontSize: '2.4rem', fontWeight: 900, color: '#fbbf24' }}>Interactive</span>
-              <span style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>clean</span>
-              <span style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--secondary)' }}>Sleek</span>
-              <span style={{ fontSize: '1.2rem', color: 'var(--text-secondary)' }}>fun</span>
-            </div>
-          </div>
-
-          {/* Module 4: Focus Mode */}
-          <div style={{ display: 'flex', flexWrap: 'wrap-reverse', alignItems: 'center', gap: '40px' }}>
-            <div style={{ flex: 1, minWidth: '300px', background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border-glass)', borderRadius: '24px', padding: '30px' }}>
-              <div style={{ background: '#ef4444-glow', color: '#ef4444', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700, marginBottom: '16px', display: 'inline-block' }}>SECURITY GUARD ACTIVE</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.9rem' }}>
-                <div style={{ borderLeft: '3px solid #ef4444', paddingLeft: '10px', color: 'var(--text-secondary)' }}>
-                  ⚠️ User <strong>"Student_9"</strong> warning: Blurred window (switched tab)
-                </div>
-                <div style={{ borderLeft: '3px solid #ef4444', paddingLeft: '10px', color: 'var(--text-secondary)' }}>
-                  🚫 User <strong>"Student_9"</strong> lock-out: 2nd violation detected.
+              {/* 11. Auto-Save & Versioning */}
+              <div className="glass-card" style={{ padding: '32px', borderRadius: '20px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                <div style={{ fontSize: '2rem', marginBottom: '12px' }}>☁️</div>
+                <h4 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#ffffff', marginBottom: '10px' }}>Auto-Save & Versioning</h4>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.98rem', lineHeight: 1.6, marginBottom: '16px' }}>
+                  Real-time local and remote database synchronization with instant backup restoring and loss prevention.
+                </p>
+                <div style={{ padding: '12px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid #10b981', borderRadius: '10px', color: '#10b981', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <CheckCircle size={16} /> All changes saved to cloud database automatically
                 </div>
               </div>
-            </div>
-            <div style={{ flex: 1, minWidth: '300px' }}>
-              <div style={{ color: '#ef4444', fontWeight: 800, fontSize: '0.9rem', textTransform: 'uppercase', marginBottom: '10px' }}>04 / FOCUS MODE (ANTI-CHEAT)</div>
-              <h3 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '16px' }}>Enforce window concentration. Prevent browser search cheats.</h3>
-              <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '20px' }}>
-                The ultimate proctor tool for educators. Enabling Focus Mode tracks active browser window state. If participants switch tabs, load search engines, or minimize the app, they receive instant socket-fed lockout warnings.
-              </p>
-              <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '10px', color: 'var(--text-secondary)' }}>
-                <li>🔒 <strong>Formal examinations:</strong> Eliminate web search cheating during graded tests.</li>
-                <li>📝 <strong>Compliance tests:</strong> Ensure employees read onboarding sliders thoroughly.</li>
-                <li>🎓 <strong>Course validation:</strong> Increase student focus during online learning.</li>
-              </ul>
-            </div>
-          </div>
 
-          {/* Module 5: Audience Q&A */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '40px' }}>
-            <div style={{ flex: 1, minWidth: '300px' }}>
-              <div style={{ color: 'var(--primary)', fontWeight: 800, fontSize: '0.9rem', textTransform: 'uppercase', marginBottom: '10px' }}>05 / AUDIENCE Q&A BOARDS</div>
-              <h3 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '16px' }}>Give everyone a voice. Upvote critical questions.</h3>
-              <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '20px' }}>
-                Collect and moderate questions from the room. Attendees can submit queries anonymously and upvote other participants' submissions, organizing the list so you answer key questions first.
-              </p>
-              <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '10px', color: 'var(--text-secondary)' }}>
-                <li>📢 <strong>All-hands meetings:</strong> Solve corporate concerns with clear, upvoted lists.</li>
-                <li>🎓 <strong>Lecture Q&A:</strong> Let shy students ask clarifying points without raising hands.</li>
-                <li>🎙️ <strong>Webinars & panels:</strong> Curate high-quality discussion pointers efficiently.</li>
-              </ul>
             </div>
-            <div style={{ flex: 1, minWidth: '300px', background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border-glass)', borderRadius: '24px', padding: '30px' }}>
-              <div style={{ background: 'var(--primary-glow)', color: 'var(--primary)', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700, marginBottom: '16px', display: 'inline-block' }}>Q&A QUEUE</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <div style={{ padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span>Will the Stripe subscriptions support corporate invoice billing?</span>
-                  <button style={{ padding: '4px 8px', background: 'var(--primary)', border: 'none', borderRadius: '4px', color: 'white', fontSize: '0.8rem' }}>▲ 124</button>
-                </div>
-                <div style={{ padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span>Can I add multiple workspaces for school departments?</span>
-                  <button style={{ padding: '4px 8px', background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '4px', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>▲ 48</button>
-                </div>
-              </div>
-            </div>
-          </div>
 
-          {/* Module 6: Excel Import */}
-          <div style={{ display: 'flex', flexWrap: 'wrap-reverse', alignItems: 'center', gap: '40px' }}>
-            <div style={{ flex: 1, minWidth: '300px', background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border-glass)', borderRadius: '24px', padding: '30px', textAlign: 'center' }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '10px' }}>📊</div>
-              <h4 style={{ fontWeight: 800, marginBottom: '8px' }}>question_bank.xlsx</h4>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Successfully imported 142 Multiple Choice slides</p>
-              <div style={{ marginTop: '16px', height: '6px', background: 'var(--border-glass)', borderRadius: '3px', overflow: 'hidden' }}>
-                <div style={{ width: '100%', height: '100%', background: '#22c55e' }}></div>
-              </div>
-            </div>
-            <div style={{ flex: 1, minWidth: '300px' }}>
-              <div style={{ color: '#22c55e', fontWeight: 800, fontSize: '0.9rem', textTransform: 'uppercase', marginBottom: '10px' }}>06 / EXCEL QUESTION IMPORT</div>
-              <h3 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '16px' }}>Upload question sheets. Skip manual slide creation.</h3>
-              <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '20px' }}>
-                Massive time saver. If you already have question banks in spreadsheets, upload them directly! The platform will parse the Excel file and auto-generate fully configured slides with options, timing parameters, and correct keys in seconds.
-              </p>
-              <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '10px', color: 'var(--text-secondary)' }}>
-                <li>⚡ <strong>Zero manual typing:</strong> Setup huge quizzes in a single click.</li>
-                <li>📝 <strong>Question banks:</strong> Repurpose existing school assessments.</li>
-                <li>📥 <strong>Pre-designed templates:</strong> Download our sample template, fill, and load.</li>
-              </ul>
-            </div>
           </div>
-
         </div>
 
         {/* Closing CTA */}

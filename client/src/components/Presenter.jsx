@@ -1121,7 +1121,14 @@ export default function Presenter({ presentationId, onBack }) {
   const gridAverages = activeSlide.type === 'grid' ? getGridAverages() : {};
 
   return (
-    <div className={`presenter-viewport theme-${theme}`}>
+    <div 
+      className={`presenter-viewport theme-${theme}`}
+      style={{
+        backgroundImage: activeSlide?.bgImage ? `linear-gradient(rgba(11, 15, 25, 0.65), rgba(11, 15, 25, 0.85)), url(${activeSlide.bgImage})` : undefined,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center'
+      }}
+    >
       <div className="ambient-bg">
         <div className="ambient-circle circle-1"></div>
         <div className="ambient-circle circle-2"></div>
@@ -1136,10 +1143,13 @@ export default function Presenter({ presentationId, onBack }) {
           <select 
             value={theme} 
             onChange={(e) => handleThemeChange(e.target.value)}
-            style={{ padding: '6px 12px', fontSize: '0.85rem', width: '130px', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', border: '1px solid var(--border-glass)' }}
+            style={{ padding: '6px 12px', fontSize: '0.85rem', width: '150px', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', border: '1px solid var(--border-glass)' }}
           >
+            <option value="cyber-neon">🌌 Cyber Neon Art</option>
+            <option value="midnight-gold">👑 Midnight Gold Art</option>
+            <option value="cosmic-nebula">✨ Cosmic Nebula Art</option>
+            <option value="playroom-magic">🎨 Playroom Magic Art</option>
             <option value="neon">Neon Eclipse</option>
-            <option value="midnight-gold">Midnight Gold (Executive)</option>
             <option value="ocean">Ocean Breeze</option>
             <option value="sunset">Sunset Glow</option>
             <option value="light-luxe">Light Luxe</option>

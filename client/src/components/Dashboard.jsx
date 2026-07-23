@@ -1,12 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Play, Edit3, Trash2, Users, Presentation as PresentationIcon } from 'lucide-react';
+import { Plus, Play, Edit3, Trash2, Users, Presentation as PresentationIcon, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
 
-export default function Dashboard({ user, onViewCreator, onViewPresenter, onJoinAudience, onOpenAiGenerator, onViewAnalytics, onViewEscapeRoom, onViewMeetingScheduler }) {
+export default function Dashboard({ 
+  user, onViewCreator, onViewPresenter, onJoinAudience, onOpenAiGenerator, 
+  onViewAnalytics, onViewEscapeRoom, onViewMeetingScheduler,
+  isSidebarCollapsed: propIsCollapsed, onToggleSidebar 
+}) {
   const [presentations, setPresentations] = useState([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [dashboardTab, setDashboardTab] = useState('presentations');
   const [referralData, setReferralData] = useState({ coins: 0, referralCode: '', referredBy: null, unlockedModules: [], referrals: [] });
+  const [internalIsCollapsed, setInternalIsCollapsed] = useState(true);
+
+  const isCollapsed = propIsCollapsed !== undefined ? propIsCollapsed : internalIsCollapsed;
+  const toggleSidebar = onToggleSidebar || (() => setInternalIsCollapsed(!internalIsCollapsed));
 
   const userEmail = user?.email || 'guest@pulsepoll.com';
 
@@ -264,90 +272,122 @@ export default function Dashboard({ user, onViewCreator, onViewPresenter, onJoin
     <div style={{ display: 'flex', gap: '30px', alignItems: 'flex-start', minHeight: 'calc(100vh - 120px)', width: '100%' }} className="animate-fade">
       {/* 1. Left Sidebar Navigation Menu */}
       <div className="glass-card" style={{
-        width: '260px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px',
-        position: 'sticky', top: '90px', border: '1px solid var(--border-glass)', borderRadius: '16px'
+        width: isCollapsed ? '76px' : '240px',
+        padding: isCollapsed ? '16px 8px' : '20px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '16px',
+        position: 'sticky',
+        top: '90px',
+        border: '1px solid var(--border-glass)',
+        borderRadius: '16px',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        overflow: 'hidden',
+        boxSizing: 'border-box'
       }}>
-        <div style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-          Navigation Menu
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: isCollapsed ? 'center' : 'space-between',
+          alignItems: 'center',
+          fontWeight: 800,
+          fontSize: '0.8rem',
+          color: 'var(--text-muted)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em'
+        }}>
+          {!isCollapsed && <span>Navigation</span>}
           <button 
-            className="btn" 
-            style={{ 
-              width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', justifyContent: 'flex-start', fontSize: '0.9rem',
-              background: dashboardTab === 'presentations' ? 'rgba(6, 182, 212, 0.1)' : 'transparent', 
-              color: dashboardTab === 'presentations' ? 'var(--primary)' : 'var(--text-secondary)', 
-              border: dashboardTab === 'presentations' ? '1px solid rgba(6, 182, 212, 0.2)' : 'none', 
-              fontWeight: 700
-            }}
+            className="btn btn-secondary btn-icon btn-sm"
+            onClick={toggleSidebar}
+            title={isCollapsed ? "Expand Sidebar Menu" : "Collapse Sidebar Menu"}
+            style={{ width: '30px', height: '30px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+          </button>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+          <button 
+            className={`sidebar-menu-btn ${dashboardTab === 'presentations' ? 'active' : ''}`}
+            title="Presentations"
+            style={{ justifyContent: isCollapsed ? 'center' : 'flex-start', padding: isCollapsed ? '12px' : '10px 14px' }}
             onClick={() => setDashboardTab('presentations')}
           >
-            📂 My Presentations
+            <span style={{ fontSize: '1.1rem' }}>📂</span>
+            {!isCollapsed && <span>Presentations</span>}
           </button>
 
           <button 
-            className="btn" 
-            style={{ 
-              width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', justifyContent: 'flex-start', fontSize: '0.9rem',
-              background: dashboardTab === 'referrals' ? 'rgba(6, 182, 212, 0.1)' : 'transparent', 
-              color: dashboardTab === 'referrals' ? 'var(--primary)' : 'var(--text-secondary)', 
-              border: dashboardTab === 'referrals' ? '1px solid rgba(6, 182, 212, 0.2)' : 'none', 
-              fontWeight: 700
-            }}
+            className={`sidebar-menu-btn ${dashboardTab === 'referrals' ? 'active' : ''}`}
+            title="Rewards"
+            style={{ justifyContent: isCollapsed ? 'center' : 'flex-start', padding: isCollapsed ? '12px' : '10px 14px' }}
             onClick={() => {
               setDashboardTab('referrals');
               fetchReferralDetails();
             }}
           >
-            🎁 Refer & Earn (Coins)
+            <span style={{ fontSize: '1.1rem' }}>🎁</span>
+            {!isCollapsed && <span>Rewards</span>}
           </button>
           
           <button 
-            className="btn btn-secondary" 
-            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', justifyContent: 'flex-start', fontSize: '0.9rem', background: 'transparent', border: 'none', color: '#06b6d4', fontWeight: 700 }}
+            className="sidebar-menu-btn" 
+            title="Analytics"
+            style={{ justifyContent: isCollapsed ? 'center' : 'flex-start', padding: isCollapsed ? '12px' : '10px 14px' }}
             onClick={() => onViewAnalytics && onViewAnalytics(presentations[0])}
           >
-            📊 Slide-by-Slide Analytics
+            <span style={{ fontSize: '1.1rem' }}>📊</span>
+            {!isCollapsed && <span>Analytics</span>}
           </button>
 
           <button 
-            className="btn btn-secondary" 
-            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', justifyContent: 'flex-start', fontSize: '0.9rem', background: 'transparent', border: 'none', color: '#10b981', fontWeight: 700 }}
+            className="sidebar-menu-btn" 
+            title="Breakout Rooms"
+            style={{ justifyContent: isCollapsed ? 'center' : 'flex-start', padding: isCollapsed ? '12px' : '10px 14px' }}
             onClick={() => onViewEscapeRoom && onViewEscapeRoom(presentations[0])}
           >
-            🗝️ Escape Room Breakouts (Max 10)
+            <span style={{ fontSize: '1.1rem' }}>🗝️</span>
+            {!isCollapsed && <span>Breakout Rooms</span>}
           </button>
 
           <button 
-            className="btn btn-secondary" 
-            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', justifyContent: 'flex-start', fontSize: '0.9rem', background: 'transparent', border: 'none', color: '#3b82f6', fontWeight: 700 }}
+            className="sidebar-menu-btn" 
+            title="Live Video"
+            style={{ justifyContent: isCollapsed ? 'center' : 'flex-start', padding: isCollapsed ? '12px' : '10px 14px' }}
             onClick={() => onViewMeetingScheduler && onViewMeetingScheduler(presentations[0])}
           >
-            📹 Zoom Meeting Scheduler & Live Webinar
+            <span style={{ fontSize: '1.1rem' }}>📹</span>
+            {!isCollapsed && <span>Live Video</span>}
           </button>
           
           <button 
-            className="btn btn-secondary" 
-            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', justifyContent: 'flex-start', fontSize: '0.9rem', background: 'transparent', border: 'none' }}
+            className="sidebar-menu-btn" 
+            title="Join Room"
+            style={{ justifyContent: isCollapsed ? 'center' : 'flex-start', padding: isCollapsed ? '12px' : '10px 14px' }}
             onClick={onJoinAudience}
           >
-            🧩 Join a Room
+            <span style={{ fontSize: '1.1rem' }}>🧩</span>
+            {!isCollapsed && <span>Join Room</span>}
           </button>
           
           <button 
-            className="btn btn-secondary" 
-            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', justifyContent: 'flex-start', fontSize: '0.9rem', background: 'transparent', border: 'none' }}
+            className="sidebar-menu-btn" 
+            title="Templates"
+            style={{ justifyContent: isCollapsed ? 'center' : 'flex-start', padding: isCollapsed ? '12px' : '10px 14px' }}
             onClick={() => alert('Explore premium templates inside our learning & educational drop-downs in the header menu!')}
           >
-            🎨 Templates Library
+            <span style={{ fontSize: '1.1rem' }}>🎨</span>
+            {!isCollapsed && <span>Templates</span>}
           </button>
 
           <button 
-            className="btn btn-secondary" 
-            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', justifyContent: 'flex-start', fontSize: '0.9rem', background: 'transparent', border: 'none' }}
+            className="sidebar-menu-btn" 
+            title="Help & Support"
+            style={{ justifyContent: isCollapsed ? 'center' : 'flex-start', padding: isCollapsed ? '12px' : '10px 14px' }}
             onClick={() => alert('Check the user_manual.md inside your workspace directory for tips & tricks!')}
           >
-            📚 Help & Guides
+            <span style={{ fontSize: '1.1rem' }}>📚</span>
+            {!isCollapsed && <span>Help & Support</span>}
           </button>
         </div>
       </div>
@@ -387,55 +427,90 @@ export default function Dashboard({ user, onViewCreator, onViewPresenter, onJoin
             </div>
 
             <div className="dashboard-grid">
-              {presentations.map((pres) => (
-                <div 
-                  key={pres.id} 
-                  className="glass-card presentation-card"
-                  onClick={() => onViewCreator(pres.id)}
-                >
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                      <div className="logo-icon" style={{ width: '28px', height: '28px' }}>
-                        <PresentationIcon size={14} color="white" />
-                      </div>
-                      <h3 style={{ fontSize: '1.2rem', fontWeight: 600 }}>{pres.title}</h3>
-                    </div>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-                      {pres.slides.length} {pres.slides.length === 1 ? 'slide' : 'slides'} • Theme: <span style={{ textTransform: 'capitalize', color: 'var(--primary)', fontWeight: '700' }}>{pres.theme || 'neon'}</span>
-                    </p>
-                  </div>
+              {presentations.map((pres) => {
+                const themeBg = 
+                  pres.theme === 'cyber-neon' ? '/assets/theme_cyber_neon.jpg' :
+                  pres.theme === 'midnight-gold' ? '/assets/theme_midnight_gold.jpg' :
+                  pres.theme === 'cosmic-nebula' ? '/assets/theme_cosmic_nebula.jpg' :
+                  pres.theme === 'playroom-magic' ? '/assets/theme_playroom_magic.jpg' :
+                  '/assets/theme_cyber_neon.jpg';
 
-                  <div className="card-meta">
-                    <span>Updated {pres.updatedAt}</span>
-                    <div style={{ display: 'flex', gap: '8px' }} onClick={(e) => e.stopPropagation()}>
-                      <button 
-                        className="btn btn-secondary btn-icon" 
-                        style={{ width: '32px', height: '32px' }}
-                        onClick={() => onViewCreator(pres.id)}
-                        title="Edit"
-                      >
-                        <Edit3 size={14} />
-                      </button>
-                      <button 
-                        className="btn btn-primary btn-icon" 
-                        style={{ width: '32px', height: '32px' }}
-                        onClick={() => onViewPresenter(pres.id)}
-                        title="Present Live"
-                      >
-                        <Play size={14} />
-                      </button>
-                      <button 
-                        className="btn btn-secondary btn-icon" 
-                        style={{ width: '32px', height: '32px', color: 'var(--accent-red)' }}
-                        onClick={(e) => handleDelete(pres.id, e)}
-                        title="Delete"
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                return (
+                  <div 
+                    key={pres.id} 
+                    className="glass-card presentation-card"
+                    onClick={() => onViewCreator(pres.id)}
+                    style={{ overflow: 'hidden', padding: 0 }}
+                  >
+                    {/* Generated Artwork Theme Banner */}
+                    <div style={{
+                      height: '110px',
+                      backgroundImage: `linear-gradient(rgba(11, 15, 25, 0.25), rgba(11, 15, 25, 0.85)), url(${themeBg})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      padding: '12px 16px',
+                      display: 'flex',
+                      alignItems: 'flex-end',
+                      justifyContent: 'space-between'
+                    }}>
+                      <span style={{
+                        background: 'rgba(6, 182, 212, 0.85)',
+                        color: '#ffffff',
+                        padding: '3px 10px',
+                        borderRadius: '20px',
+                        fontSize: '0.72rem',
+                        fontWeight: 800,
+                        backdropFilter: 'blur(4px)',
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.3)'
+                      }}>
+                        🎨 {pres.theme || 'cyber-neon'} Theme
+                      </span>
+                    </div>
+
+                    <div style={{ padding: '18px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                        <div className="logo-icon" style={{ width: '28px', height: '28px', flexShrink: 0 }}>
+                          <PresentationIcon size={14} color="white" />
+                        </div>
+                        <h3 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>{pres.title}</h3>
+                      </div>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 16px 0' }}>
+                        {pres.slides.length} {pres.slides.length === 1 ? 'slide' : 'slides'} • {pres.category || 'Interactive Deck'}
+                      </p>
+
+                      <div className="card-meta" style={{ padding: 0, marginTop: 0 }}>
+                        <span style={{ fontSize: '0.75rem' }}>Updated {pres.updatedAt}</span>
+                        <div style={{ display: 'flex', gap: '8px' }} onClick={(e) => e.stopPropagation()}>
+                          <button 
+                            className="btn btn-secondary btn-icon" 
+                            style={{ width: '32px', height: '32px' }}
+                            onClick={() => onViewCreator(pres.id)}
+                            title="Edit"
+                          >
+                            <Edit3 size={14} />
+                          </button>
+                          <button 
+                            className="btn btn-primary btn-icon" 
+                            style={{ width: '32px', height: '32px' }}
+                            onClick={() => onViewPresenter(pres.id)}
+                            title="Present Live"
+                          >
+                            <Play size={14} />
+                          </button>
+                          <button 
+                            className="btn btn-secondary btn-icon" 
+                            style={{ width: '32px', height: '32px', color: 'var(--accent-red)' }}
+                            onClick={(e) => handleDelete(pres.id, e)}
+                            title="Delete"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {presentations.length === 0 && (
