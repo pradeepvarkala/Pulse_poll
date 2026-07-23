@@ -11,7 +11,8 @@ import InstructorRemote from './components/InstructorRemote';
 import AnalyticsReport from './components/AnalyticsReport';
 import EscapeRoomBuilder from './components/EscapeRoomBuilder';
 import VirtualMeetingScheduler from './components/VirtualMeetingScheduler';
-import { Presentation as PresIcon, User as UserIcon, Settings, Menu, Volume2, VolumeX, Sun, Moon } from 'lucide-react';
+import SessionManager from './components/SessionManager';
+import { Presentation as PresIcon, User as UserIcon, Settings, Menu, Volume2, VolumeX, Sun, Moon, Calendar } from 'lucide-react';
 import { playThemeToggleSound, toggleMuteAudio } from './utils/soundEffects';
 
 const CATEGORY_TEMPLATES = [
@@ -1484,6 +1485,14 @@ export default function App() {
             <button className="btn btn-secondary" onClick={() => setView('pricing')}>
               ⚡ Plans
             </button>
+            <button 
+              className={`btn ${view === 'sessions' ? 'btn-primary' : 'btn-secondary'}`}
+              onClick={() => setView('sessions')}
+              title="Multi-Day Training Workshop Manager"
+              style={{ fontWeight: 800 }}
+            >
+              📅 Workshops
+            </button>
             <button className="btn btn-secondary" onClick={() => setView('remote')} title="Launch Trainer Companion Mobile App">
               📱 Trainer App
             </button>
@@ -1623,6 +1632,16 @@ export default function App() {
               presentation={CATEGORY_TEMPLATES[0]}
               onBack={handleNavigateToDashboard}
               user={user}
+            />
+          )}
+
+          {view === 'sessions' && (
+            <SessionManager 
+              onLaunchPresenter={(presId) => {
+                setSelectedPresentationId(presId);
+                handleNavigateToPresenter();
+              }}
+              onBackToDashboard={handleNavigateToDashboard}
             />
           )}
 
