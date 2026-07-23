@@ -726,7 +726,7 @@ export default function App() {
   // Authentication state
   const [user, setUser] = useState(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true); // Minimized on load by default
-  const [isProTheme, setIsProTheme] = useState(false);
+  const [isProTheme, setIsProTheme] = useState(true);
   const [audioMuted, setAudioMuted] = useState(false);
 
   useEffect(() => {

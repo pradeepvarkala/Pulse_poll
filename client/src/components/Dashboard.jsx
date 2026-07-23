@@ -392,11 +392,11 @@ export default function Dashboard({
             <div className="dashboard-grid">
               {presentations.map((pres) => {
                 const themeBg = 
-                  pres.theme === 'cyber-neon' ? '/assets/theme_cyber_neon.jpg' :
-                  pres.theme === 'midnight-gold' ? '/assets/theme_midnight_gold.jpg' :
-                  pres.theme === 'cosmic-nebula' ? '/assets/theme_cosmic_nebula.jpg' :
-                  pres.theme === 'playroom-magic' ? '/assets/theme_playroom_magic.jpg' :
-                  '/assets/theme_cyber_neon.jpg';
+                  pres.theme === 'corporate' ? '/assets/corporate_thumb.jpg' :
+                  pres.theme === 'cyber-neon' || pres.theme === 'future-minds' ? '/assets/cyber_thumb.jpg' :
+                  pres.theme === 'cosmic-nebula' ? '/assets/cosmic_thumb.jpg' :
+                  pres.theme === 'playroom-magic' || pres.theme === 'playroom' ? '/assets/playroom_thumb.jpg' :
+                  '/assets/corporate_thumb.jpg';
 
                 return (
                   <div 
