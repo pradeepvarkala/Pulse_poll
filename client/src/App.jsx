@@ -1317,21 +1317,18 @@ export default function App() {
       {/* Header (hidden in presenter & audience fullscreen views) */}
       {view !== 'presenter' && view !== 'audience' && (
         <header className="app-header" style={{ position: 'relative', zIndex: 1000 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-            <button 
-              className="btn btn-secondary btn-icon"
-              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-              title={isSidebarCollapsed ? "Expand Navigation Menu" : "Collapse Navigation Menu"}
-              style={{ width: '38px', height: '38px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div 
+              className="logo" 
+              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
+              style={{ marginRight: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', userSelect: 'none' }}
+              title="Click logo to toggle navigation menu"
             >
-              <Menu size={20} />
-            </button>
-
-            <div className="logo" onClick={() => { setIsSidebarCollapsed(!isSidebarCollapsed); handleNavigateToDashboard(); }} style={{ marginRight: '10px', cursor: 'pointer' }}>
-              <div className="logo-icon">
-                <PresIcon size={18} color="white" />
+              <div className="logo-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                <Menu size={15} color="white" />
+                <PresIcon size={16} color="white" />
               </div>
-              <span>PulsePoll</span>
+              <span style={{ fontWeight: 800 }}>PulsePoll</span>
             </div>
 
             {/* Logged-In Submenu Nav Bar */}
@@ -1494,13 +1491,12 @@ export default function App() {
               Join a Room
             </button>
             <button 
-              className={`btn ${view === 'admin' ? 'btn-primary' : 'btn-secondary'}`}
-              style={{ display: 'flex', gap: '6px', alignItems: 'center' }}
+              className={`btn btn-icon ${view === 'admin' ? 'btn-primary' : 'btn-secondary'}`}
+              style={{ width: '38px', height: '38px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               onClick={() => setView('admin')}
-              title="Admin Panel Settings"
+              title="Admin Settings Panel"
             >
-              <Settings size={16} />
-              <span>Admin settings</span>
+              <Settings size={18} />
             </button>
             {user?.email === 'pradeepvarkala@gmail.com' && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#0f172a', padding: '6px 12px', borderRadius: '10px', border: '1px solid rgba(6, 182, 212, 0.4)', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
