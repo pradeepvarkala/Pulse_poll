@@ -1339,12 +1339,12 @@ export default function App() {
               <div className="logo-icon">
                 <PresIcon size={18} color="white" />
               </div>
-              <span style={{ fontWeight: 800 }}>PulsePoll</span>
+              <span style={{ fontWeight: 700, fontSize: '1.1rem', letterSpacing: '-0.01em' }}>PulsePoll</span>
             </div>
 
             {/* Consolidated Explore Catalog Dropdown */}
             <div 
-              style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 800, color: activeDropdown ? 'var(--primary)' : 'var(--text-primary)' }}
+              style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 600, color: activeDropdown ? 'var(--accent)' : 'var(--text-primary)' }}
               onMouseEnter={() => setActiveDropdown('explore')}
               onMouseLeave={() => setActiveDropdown(null)}
             >
@@ -1354,38 +1354,38 @@ export default function App() {
               {activeDropdown === 'explore' && (
                 <div style={{ position: 'absolute', top: '100%', left: 0, paddingTop: '10px', zIndex: 1001 }}>
                   <div className="glass-card" style={{
-                    width: '450px', padding: '20px', background: '#0b0f19', border: '1.5px solid var(--border-glass)',
+                    width: '450px', padding: '20px', background: 'var(--surface)', border: '1px solid var(--border)',
                     borderRadius: '16px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px',
-                    boxShadow: '0 20px 40px rgba(0,0,0,0.6)', textAlign: 'left'
+                    boxShadow: '0 20px 40px rgba(0,0,0,0.4)', textAlign: 'left'
                   }}>
                     {/* Education */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <div style={{ fontWeight: 900, fontSize: '0.85rem', color: '#06b6d4', borderBottom: '1px solid var(--border-glass)', paddingBottom: '4px' }}>
+                      <div style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--accent)', borderBottom: '1px solid var(--border-soft)', paddingBottom: '4px' }}>
                         🎓 Education
                       </div>
-                      <span className="dropdown-link" style={{ fontSize: '0.78rem' }} onClick={() => { handleTriggerContextualSlide('K-12 Education', false); setActiveDropdown(null); }}>K-12 Education</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.78rem' }} onClick={() => { handleTriggerContextualSlide('Higher Education', false); setActiveDropdown(null); }}>Higher Ed</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.78rem' }} onClick={() => { handleTriggerContextualSlide('Student Activities', false); setActiveDropdown(null); }}>Student Activities</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.8rem', fontWeight: 500 }} onClick={() => { handleTriggerContextualSlide('K-12 Education', false); setActiveDropdown(null); }}>K-12 Education</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.8rem', fontWeight: 500 }} onClick={() => { handleTriggerContextualSlide('Higher Education', false); setActiveDropdown(null); }}>Higher Ed</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.8rem', fontWeight: 500 }} onClick={() => { handleTriggerContextualSlide('Student Activities', false); setActiveDropdown(null); }}>Student Activities</span>
                     </div>
 
                     {/* Enterprise */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <div style={{ fontWeight: 900, fontSize: '0.85rem', color: '#8b5cf6', borderBottom: '1px solid var(--border-glass)', paddingBottom: '4px' }}>
+                      <div style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--accent)', borderBottom: '1px solid var(--border-soft)', paddingBottom: '4px' }}>
                         💼 Enterprise
                       </div>
-                      <span className="dropdown-link" style={{ fontSize: '0.78rem' }} onClick={() => { handleTriggerContextualSlide('Corporate Training', true); setActiveDropdown(null); }}>Corporate 🔒</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.78rem' }} onClick={() => { handleTriggerContextualSlide('Staff Meetings', false); setActiveDropdown(null); }}>Staff Meetings</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.78rem' }} onClick={() => { handleTriggerContextualSlide('Security & Compliance', true); setActiveDropdown(null); }}>Security 🔒</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.8rem', fontWeight: 500 }} onClick={() => { handleTriggerContextualSlide('Corporate Training', true); setActiveDropdown(null); }}>Corporate 🔒</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.8rem', fontWeight: 500 }} onClick={() => { handleTriggerContextualSlide('Staff Meetings', false); setActiveDropdown(null); }}>Staff Meetings</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.8rem', fontWeight: 500 }} onClick={() => { handleTriggerContextualSlide('Security & Compliance', true); setActiveDropdown(null); }}>Security 🔒</span>
                     </div>
 
                     {/* Features */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <div style={{ fontWeight: 900, fontSize: '0.85rem', color: '#f59e0b', borderBottom: '1px solid var(--border-glass)', paddingBottom: '4px' }}>
+                      <div style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--gold)', borderBottom: '1px solid var(--border-soft)', paddingBottom: '4px' }}>
                         ⚡ Features
                       </div>
-                      <span className="dropdown-link" style={{ fontSize: '0.78rem' }} onClick={() => { handleTriggerContextualSlide('AI quiz generator', true); setActiveDropdown(null); }}>PulseAI 🔒</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.78rem' }} onClick={() => { handleTriggerContextualSlide('PulseAcademy', false); setActiveDropdown(null); }}>PulseAcademy</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.78rem' }} onClick={() => { handleTriggerContextualSlide('Templates', false); setActiveDropdown(null); }}>Templates Catalog</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.8rem', fontWeight: 500 }} onClick={() => { handleTriggerContextualSlide('AI quiz generator', true); setActiveDropdown(null); }}>PulseAI 🔒</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.8rem', fontWeight: 500 }} onClick={() => { handleTriggerContextualSlide('PulseAcademy', false); setActiveDropdown(null); }}>PulseAcademy</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.8rem', fontWeight: 500 }} onClick={() => { handleTriggerContextualSlide('Templates', false); setActiveDropdown(null); }}>Templates Catalog</span>
                     </div>
                   </div>
                 </div>

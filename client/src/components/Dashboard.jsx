@@ -211,10 +211,10 @@ export default function Dashboard({
 
   const getBadgeStyle = () => {
     const tier = user?.tier || 'free';
-    if (tier === 'admin') return { background: '#10b981', color: 'white', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800 };
-    if (tier === 'business') return { background: '#f59e0b', color: 'white', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800 };
-    if (tier === 'pro') return { background: 'var(--primary)', color: 'white', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800 };
-    return { background: 'var(--text-muted)', color: 'white', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800 };
+    if (tier === 'admin') return { background: 'var(--accent)', color: '#08211E', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600 };
+    if (tier === 'business') return { background: 'var(--gold)', color: '#3A2600', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600 };
+    if (tier === 'pro') return { background: 'var(--accent)', color: '#08211E', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600 };
+    return { background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-muted)', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600 };
   };
 
   const getBadgeText = () => {
@@ -363,10 +363,10 @@ export default function Dashboard({
             <div style={getBannerStyle()}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                  <h1 style={{ fontSize: '2.2rem', margin: 0 }}>Welcome back, {user?.name || 'Presenter'}</h1>
+                  <h1 style={{ fontSize: '1.6rem', fontWeight: 700, margin: 0 }}>Welcome back, {user?.name || 'Presenter'}</h1>
                   <span style={getBadgeStyle()}>{getBadgeText()}</span>
                 </div>
-                <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
+                <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.9rem', lineHeight: 1.5 }}>
                   {user?.tier === 'admin' 
                     ? 'You have complete administrative root permissions. Manage presentations, system settings, and core databases.' 
                     : 'Create interactive slides, collect live audience feedback, and run timed tests.'}
@@ -375,16 +375,16 @@ export default function Dashboard({
               <div style={{ display: 'flex', gap: '12px' }}>
                 {onOpenAiGenerator && (
                   <button 
-                    className="btn btn-primary animate-pulse" 
-                    style={{ background: 'linear-gradient(135deg, #06b6d4, #3b82f6)', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 0 15px rgba(6,182,212,0.3)', border: '1px solid rgba(255,255,255,0.3)' }}
+                    className="btn btn-primary" 
+                    style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', border: 'none' }}
                     onClick={onOpenAiGenerator}
                   >
                     <span>🤖 PulseAI Quiz Generator</span>
                     <span>⚡</span>
                   </button>
                 )}
-                <button className="btn btn-primary" onClick={() => setIsCreateModalOpen(true)}>
-                  <Plus size={18} /> New Presentation
+                <button className="btn btn-secondary" onClick={() => setIsCreateModalOpen(true)} style={{ fontWeight: 700 }}>
+                  <Plus size={16} /> New Presentation
                 </button>
               </div>
             </div>
