@@ -1342,6 +1342,15 @@ export default function App() {
               <span style={{ fontWeight: 700, fontSize: '1.1rem', letterSpacing: '-0.01em' }}>PulsePoll</span>
             </div>
 
+            {/* Direct 1-Click Workshops Button */}
+            <button 
+              className="btn btn-secondary"
+              onClick={() => setView('sessions')}
+              style={{ padding: '6px 14px', fontSize: '0.82rem', fontWeight: 600, display: 'flex', gap: '6px', alignItems: 'center', background: 'var(--surface-2)', border: '1px solid var(--border)', flexShrink: 0 }}
+            >
+              <span>📅 Workshops</span>
+            </button>
+
             {/* Consolidated Explore Catalog Dropdown */}
             <div 
               style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 600, color: activeDropdown === 'explore' ? 'var(--accent)' : 'var(--text-primary)' }}
@@ -1588,6 +1597,7 @@ export default function App() {
               onViewPresenter={handleNavigateToPresenter}
               onJoinAudience={handleNavigateToAudience}
               onOpenAiGenerator={() => handleTriggerContextualSlide('AI quiz generator', true)}
+              onViewSessions={() => setView('sessions')}
               onViewAnalytics={(pres) => {
                 if (pres) setSelectedPresentationId(pres.id);
                 setView('analytics');

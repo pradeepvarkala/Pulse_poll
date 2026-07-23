@@ -3,7 +3,7 @@ import { Plus, Play, Edit3, Trash2, Users, Presentation as PresentationIcon, Che
 
 export default function Dashboard({ 
   user, onViewCreator, onViewPresenter, onJoinAudience, onOpenAiGenerator, 
-  onViewAnalytics, onViewEscapeRoom, onViewMeetingScheduler,
+  onViewAnalytics, onViewEscapeRoom, onViewMeetingScheduler, onViewSessions,
   isSidebarCollapsed: propIsCollapsed, onToggleSidebar, onLogout
 }) {
   const [presentations, setPresentations] = useState([]);
@@ -275,6 +275,16 @@ export default function Dashboard({
           </button>
 
           <button 
+            className="sidebar-menu-btn"
+            title="Multi-Day Workshops"
+            style={{ justifyContent: isCollapsed ? 'center' : 'flex-start', padding: isCollapsed ? '12px' : '10px 14px', background: 'var(--accent-soft)', color: 'var(--accent)', fontWeight: 600 }}
+            onClick={onViewSessions}
+          >
+            <span style={{ fontSize: '1.1rem' }}>📅</span>
+            {!isCollapsed && <span>Multi-Day Workshops</span>}
+          </button>
+
+          <button 
             className={`sidebar-menu-btn ${dashboardTab === 'referrals' ? 'active' : ''}`}
             title="Rewards"
             style={{ justifyContent: isCollapsed ? 'center' : 'flex-start', padding: isCollapsed ? '12px' : '10px 14px' }}
@@ -383,6 +393,13 @@ export default function Dashboard({
                     <span>⚡</span>
                   </button>
                 )}
+                <button 
+                  className="btn btn-secondary" 
+                  onClick={onViewSessions} 
+                  style={{ fontWeight: 700, border: '1px solid var(--border)', color: 'var(--text-primary)', gap: '6px' }}
+                >
+                  <span>📅 Multi-Day Workshops</span>
+                </button>
                 <button className="btn btn-secondary" onClick={() => setIsCreateModalOpen(true)} style={{ fontWeight: 700 }}>
                   <Plus size={16} /> New Presentation
                 </button>
