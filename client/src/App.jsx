@@ -731,9 +731,11 @@ export default function App() {
 
   useEffect(() => {
     if (isProTheme) {
+      document.body.setAttribute('data-theme', 'light');
       document.body.classList.add('theme-light-pro');
       document.body.classList.remove('theme-neon');
     } else {
+      document.body.setAttribute('data-theme', 'dark');
       document.body.classList.add('theme-neon');
       document.body.classList.remove('theme-light-pro');
     }
@@ -1403,28 +1405,21 @@ export default function App() {
               {audioMuted ? <VolumeX size={15} color="#ef4444" /> : <Volume2 size={15} color="#2563eb" />}
             </button>
 
-            {/* Global Theme Mode Switcher (Dark Arcade vs Light Professional) */}
-            <button 
-              className="btn btn-secondary" 
+            {/* User Design System Theme Toggle Knob */}
+            <div 
+              className="theme-toggle" 
               onClick={handleGlobalToggleTheme}
-              title="Switch Platform Theme Mode"
-              style={{ 
-                padding: '6px 12px', 
-                fontSize: '0.8rem', 
-                fontWeight: 800, 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '6px',
-                flexShrink: 0,
-                background: isProTheme ? '#ffffff' : '#0f172a',
-                color: isProTheme ? '#2563eb' : '#38bdf8',
-                border: '1.5px solid #2563eb',
-                boxShadow: '0 2px 10px rgba(37,99,235,0.15)'
-              }}
+              role="button"
+              title="Toggle Color Theme"
+              style={{ flexShrink: 0 }}
             >
-              {isProTheme ? <Sun size={14} color="#2563eb" /> : <Moon size={14} color="#38bdf8" />}
-              <span style={{ whiteSpace: 'nowrap' }}>{isProTheme ? '💼 Light Pro' : '🎮 Arcade Dark'}</span>
-            </button>
+              <div 
+                className="theme-toggle-knob" 
+                style={{ transform: isProTheme ? 'translateX(26px)' : 'none' }}
+              >
+                {isProTheme ? <Sun size={13} color="#08211E" /> : <Moon size={13} color="#08211E" />}
+              </div>
+            </div>
 
             <button 
               className="btn btn-primary" 

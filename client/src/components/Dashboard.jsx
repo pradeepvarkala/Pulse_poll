@@ -577,150 +577,143 @@ export default function Dashboard({
             </div>
           </>
         ) : (
-          /* REFERRAL & COIN GAMIFICATION TAB */
-          <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-            <div className="glass-card" style={{
-              background: 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(37,99,235,0.15))',
-              border: '1px solid var(--primary)', padding: '30px', borderRadius: '20px',
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px'
-            }}>
-              <div>
-                <h2 style={{ fontSize: '1.8rem', fontWeight: 800, margin: '0 0 10px 0', color: 'var(--text-primary)' }}>🎁 Refer Friends, Earn Coin Rewards</h2>
-                <p style={{ color: 'var(--text-secondary)', margin: 0, maxWidth: '600px', fontSize: '0.95rem', lineHeight: 1.5 }}>
-                  Share your referral link! When a friend registers, they receive a starter bonus of <strong>20 coins</strong>. Once they upgrade to any paid tier, you receive <strong>100 coins</strong>! Use coins to temporarily unlock premium modules.
-                </p>
+          /* REFERRAL & COIN GAMIFICATION TAB MATCHING USER DESIGN TEMPLATE */
+          <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+            <section className="hero">
+              <div className="hero-left">
+                <div className="hero-eyebrow">🎁 Referral Program</div>
+                <div className="hero-title font-display">Refer Friends, Earn Coin Rewards</div>
+                <div className="hero-desc">
+                  Share your referral link! When a friend registers, they receive a starter bonus of <b>20 coins</b>.
+                  Once they upgrade to any paid tier, you receive <b>100 coins</b>! Use coins to temporarily unlock premium modules.
+                </div>
               </div>
-              <div style={{
-                background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-glass)',
-                padding: '15px 25px', borderRadius: '15px', textAlign: 'center'
-              }}>
-                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Your Balance</div>
-                <div style={{ fontSize: '2.5rem', fontWeight: 900, color: 'var(--accent-green)', margin: '5px 0' }}>🪙 {referralData.coins}</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Referral Coins</div>
+              <div className="balance-card">
+                <div className="balance-label">Your Balance</div>
+                <div className="balance-value">
+                  <div className="coin-icon">¢</div>
+                  <span className="balance-number font-display">{referralData.coins || 0}</span>
+                </div>
+                <div className="balance-sub">Referral Coins</div>
               </div>
-            </div>
+            </section>
 
-            {/* Link Sharing Widget */}
-            <div className="glass-card" style={{ padding: '24px', borderRadius: '16px', border: '1px solid var(--border-glass)' }}>
-              <label style={{ display: 'block', fontWeight: 700, marginBottom: '8px', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
-                Your Unique Referral Link
-              </label>
-              <div style={{ display: 'flex', gap: '10px' }}>
+            <section className="card">
+              <div className="card-label">YOUR UNIQUE REFERRAL LINK</div>
+              <div className="link-row">
                 <input 
+                  className="link-input font-mono" 
+                  id="refLink" 
                   type="text" 
                   readOnly 
                   value={`${window.location.origin}?ref=${referralData.referralCode || 'REF-CODE'}`}
-                  style={{
-                    flex: 1, background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-glass)',
-                    borderRadius: '8px', padding: '10px 14px', color: 'var(--text-primary)',
-                    fontFamily: 'monospace', fontSize: '0.9rem'
-                  }}
                   onClick={(e) => e.target.select()}
                 />
                 <button 
-                  className="btn btn-primary"
-                  onClick={() => {
+                  className="copy-btn" 
+                  id="copyBtn"
+                  onClick={(e) => {
                     navigator.clipboard.writeText(`${window.location.origin}?ref=${referralData.referralCode || 'REF-CODE'}`);
-                    alert('Copied referral link to clipboard! Share it with friends to earn coins.');
+                    const btn = e.currentTarget;
+                    btn.classList.add('copied');
+                    btn.innerText = 'Copied!';
+                    setTimeout(() => {
+                      btn.classList.remove('copied');
+                      btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy Link</span>`;
+                    }, 1800);
                   }}
                 >
-                  Copy Link
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  <span>Copy Link</span>
                 </button>
               </div>
-            </div>
+            </section>
 
-            {/* Unlocks shop */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-              
-              {/* Card 1: Focus Mode */}
-              <div className="glass-card" style={{ padding: '24px', borderRadius: '16px', border: '1px solid var(--border-glass)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                <div>
-                  <h3 style={{ fontSize: '1.2rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    🔒 Focus Mode (Anti-Cheat)
-                  </h3>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '10px', lineHeight: 1.4 }}>
-                    Locks users into the active presenting tab. Lockouts are triggered if they open other tabs during a live session.
-                  </p>
-                  
-                  {/* Status indicator */}
-                  <div style={{ margin: '15px 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                    Status: {referralData.unlockedModules?.some(m => m.module === 'focus_mode' && new Date(m.expiresAt) > new Date()) ? (
-                      <span style={{ color: 'var(--accent-green)', fontWeight: 700 }}>🔓 Unlocked until {new Date(referralData.unlockedModules.find(m => m.module === 'focus_mode').expiresAt).toLocaleDateString()}</span>
-                    ) : (
-                      <span style={{ color: 'var(--accent-red)', fontWeight: 700 }}>🔒 Locked</span>
-                    )}
-                  </div>
+            <section className="feature-grid">
+              {/* Feature 1: Focus Mode */}
+              <div className="feature-card">
+                <div className="feature-head">
+                  <span className="feature-icon">🔒</span>
+                  <span className="feature-title font-display">Focus Mode (Anti-Cheat)</span>
                 </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <button className="btn btn-secondary" style={{ fontSize: '0.8rem' }} onClick={() => handleRedeemModule('focus_mode', 7)}>7 Days (100 Coins)</button>
-                  <button className="btn btn-secondary" style={{ fontSize: '0.8rem' }} onClick={() => handleRedeemModule('focus_mode', 30)}>30 Days (200 Coins)</button>
+                <div className="feature-desc">
+                  Locks users into the active presenting tab. Lockouts are triggered if they open other tabs during a live session.
                 </div>
+                <div className="feature-status">
+                  {referralData.unlockedModules?.some(m => m.module === 'focus_mode' && new Date(m.expiresAt) > new Date()) ? (
+                    <span style={{ color: 'var(--accent)', fontWeight: 700 }}>🔓 Unlocked</span>
+                  ) : (
+                    <span className="status-locked" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span className="status-dot"></span>Locked</span>
+                  )}
+                </div>
+                <button className="unlock-btn" onClick={() => handleRedeemModule('focus_mode', 7)}>
+                  7 Days <span className="coin-tag">(100 Coins)</span>
+                </button>
+                <button className="unlock-btn" onClick={() => handleRedeemModule('focus_mode', 30)}>
+                  30 Days <span className="coin-tag">(200 Coins)</span>
+                </button>
               </div>
 
-              {/* Card 2: Stopwatch Slide */}
-              <div className="glass-card" style={{ padding: '24px', borderRadius: '16px', border: '1px solid var(--border-glass)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                <div>
-                  <h3 style={{ fontSize: '1.2rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    ⏱️ Stopwatch / Timer Slide
-                  </h3>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '10px', lineHeight: 1.4 }}>
-                    Introduce interactive countdowns, countups, and timed activities with milli-second tick precision and arpeggios.
-                  </p>
-                  
-                  <div style={{ margin: '15px 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                    Status: {referralData.unlockedModules?.some(m => m.module === 'stopwatch' && new Date(m.expiresAt) > new Date()) ? (
-                      <span style={{ color: 'var(--accent-green)', fontWeight: 700 }}>🔓 Unlocked until {new Date(referralData.unlockedModules.find(m => m.module === 'stopwatch').expiresAt).toLocaleDateString()}</span>
-                    ) : (
-                      <span style={{ color: 'var(--accent-red)', fontWeight: 700 }}>🔒 Locked</span>
-                    )}
-                  </div>
+              {/* Feature 2: Stopwatch / Timer Slide */}
+              <div className="feature-card">
+                <div className="feature-head">
+                  <span className="feature-icon">⏱️</span>
+                  <span className="feature-title font-display">Stopwatch / Timer Slide</span>
                 </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <button className="btn btn-secondary" style={{ fontSize: '0.8rem' }} onClick={() => handleRedeemModule('stopwatch', 7)}>7 Days (100 Coins)</button>
-                  <button className="btn btn-secondary" style={{ fontSize: '0.8rem' }} onClick={() => handleRedeemModule('stopwatch', 30)}>30 Days (200 Coins)</button>
+                <div className="feature-desc">
+                  Introduce interactive countdowns, countups, and timed activities with milli-second tick precision and arpeggios.
                 </div>
+                <div className="feature-status">
+                  {referralData.unlockedModules?.some(m => m.module === 'stopwatch' && new Date(m.expiresAt) > new Date()) ? (
+                    <span style={{ color: 'var(--accent)', fontWeight: 700 }}>🔓 Unlocked</span>
+                  ) : (
+                    <span className="status-locked" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span className="status-dot"></span>Locked</span>
+                  )}
+                </div>
+                <button className="unlock-btn" onClick={() => handleRedeemModule('stopwatch', 7)}>
+                  7 Days <span className="coin-tag">(100 Coins)</span>
+                </button>
+                <button className="unlock-btn" onClick={() => handleRedeemModule('stopwatch', 30)}>
+                  30 Days <span className="coin-tag">(200 Coins)</span>
+                </button>
               </div>
 
-              {/* Card 3: Brainstorm sticky notes */}
-              <div className="glass-card" style={{ padding: '24px', borderRadius: '16px', border: '1px solid var(--border-glass)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                <div>
-                  <h3 style={{ fontSize: '1.2rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    📌 Brainstorm Sticky Notes
-                  </h3>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '10px', lineHeight: 1.4 }}>
-                    Let users submit words/opinions to categorised grids. Presenter can sort and drag-drop columns dynamically.
-                  </p>
-                  
-                  <div style={{ margin: '15px 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                    Status: {referralData.unlockedModules?.some(m => m.module === 'brainstorm' && new Date(m.expiresAt) > new Date()) ? (
-                      <span style={{ color: 'var(--accent-green)', fontWeight: 700 }}>🔓 Unlocked until {new Date(referralData.unlockedModules.find(m => m.module === 'brainstorm').expiresAt).toLocaleDateString()}</span>
-                    ) : (
-                      <span style={{ color: 'var(--accent-red)', fontWeight: 700 }}>🔒 Locked</span>
-                    )}
-                  </div>
+              {/* Feature 3: Brainstorm Sticky Notes */}
+              <div className="feature-card">
+                <div className="feature-head">
+                  <span className="feature-icon">📌</span>
+                  <span className="feature-title font-display">Brainstorm Sticky Notes</span>
                 </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <button className="btn btn-secondary" style={{ fontSize: '0.8rem' }} onClick={() => handleRedeemModule('brainstorm', 7)}>7 Days (100 Coins)</button>
-                  <button className="btn btn-secondary" style={{ fontSize: '0.8rem' }} onClick={() => handleRedeemModule('brainstorm', 30)}>30 Days (200 Coins)</button>
+                <div className="feature-desc">
+                  Let users submit words/opinions to categorised grids. Presenter can sort and drag-drop columns dynamically.
                 </div>
+                <div className="feature-status">
+                  {referralData.unlockedModules?.some(m => m.module === 'brainstorm' && new Date(m.expiresAt) > new Date()) ? (
+                    <span style={{ color: 'var(--accent)', fontWeight: 700 }}>🔓 Unlocked</span>
+                  ) : (
+                    <span className="status-locked" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span className="status-dot"></span>Locked</span>
+                  )}
+                </div>
+                <button className="unlock-btn" onClick={() => handleRedeemModule('brainstorm', 7)}>
+                  7 Days <span className="coin-tag">(100 Coins)</span>
+                </button>
+                <button className="unlock-btn" onClick={() => handleRedeemModule('brainstorm', 30)}>
+                  30 Days <span className="coin-tag">(200 Coins)</span>
+                </button>
               </div>
+            </section>
 
-            </div>
-
-            {/* Referral Registry table */}
-            <div className="glass-card" style={{ padding: '24px', borderRadius: '16px', border: '1px solid var(--border-glass)' }}>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '15px' }}>👥 Referred Signups Registry</h3>
+            <section className="card">
+              <div className="card-label">👥 REFERRED SIGNUPS REGISTRY</div>
               {referralData.referrals?.length === 0 ? (
-                <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', textAlign: 'center', padding: '20px 0' }}>
-                  No referrals recorded yet. Share your unique code to invite users!
+                <div className="registry-empty">
+                  <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M17 8l3 3-3 3"/><path d="M14 11h6"/></svg>
+                  <p>No referrals recorded yet. <b>Share your unique code to invite users!</b></p>
                 </div>
               ) : (
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', textAlign: 'left' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13.5px', textAlign: 'left' }}>
                   <thead>
-                    <tr style={{ borderBottom: '1px solid var(--border-glass)', color: 'var(--text-muted)' }}>
+                    <tr style={{ borderBottom: '1px solid var(--border)', color: 'var(--text-muted)' }}>
                       <th style={{ padding: '10px' }}>Name</th>
                       <th style={{ padding: '10px' }}>Email</th>
                       <th style={{ padding: '10px' }}>Plan Status</th>
@@ -729,25 +722,25 @@ export default function Dashboard({
                   </thead>
                   <tbody>
                     {referralData.referrals?.map((ref, idx) => (
-                      <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
+                      <tr key={idx} style={{ borderBottom: '1px solid var(--border-soft)' }}>
                         <td style={{ padding: '12px 10px', fontWeight: 600 }}>{ref.name}</td>
-                        <td style={{ padding: '12px 10px', color: 'var(--text-secondary)' }}>{ref.email}</td>
+                        <td style={{ padding: '12px 10px', color: 'var(--text-muted)' }}>{ref.email}</td>
                         <td style={{ padding: '12px 10px' }}>
                           <span style={{
                             padding: '3px 8px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 800,
-                            background: ref.tier === 'free' ? 'rgba(255,255,255,0.05)' : 'rgba(16, 185, 129, 0.15)',
-                            color: ref.tier === 'free' ? 'var(--text-secondary)' : '#34d399'
+                            background: ref.tier === 'free' ? 'var(--surface-2)' : 'var(--accent-soft)',
+                            color: ref.tier === 'free' ? 'var(--text-muted)' : 'var(--accent)'
                           }}>
                             {ref.tier.toUpperCase()}
                           </span>
                         </td>
-                        <td style={{ padding: '12px 10px', color: 'var(--text-muted)' }}>{new Date(ref.created_at).toLocaleDateString()}</td>
+                        <td style={{ padding: '12px 10px', color: 'var(--text-faint)' }}>{new Date(ref.created_at).toLocaleDateString()}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               )}
-            </div>
+            </section>
           </div>
         )}
       </div>
