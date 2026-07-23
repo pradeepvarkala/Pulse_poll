@@ -12,7 +12,7 @@ import AnalyticsReport from './components/AnalyticsReport';
 import EscapeRoomBuilder from './components/EscapeRoomBuilder';
 import VirtualMeetingScheduler from './components/VirtualMeetingScheduler';
 import SessionManager from './components/SessionManager';
-import { Presentation as PresIcon, User as UserIcon, Settings, Menu, Volume2, VolumeX, Sun, Moon, Calendar } from 'lucide-react';
+import { Presentation as PresIcon, User as UserIcon, Settings, Menu, Volume2, VolumeX, Sun, Moon, Calendar, LogOut } from 'lucide-react';
 import { playThemeToggleSound, toggleMuteAudio } from './utils/soundEffects';
 
 const CATEGORY_TEMPLATES = [
@@ -1561,21 +1561,50 @@ export default function App() {
               </div>
             )}
 
-            <div 
-              style={{ 
-                width: '38px', height: '38px', borderRadius: '50%',
-                background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontWeight: 800, color: 'white', overflow: 'hidden', cursor: 'pointer'
-              }}
-              onClick={() => setView('admin')}
-              title="View Profile Settings"
-            >
-              {user?.avatar ? (
-                <img src={user.avatar} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : (
-                (user?.name || user?.email || 'User').slice(0, 2).toUpperCase()
-              )}
+            {/* User Profile Badge & Logout Button */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <button 
+                className="btn btn-secondary" 
+                onClick={() => setView('admin')}
+                title="View Profile Settings"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 10px',
+                  borderRadius: '20px', border: '1px solid var(--border-glass)',
+                  background: 'rgba(255,255,255,0.04)'
+                }}
+              >
+                <div 
+                  style={{ 
+                    width: '28px', height: '28px', borderRadius: '50%',
+                    background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontWeight: 800, color: 'white', fontSize: '0.75rem', overflow: 'hidden'
+                  }}
+                >
+                  {user?.avatar ? (
+                    <img src={user.avatar} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    (user?.name || user?.email || 'U').slice(0, 1).toUpperCase()
+                  )}
+                </div>
+                <span style={{ fontSize: '0.82rem', fontWeight: 800, maxWidth: '110px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {user?.name || user?.email?.split('@')[0] || 'Profile'}
+                </span>
+              </button>
+
+              <button 
+                className="btn btn-secondary"
+                onClick={handleLogout}
+                title="Logout of PulsePoll"
+                style={{
+                  padding: '6px 12px', fontSize: '0.82rem', fontWeight: 800,
+                  color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.3)',
+                  background: 'rgba(239, 68, 68, 0.1)', gap: '6px'
+                }}
+              >
+                <LogOut size={15} />
+                <span>Logout</span>
+              </button>
             </div>
           </div>
         </header>
