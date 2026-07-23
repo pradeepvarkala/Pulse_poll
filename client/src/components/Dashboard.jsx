@@ -382,12 +382,18 @@ export default function Dashboard({
 
           <button 
             className="sidebar-menu-btn" 
-            title="Help & Support"
-            style={{ justifyContent: isCollapsed ? 'center' : 'flex-start', padding: isCollapsed ? '12px' : '10px 14px' }}
-            onClick={() => alert('Check the user_manual.md inside your workspace directory for tips & tricks!')}
+            title="Logout"
+            style={{ 
+              justifyContent: isCollapsed ? 'center' : 'flex-start', 
+              padding: isCollapsed ? '12px' : '10px 14px',
+              marginTop: '16px',
+              borderTop: '1px solid var(--border-glass)',
+              color: '#f87171'
+            }}
+            onClick={onLogout}
           >
-            <span style={{ fontSize: '1.1rem' }}>📚</span>
-            {!isCollapsed && <span>Help & Support</span>}
+            <span style={{ fontSize: '1.1rem' }}>🚪</span>
+            {!isCollapsed && <span style={{ color: '#f87171', fontWeight: 800 }}>Logout</span>}
           </button>
         </div>
       </div>

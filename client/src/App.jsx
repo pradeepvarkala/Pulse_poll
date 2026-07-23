@@ -1449,15 +1449,16 @@ export default function App() {
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {/* Scrollable Middle Actions Bar */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflowX: 'auto', flex: 1, padding: '0 8px', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             {/* Audio Mute Toggle */}
             <button 
               className="btn btn-secondary" 
               onClick={handleGlobalToggleMute}
               title={audioMuted ? "Unmute Audio Themes" : "Mute Audio Themes"}
-              style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+              style={{ padding: '6px 10px', display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}
             >
-              {audioMuted ? <VolumeX size={16} color="#ef4444" /> : <Volume2 size={16} color="#06b6d4" />}
+              {audioMuted ? <VolumeX size={15} color="#ef4444" /> : <Volume2 size={15} color="#06b6d4" />}
             </button>
 
             {/* Global Theme Mode Switcher (Dark Arcade vs Light Professional) */}
@@ -1466,58 +1467,60 @@ export default function App() {
               onClick={handleGlobalToggleTheme}
               title="Switch Platform Theme Mode"
               style={{ 
-                padding: '8px 14px', 
-                fontSize: '0.85rem', 
+                padding: '6px 12px', 
+                fontSize: '0.8rem', 
                 fontWeight: 800, 
                 display: 'flex', 
                 alignItems: 'center', 
                 gap: '6px',
+                flexShrink: 0,
                 background: isProTheme ? '#ffffff' : '#0f172a',
                 color: isProTheme ? '#0f172a' : '#06b6d4',
                 border: isProTheme ? '1px solid #2563eb' : '1px solid #06b6d4',
                 boxShadow: isProTheme ? '0 2px 10px rgba(37,99,235,0.15)' : '0 0 12px rgba(6,182,212,0.3)'
               }}
             >
-              {isProTheme ? <Sun size={15} color="#2563eb" /> : <Moon size={15} color="#06b6d4" />}
-              <span>{isProTheme ? '💼 Light Pro' : '🎮 Arcade Dark'}</span>
+              {isProTheme ? <Sun size={14} color="#2563eb" /> : <Moon size={14} color="#06b6d4" />}
+              <span style={{ whiteSpace: 'nowrap' }}>{isProTheme ? '💼 Light Pro' : '🎮 Arcade Dark'}</span>
             </button>
 
             <button 
               className="btn btn-primary animate-pulse" 
-              style={{ background: 'linear-gradient(135deg, #06b6d4, #3b82f6)', fontWeight: 800, display: 'flex', gap: '6px', alignItems: 'center', boxShadow: '0 0 15px rgba(6, 182, 212, 0.3)', border: '1px solid rgba(255,255,255,0.3)' }}
+              style={{ background: 'linear-gradient(135deg, #06b6d4, #3b82f6)', fontWeight: 800, display: 'flex', gap: '4px', alignItems: 'center', boxShadow: '0 0 15px rgba(6, 182, 212, 0.3)', border: '1px solid rgba(255,255,255,0.3)', flexShrink: 0, padding: '6px 12px', fontSize: '0.8rem' }}
               onClick={() => handleTriggerContextualSlide('AI quiz generator', true)}
             >
               <span>🤖 PulseAI</span>
               <span>⚡</span>
             </button>
-            <button className="btn btn-secondary" onClick={() => setView('pricing')}>
+            <button className="btn btn-secondary" onClick={() => setView('pricing')} style={{ flexShrink: 0, padding: '6px 12px', fontSize: '0.8rem' }}>
               ⚡ Plans
             </button>
             <button 
               className={`btn ${view === 'sessions' ? 'btn-primary' : 'btn-secondary'}`}
               onClick={() => setView('sessions')}
               title="Multi-Day Training Workshop Manager"
-              style={{ fontWeight: 800 }}
+              style={{ fontWeight: 800, flexShrink: 0, padding: '6px 12px', fontSize: '0.8rem' }}
             >
               📅 Workshops
             </button>
-            <button className="btn btn-secondary" onClick={() => setView('remote')} title="Launch Trainer Companion Mobile App">
+            <button className="btn btn-secondary" onClick={() => setView('remote')} title="Launch Trainer Companion Mobile App" style={{ flexShrink: 0, padding: '6px 12px', fontSize: '0.8rem' }}>
               📱 Trainer App
             </button>
-            <button className="btn btn-secondary" onClick={handleNavigateToAudience}>
+            <button className="btn btn-secondary" onClick={handleNavigateToAudience} style={{ flexShrink: 0, padding: '6px 12px', fontSize: '0.8rem' }}>
               Join a Room
             </button>
             <button 
               className={`btn btn-icon ${view === 'admin' ? 'btn-primary' : 'btn-secondary'}`}
-              style={{ width: '38px', height: '38px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              style={{ width: '34px', height: '34px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
               onClick={() => setView('admin')}
               title="Admin Settings Panel"
             >
-              <Settings size={18} />
+              <Settings size={16} />
             </button>
+
             {user?.email === 'pradeepvarkala@gmail.com' && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#0f172a', padding: '6px 12px', borderRadius: '10px', border: '1px solid rgba(6, 182, 212, 0.4)', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#06b6d4' }}>Plan Switch:</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#0f172a', padding: '4px 10px', borderRadius: '10px', border: '1px solid rgba(6, 182, 212, 0.4)', flexShrink: 0 }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#06b6d4' }}>Plan:</span>
                 <select 
                   value={user.tier}
                   onChange={async (e) => {
@@ -1543,69 +1546,63 @@ export default function App() {
                     }
                   }}
                   style={{
-                    background: '#1e293b',
-                    border: '1px solid #334155',
-                    color: '#ffffff',
-                    fontSize: '0.85rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    padding: '4px 8px',
-                    borderRadius: '6px',
-                    outline: 'none'
+                    background: '#1e293b', border: '1px solid #334155', color: '#ffffff',
+                    fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', padding: '2px 6px', borderRadius: '6px', outline: 'none'
                   }}
                 >
-                  <option value="admin" style={{ background: '#0f172a', color: '#ffffff' }}>Admin (Full)</option>
-                  <option value="pro" style={{ background: '#0f172a', color: '#ffffff' }}>Pro / Premium</option>
-                  <option value="free" style={{ background: '#0f172a', color: '#ffffff' }}>Free Tier</option>
+                  <option value="admin" style={{ background: '#0f172a', color: '#ffffff' }}>Admin</option>
+                  <option value="pro" style={{ background: '#0f172a', color: '#ffffff' }}>Pro</option>
+                  <option value="free" style={{ background: '#0f172a', color: '#ffffff' }}>Free</option>
                 </select>
               </div>
             )}
+          </div>
 
-            {/* User Profile Badge & Logout Button */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <button 
-                className="btn btn-secondary" 
-                onClick={() => setView('admin')}
-                title="View Profile Settings"
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 10px',
-                  borderRadius: '20px', border: '1px solid var(--border-glass)',
-                  background: 'rgba(255,255,255,0.04)'
+          {/* STICKY ALWAYS-VISIBLE RIGHT SECTION: Profile & Logout */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0, marginLeft: 'auto' }}>
+            <button 
+              className="btn btn-secondary" 
+              onClick={() => setView('admin')}
+              title="View Profile Settings"
+              style={{
+                display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 10px',
+                borderRadius: '20px', border: '1px solid var(--border-glass)',
+                background: 'rgba(255,255,255,0.04)', flexShrink: 0
+              }}
+            >
+              <div 
+                style={{ 
+                  width: '28px', height: '28px', borderRadius: '50%',
+                  background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontWeight: 800, color: 'white', fontSize: '0.75rem', overflow: 'hidden'
                 }}
               >
-                <div 
-                  style={{ 
-                    width: '28px', height: '28px', borderRadius: '50%',
-                    background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontWeight: 800, color: 'white', fontSize: '0.75rem', overflow: 'hidden'
-                  }}
-                >
-                  {user?.avatar ? (
-                    <img src={user.avatar} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  ) : (
-                    (user?.name || user?.email || 'U').slice(0, 1).toUpperCase()
-                  )}
-                </div>
-                <span style={{ fontSize: '0.82rem', fontWeight: 800, maxWidth: '110px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {user?.name || user?.email?.split('@')[0] || 'Profile'}
-                </span>
-              </button>
+                {user?.avatar ? (
+                  <img src={user.avatar} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  (user?.name || user?.email || 'U').slice(0, 1).toUpperCase()
+                )}
+              </div>
+              <span style={{ fontSize: '0.82rem', fontWeight: 800, maxWidth: '110px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {user?.name || user?.email?.split('@')[0] || 'Profile'}
+              </span>
+            </button>
 
-              <button 
-                className="btn btn-secondary"
-                onClick={handleLogout}
-                title="Logout of PulsePoll"
-                style={{
-                  padding: '6px 12px', fontSize: '0.82rem', fontWeight: 800,
-                  color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.3)',
-                  background: 'rgba(239, 68, 68, 0.1)', gap: '6px'
-                }}
-              >
-                <LogOut size={15} />
-                <span>Logout</span>
-              </button>
-            </div>
+            <button 
+              className="btn btn-primary"
+              onClick={handleLogout}
+              title="Logout of PulsePoll"
+              style={{
+                padding: '6px 14px', fontSize: '0.82rem', fontWeight: 800,
+                color: '#ffffff', background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                border: '1px solid #f87171', gap: '6px', flexShrink: 0,
+                boxShadow: '0 0 12px rgba(239, 68, 68, 0.4)'
+              }}
+            >
+              <LogOut size={15} />
+              <span>Logout</span>
+            </button>
           </div>
         </header>
       )}
@@ -1634,6 +1631,7 @@ export default function App() {
               }}
               isSidebarCollapsed={isSidebarCollapsed}
               onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+              onLogout={handleLogout}
             />
           )}
 
