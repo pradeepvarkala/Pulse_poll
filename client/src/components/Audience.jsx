@@ -80,6 +80,7 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
 
   // Intelligent Grouping & Team Assignment State
   const [gender, setGender] = useState('M'); // 'M' or 'F'
+  const [avatar, setAvatar] = useState('🚀');
   const [assignedTeamCard, setAssignedTeamCard] = useState(null);
 
   useEffect(() => {
@@ -653,6 +654,29 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
                 >
                   👩 Female
                 </button>
+              </div>
+            </div>
+
+            <div className="settings-group">
+              <label style={{ fontSize: '0.8rem', fontWeight: 800, textAlign: 'center', display: 'block', color: 'var(--text-secondary)' }}>
+                Choose Profile Avatar Icon
+              </label>
+              <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                {['🚀', '🦁', '🐯', '🦅', '👑', '🎮', '🎨', '🔥', '⭐', '⚡'].map(a => (
+                  <button 
+                    key={a}
+                    type="button"
+                    style={{
+                      width: '36px', height: '36px', borderRadius: '10px', fontSize: '1.2rem',
+                      background: avatar === a ? 'var(--primary)' : 'rgba(255,255,255,0.05)',
+                      border: avatar === a ? '2px solid #ffffff' : '1px solid var(--border-glass)',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => setAvatar(a)}
+                  >
+                    {a}
+                  </button>
+                ))}
               </div>
             </div>
 

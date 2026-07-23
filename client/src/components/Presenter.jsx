@@ -442,6 +442,27 @@ export default function Presenter({ presentationId, onBack }) {
   const [repeatPairCount, setRepeatPairCount] = useState(0);
   const [participantRoster, setParticipantRoster] = useState([]);
 
+  // Sports Leaderboard Podium & Grand Finale States
+  const [leaderboardViewMode, setLeaderboardViewMode] = useState('individual'); // 'individual' or 'team'
+  const [showFinaleModal, setShowFinaleModal] = useState(false);
+
+  const getTeamStandings = () => {
+    if (!groupAllocations || groupAllocations.length === 0) return [];
+    
+    return groupAllocations.map(g => {
+      let totalPts = 0;
+      (g.members || []).forEach(m => {
+        totalPts += (leaderboard[m.name] || 0);
+      });
+      return {
+        name: g.name,
+        code: g.code,
+        score: totalPts,
+        memberCount: (g.members || []).length
+      };
+    }).sort((a, b) => b.score - a.score);
+  };
+
   const handleSolveAndAssignGroups = () => {
     const activeRoster = participantRoster.length >= 2 ? participantRoster : [
       { id: 'p-1', name: 'Alex Rivers', gender: 'M' },
@@ -1959,27 +1980,145 @@ export default function Presenter({ presentationId, onBack }) {
               {activeSlide.type === 'quiz' && (
                 <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
                   {leaderboardVisible ? (
-                    <div className="leaderboard-container">
-                      <h2 style={{ textAlign: 'center', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                        <Trophy color="var(--accent-amber)" /> Leaderboard
+                    <div className="leaderboard-container animate-fade" style={{ width: '100%', maxWidth: '850px', background: 'rgba(11, 15, 25, 0.85)', padding: '24px', borderRadius: '24px', border: '1px solid var(--border-glass)' }}>
+                      <h2 style={{ textAlign: 'center', marginBottom: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', fontSize: '1.8rem', color: '#ffffff' }}>
+                        <Trophy size={32} color="#fbbf24" style={{ filter: 'drop-shadow(0 0 12px rgba(251, 191, 36, 0.6))' }} /> 
+                        Sports Championship Leaderboard
                       </h2>
-                      <div className="leaderboard-list">
-                        {Object.entries(leaderboard)
-                          .sort((a, b) => b[1] - a[1])
-                          .slice(0, 5)
-                          .map(([nickname, score], idx) => (
-                            <div key={nickname} className="leaderboard-row" style={{ animationDelay: `${idx * 0.1}s` }}>
-                              <div className="leaderboard-row-left">
-                                <span className={`leaderboard-rank rank-${idx + 1}`}>{idx + 1}</span>
-                                <span className="leaderboard-name">{nickname}</span>
+
+                      {/* Mode Selector: Individual vs Team */}
+                      <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginBottom: '25px' }}>
+                        <button 
+                          className={`btn ${leaderboardViewMode === 'individual' ? 'btn-primary' : 'btn-secondary'}`}
+                          onClick={() => setLeaderboardViewMode('individual')}
+                          style={{ padding: '10px 22px', fontSize: '0.9rem', fontWeight: 800 }}
+                        >
+                          👤 Individual Standings
+                        </button>
+                        <button 
+                          className={`btn ${leaderboardViewMode === 'team' ? 'btn-primary' : 'btn-secondary'}`}
+                          onClick={() => setLeaderboardViewMode('team')}
+                          style={{ padding: '10px 22px', fontSize: '0.9rem', fontWeight: 800 }}
+                        >
+                          👥 Team / Group Standings
+                        </button>
+                      </div>
+
+                      {leaderboardViewMode === 'individual' ? (
+                        <>
+                          {/* Top 3 Sports Victory Podium */}
+                          {(() => {
+                            const sorted = Object.entries(leaderboard).sort((a, b) => b[1] - a[1]);
+                            const first = sorted[0];
+                            const second = sorted[1];
+                            const third = sorted[2];
+
+                            if (sorted.length === 0) {
+                              return <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '30px' }}>No participants scored yet.</div>;
+                            }
+
+                            return (
+                              <div>
+                                {/* 3D Sports Podium Display */}
+                                <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: '15px', height: '220px', marginBottom: '30px' }}>
+                                  
+                                  {/* 2nd Place Silver */}
+                                  {second && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, maxWidth: '140px' }}>
+                                      <div style={{ fontSize: '1.8rem', marginBottom: '4px' }}>🥈</div>
+                                      <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#cbd5e1', textAlign: 'center', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', width: '100%' }}>{second[0]}</div>
+                                      <div style={{ fontSize: '0.85rem', color: '#06b6d4', fontWeight: 800, marginBottom: '6px' }}>{second[1]} pts</div>
+                                      <div style={{
+                                        width: '100%', height: '110px', background: 'linear-gradient(180deg, #94a3b8, #475569)',
+                                        borderRadius: '16px 16px 0 0', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        fontWeight: 900, fontSize: '1.8rem', color: '#ffffff', boxShadow: '0 4px 20px rgba(148, 163, 184, 0.4)'
+                                      }}>
+                                        2
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* 1st Place Gold */}
+                                  {first && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, maxWidth: '170px' }}>
+                                      <div style={{ fontSize: '2.5rem', marginBottom: '2px', animation: 'trophyBounce 1.5s ease-in-out infinite' }}>👑 🥇</div>
+                                      <div style={{ fontWeight: 900, fontSize: '1.1rem', color: '#fbbf24', textAlign: 'center', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', width: '100%' }}>{first[0]}</div>
+                                      <div style={{ fontSize: '0.95rem', color: '#fbbf24', fontWeight: 900, marginBottom: '6px' }}>{first[1]} pts</div>
+                                      <div style={{
+                                        width: '100%', height: '150px', background: 'linear-gradient(180deg, #f59e0b, #d97706)',
+                                        borderRadius: '20px 20px 0 0', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        fontWeight: 900, fontSize: '2.2rem', color: '#ffffff', boxShadow: '0 0 30px rgba(245, 158, 11, 0.6)',
+                                        border: '2px solid #fef08a'
+                                      }}>
+                                        1
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* 3rd Place Bronze */}
+                                  {third && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, maxWidth: '140px' }}>
+                                      <div style={{ fontSize: '1.8rem', marginBottom: '4px' }}>🥉</div>
+                                      <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#d97706', textAlign: 'center', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', width: '100%' }}>{third[0]}</div>
+                                      <div style={{ fontSize: '0.85rem', color: '#06b6d4', fontWeight: 800, marginBottom: '6px' }}>{third[1]} pts</div>
+                                      <div style={{
+                                        width: '100%', height: '85px', background: 'linear-gradient(180deg, #d97706, #78350f)',
+                                        borderRadius: '16px 16px 0 0', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        fontWeight: 900, fontSize: '1.8rem', color: '#ffffff', boxShadow: '0 4px 20px rgba(217, 119, 6, 0.4)'
+                                      }}>
+                                        3
+                                      </div>
+                                    </div>
+                                  )}
+
+                                </div>
+
+                                {/* Standings List 4+ */}
+                                <div className="leaderboard-list">
+                                  {sorted.slice(3, 10).map(([nickname, score], idx) => (
+                                    <div key={nickname} className="leaderboard-row" style={{ padding: '12px 18px' }}>
+                                      <div className="leaderboard-row-left">
+                                        <span className="leaderboard-rank" style={{ width: '32px', height: '32px', fontWeight: 800 }}>{idx + 4}</span>
+                                        <span className="leaderboard-name">{nickname}</span>
+                                      </div>
+                                      <span className="leaderboard-score" style={{ fontWeight: 800 }}>{score} pts</span>
+                                    </div>
+                                  ))}
+                                </div>
                               </div>
-                              <span className="leaderboard-score">{score} pts</span>
+                            );
+                          })()}
+                        </>
+                      ) : (
+                        /* Team Standings View */
+                        <div className="leaderboard-list">
+                          {getTeamStandings().map((team, idx) => (
+                            <div key={team.name} className="leaderboard-row" style={{ padding: '14px 20px', background: idx === 0 ? 'rgba(6, 182, 212, 0.15)' : 'rgba(255,255,255,0.03)', borderColor: idx === 0 ? '#06b6d4' : 'var(--border-glass)' }}>
+                              <div className="leaderboard-row-left">
+                                <span className={`leaderboard-rank rank-${idx + 1}`} style={{ width: '38px', height: '38px', fontSize: '1.1rem', fontWeight: 900 }}>
+                                  {idx === 0 ? '🏆' : idx + 1}
+                                </span>
+                                <div>
+                                  <div className="leaderboard-name" style={{ fontSize: '1.1rem', fontWeight: 800, color: idx === 0 ? '#06b6d4' : 'var(--text-primary)' }}>
+                                    {team.name}
+                                  </div>
+                                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                                    CODE: {team.code} • {team.memberCount} members
+                                  </div>
+                                </div>
+                              </div>
+                              <span className="leaderboard-score" style={{ fontSize: '1.2rem', fontWeight: 900, color: idx === 0 ? '#06b6d4' : '#ffffff' }}>
+                                {team.score} pts
+                              </span>
                             </div>
                           ))}
-                        {Object.keys(leaderboard).length === 0 && (
-                          <div style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No participants scored yet.</div>
-                        )}
-                      </div>
+                          {getTeamStandings().length === 0 && (
+                            <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '24px' }}>
+                              No team allocations active yet. Open 👥 Group Manager to assign teams!
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div style={{ width: '100%', maxWidth: '750px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -2372,6 +2511,18 @@ export default function Presenter({ presentationId, onBack }) {
             title="Intelligent Team & Group Manager"
           >
             <Users size={20} />
+          </button>
+
+          <button 
+            className="btn btn-secondary btn-icon" 
+            style={{ border: 'none', color: showFinaleModal ? '#fbbf24' : 'white' }}
+            onClick={() => {
+              setConfettiActive(true);
+              setShowFinaleModal(true);
+            }}
+            title="Launch Grand Finale Sports Trophy Celebration"
+          >
+            <Trophy size={20} color="#fbbf24" />
           </button>
 
           {['quiz', 'poll'].includes(activeSlide.type) && (activeSlide.correctAnswerIndex !== undefined || (activeSlide.correctAnswerIndices || []).length > 0) && (
@@ -3004,6 +3155,153 @@ export default function Presenter({ presentationId, onBack }) {
                 </div>
               ))}
             </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* Grand Finale Championship Victory Modal */}
+      {showFinaleModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(5, 8, 16, 0.92)', backdropFilter: 'blur(12px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000,
+          padding: '20px'
+        }}>
+          <div className="glass-card animate-fade" style={{
+            width: '100%', maxWidth: '950px', background: 'linear-gradient(135deg, #0b0f19, #1e1b4b)',
+            border: '2px solid #f59e0b', borderRadius: '32px', padding: '40px', position: 'relative',
+            boxShadow: '0 0 50px rgba(245, 158, 11, 0.4)', textAlign: 'center', overflowY: 'auto', maxHeight: '90vh'
+          }}>
+            <button 
+              onClick={() => setShowFinaleModal(false)}
+              style={{
+                position: 'absolute', top: '24px', right: '24px', background: 'transparent',
+                border: 'none', color: '#ffffff', fontSize: '1.8rem', cursor: 'pointer'
+              }}
+            >
+              ✕
+            </button>
+
+            <div style={{ fontSize: '4rem', animation: 'trophyBounce 1.2s ease-in-out infinite', marginBottom: '10px' }}>
+              🏆 👑 🎆
+            </div>
+
+            <h1 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#fbbf24', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+              Grand Finale Championship
+            </h1>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', marginBottom: '30px' }}>
+              Final Tournament Standings & Overall Victory Ceremony
+            </p>
+
+            {/* Toggle Individual / Team */}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginBottom: '30px' }}>
+              <button 
+                className={`btn ${leaderboardViewMode === 'individual' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setLeaderboardViewMode('individual')}
+                style={{ padding: '12px 28px', fontSize: '1rem', fontWeight: 900 }}
+              >
+                👤 Individual Champion
+              </button>
+              <button 
+                className={`btn ${leaderboardViewMode === 'team' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setLeaderboardViewMode('team')}
+                style={{ padding: '12px 28px', fontSize: '1rem', fontWeight: 900 }}
+              >
+                👥 Winning Team Cup
+              </button>
+            </div>
+
+            {leaderboardViewMode === 'individual' ? (
+              <div>
+                {/* 3D Grand Podium */}
+                {(() => {
+                  const sorted = Object.entries(leaderboard).sort((a, b) => b[1] - a[1]);
+                  const winner = sorted[0];
+
+                  return (
+                    <div>
+                      {winner && (
+                        <div style={{
+                          background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(234, 179, 8, 0.1))',
+                          border: '2px solid #fbbf24', borderRadius: '24px', padding: '24px', marginBottom: '30px',
+                          display: 'inline-block', minWidth: '300px', boxShadow: '0 0 35px rgba(251, 191, 36, 0.3)'
+                        }}>
+                          <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#fbbf24', textTransform: 'uppercase' }}>
+                            🥇 GRAND CHAMPION 🥇
+                          </div>
+                          <div style={{ fontSize: '2.2rem', fontWeight: 900, color: '#ffffff', margin: '8px 0' }}>
+                            {winner[0]}
+                          </div>
+                          <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#06b6d4' }}>
+                            {winner[1]} TOTAL POINTS
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="leaderboard-list">
+                        {sorted.slice(1, 10).map(([name, pts], i) => (
+                          <div key={name} className="leaderboard-row" style={{ padding: '14px 24px' }}>
+                            <div className="leaderboard-row-left">
+                              <span className={`leaderboard-rank rank-${i + 2}`}>{i + 2}</span>
+                              <span className="leaderboard-name" style={{ fontSize: '1.1rem', fontWeight: 800 }}>{name}</span>
+                            </div>
+                            <span className="leaderboard-score" style={{ fontSize: '1.2rem', fontWeight: 900 }}>{pts} pts</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            ) : (
+              <div>
+                {/* Winning Team Podium */}
+                {(() => {
+                  const teams = getTeamStandings();
+                  const winningTeam = teams[0];
+
+                  return (
+                    <div>
+                      {winningTeam && (
+                        <div style={{
+                          background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(37, 99, 235, 0.2))',
+                          border: '2px solid #06b6d4', borderRadius: '24px', padding: '24px', marginBottom: '30px',
+                          display: 'inline-block', minWidth: '320px', boxShadow: '0 0 35px rgba(6, 182, 212, 0.4)'
+                        }}>
+                          <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#06b6d4', textTransform: 'uppercase' }}>
+                            🏆 WINNING TEAM CUP 🏆
+                          </div>
+                          <div style={{ fontSize: '2.4rem', fontWeight: 900, color: '#ffffff', margin: '8px 0' }}>
+                            {winningTeam.name}
+                          </div>
+                          <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#fbbf24' }}>
+                            {winningTeam.score} TOTAL TEAM POINTS
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="leaderboard-list">
+                        {teams.map((t, idx) => (
+                          <div key={t.name} className="leaderboard-row" style={{ padding: '16px 24px' }}>
+                            <div className="leaderboard-row-left">
+                              <span className="leaderboard-rank" style={{ width: '40px', height: '40px', fontSize: '1.2rem', fontWeight: 900 }}>
+                                {idx === 0 ? '🏆' : idx + 1}
+                              </span>
+                              <div>
+                                <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#ffffff' }}>{t.name}</div>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{t.code} • {t.memberCount} Members</div>
+                              </div>
+                            </div>
+                            <span style={{ fontSize: '1.3rem', fontWeight: 900, color: '#06b6d4' }}>{t.score} pts</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
 
           </div>
         </div>
