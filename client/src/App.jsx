@@ -716,7 +716,45 @@ const CATEGORY_TEMPLATES = [
 ];
 
 export default function App() {
-  const [view, setView] = useState('dashboard'); // dashboard, creator, presenter, audience, admin
+  const [viewState, setViewState] = useState(() => {
+    const hash = window.location.hash.replace('#', '');
+    return hash || 'dashboard';
+  });
+
+  // Custom setView wrapper that syncs browser history stack (pushState)
+  const setView = (nextView, replace = false) => {
+    if (nextView !== viewState) {
+      setViewState(nextView);
+      const hash = '#' + nextView;
+      if (replace) {
+        window.history.replaceState({ view: nextView }, '', hash);
+      } else {
+        window.history.pushState({ view: nextView }, '', hash);
+      }
+    }
+  };
+
+  const view = viewState;
+
+  // Listen to browser Back & Forward button events (popstate)
+  useEffect(() => {
+    const handlePopState = (event) => {
+      if (event.state && event.state.view) {
+        setViewState(event.state.view);
+      } else {
+        const hash = window.location.hash.replace('#', '');
+        if (hash) {
+          setViewState(hash);
+        } else {
+          setViewState('dashboard');
+        }
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   const [selectedPresentationId, setSelectedPresentationId] = useState(null);
   const [urlRoomCode, setUrlRoomCode] = useState('');
   const [authMode, setAuthMode] = useState(null); // null (shows landing page), 'login', 'signup'
