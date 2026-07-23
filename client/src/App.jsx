@@ -1625,6 +1625,36 @@ export default function App() {
         </header>
       )}
 
+      {/* Universal Path-Based Breadcrumb Navigation Bar */}
+      {view !== 'presenter' && view !== 'audience' && (
+        <div style={{
+          padding: '8px 24px', background: 'var(--surface-2)', borderBottom: '1px solid var(--border-soft)',
+          display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'var(--text-muted)'
+        }}>
+          <span 
+            style={{ cursor: 'pointer', color: 'var(--accent)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }} 
+            onClick={handleNavigateToDashboard}
+          >
+            🏠 Dashboard
+          </span>
+          {view !== 'dashboard' && (
+            <>
+              <span>/</span>
+              <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                {view === 'sessions' && '📅 Multi-Day Workshops'}
+                {view === 'creator' && '🎨 Presentation Creator'}
+                {view === 'analytics' && '📊 Analytics Report'}
+                {view === 'pricing' && '⚡ Subscriptions & Plans'}
+                {view === 'escaperoom' && '🗝️ Breakout Rooms'}
+                {view === 'meeting' && '📹 Live Video'}
+                {view === 'admin' && '🛡️ System Admin'}
+                {view === 'remote' && '📱 Trainer Companion'}
+              </span>
+            </>
+          )}
+        </div>
+      )}
+
       {/* Primary Routing Panel */}
       {view !== 'presenter' && view !== 'audience' ? (
         <main className="main-content">

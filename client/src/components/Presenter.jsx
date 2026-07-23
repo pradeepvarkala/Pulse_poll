@@ -1556,11 +1556,15 @@ export default function Presenter({ presentationId, onBack, user: userProp }) {
           </select>
         </div>
 
-        <div className="join-instruction-card">
-          <img src={qrCodeUrl} alt="Join QR Code" className="qr-code-img" />
-          <div>
-            <span className="join-text">Scan or join at: <strong style={{ color: 'var(--text-primary)' }}>{window.location.host}/join</strong></span>
-            <span className="join-code">CODE: {roomCode.slice(0,3)} {roomCode.slice(3)}</span>
+        <div className="join-instruction-card" style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(15, 23, 42, 0.85)', padding: '6px 14px', borderRadius: '14px', border: '1px solid var(--border-glass)' }}>
+          <img src={qrCodeUrl} alt="Join QR Code" className="qr-code-img" style={{ width: '32px', height: '32px', borderRadius: '6px' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'nowrap' }}>
+            <span className="join-text" style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+              SCAN OR JOIN AT: <strong style={{ color: '#ffffff', letterSpacing: '0.02em' }}>{window.location.host.toUpperCase()}/JOIN</strong>
+            </span>
+            <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#38bdf8', background: 'rgba(56, 189, 248, 0.15)', padding: '3px 10px', borderRadius: '8px', border: '1px solid rgba(56, 189, 248, 0.3)', letterSpacing: '0.05em' }}>
+              CODE: {roomCode.slice(0,3)} {roomCode.slice(3)}
+            </span>
           </div>
         </div>
 
@@ -1585,10 +1589,10 @@ export default function Presenter({ presentationId, onBack, user: userProp }) {
       </div>
 
       {/* Main Slide Visualization Body */}
-      <div className="presenter-body" style={{ display: 'flex', gap: '30px', padding: '20px 40px', height: 'calc(100vh - 75px)', overflow: 'hidden' }}>
+      <div className="presenter-body" style={{ display: 'flex', gap: '20px', padding: '12px 30px', height: 'calc(100vh - 75px)', overflow: 'hidden' }}>
         
         {/* Left Area: Slide Content Canvas */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', paddingRight: '10px' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', paddingRight: '6px' }}>
           {confettiActive && (
           <div className="confetti-overlay">
             {Array.from({ length: 60 }).map((_, i) => {
@@ -1614,7 +1618,7 @@ export default function Presenter({ presentationId, onBack, user: userProp }) {
             })}
           </div>
         )}
-        <h1 className="presenter-question" style={{ color: '#ffffff', textShadow: '0 2px 12px rgba(0,0,0,0.95)' }}>{activeSlide.question}</h1>
+        <h1 className="presenter-question" style={{ fontSize: 'clamp(1.3rem, 2.2vw, 1.8rem)', marginBottom: '10px', lineHeight: 1.3, color: '#ffffff', textShadow: '0 2px 12px rgba(0,0,0,0.95)', maxWidth: '900px', margin: '0 auto 10px auto' }}>{activeSlide.question}</h1>
 
         {/* Universal Time Limit display */}
         {quizTimer > 0 && (
