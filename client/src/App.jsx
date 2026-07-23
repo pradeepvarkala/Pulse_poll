@@ -1363,9 +1363,9 @@ export default function App() {
                       <div style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--accent)', borderBottom: '1px solid var(--border-soft)', paddingBottom: '4px' }}>
                         🎓 Education
                       </div>
-                      <span className="dropdown-link" style={{ fontSize: '0.8rem', fontWeight: 500 }} onClick={() => { handleTriggerContextualSlide('K-12 Education', false); setActiveDropdown(null); }}>K-12 Education</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.8rem', fontWeight: 500 }} onClick={() => { handleTriggerContextualSlide('Higher Education', false); setActiveDropdown(null); }}>Higher Ed</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.8rem', fontWeight: 500 }} onClick={() => { handleTriggerContextualSlide('Student Activities', false); setActiveDropdown(null); }}>Student Activities</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-primary)' }} onClick={() => { handleTriggerContextualSlide('K-12 Education', false); setActiveDropdown(null); }}>K-12 Education</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-primary)' }} onClick={() => { handleTriggerContextualSlide('Higher Education', false); setActiveDropdown(null); }}>Higher Ed</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-primary)' }} onClick={() => { handleTriggerContextualSlide('Student Activities', false); setActiveDropdown(null); }}>Student Activities</span>
                     </div>
 
                     {/* Enterprise */}
@@ -1373,9 +1373,9 @@ export default function App() {
                       <div style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--accent)', borderBottom: '1px solid var(--border-soft)', paddingBottom: '4px' }}>
                         💼 Enterprise
                       </div>
-                      <span className="dropdown-link" style={{ fontSize: '0.8rem', fontWeight: 500 }} onClick={() => { handleTriggerContextualSlide('Corporate Training', true); setActiveDropdown(null); }}>Corporate 🔒</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.8rem', fontWeight: 500 }} onClick={() => { handleTriggerContextualSlide('Staff Meetings', false); setActiveDropdown(null); }}>Staff Meetings</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.8rem', fontWeight: 500 }} onClick={() => { handleTriggerContextualSlide('Security & Compliance', true); setActiveDropdown(null); }}>Security 🔒</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-primary)' }} onClick={() => { handleTriggerContextualSlide('Corporate Training', true); setActiveDropdown(null); }}>Corporate 🔒</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-primary)' }} onClick={() => { handleTriggerContextualSlide('Staff Meetings', false); setActiveDropdown(null); }}>Staff Meetings</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-primary)' }} onClick={() => { handleTriggerContextualSlide('Security & Compliance', true); setActiveDropdown(null); }}>Security 🔒</span>
                     </div>
 
                     {/* Features */}
@@ -1383,9 +1383,9 @@ export default function App() {
                       <div style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--gold)', borderBottom: '1px solid var(--border-soft)', paddingBottom: '4px' }}>
                         ⚡ Features
                       </div>
-                      <span className="dropdown-link" style={{ fontSize: '0.8rem', fontWeight: 500 }} onClick={() => { handleTriggerContextualSlide('AI quiz generator', true); setActiveDropdown(null); }}>PulseAI 🔒</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.8rem', fontWeight: 500 }} onClick={() => { handleTriggerContextualSlide('PulseAcademy', false); setActiveDropdown(null); }}>PulseAcademy</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.8rem', fontWeight: 500 }} onClick={() => { handleTriggerContextualSlide('Templates', false); setActiveDropdown(null); }}>Templates Catalog</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-primary)' }} onClick={() => { handleTriggerContextualSlide('AI quiz generator', true); setActiveDropdown(null); }}>PulseAI 🔒</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-primary)' }} onClick={() => { handleTriggerContextualSlide('PulseAcademy', false); setActiveDropdown(null); }}>PulseAcademy</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-primary)' }} onClick={() => { handleTriggerContextualSlide('Templates', false); setActiveDropdown(null); }}>Templates Catalog</span>
                     </div>
                   </div>
                 </div>

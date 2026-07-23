@@ -203,17 +203,26 @@ select option:checked {
   box-sizing: border-box !important;
 }
 
-/* Drag and Drop Thumbnail Cursor */
-.slide-thumbnail {
-  cursor: grab;
+.dropdown-link {
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 6px 10px;
+  display: block;
   user-select: none;
 }
-.slide-thumbnail:active {
-  cursor: grabbing;
+
+[data-theme="light"] .dropdown-link,
+body.light-theme .dropdown-link,
+.theme-light-pro .dropdown-link,
+.theme-playroom-magic .dropdown-link {
+  color: #1e293b !important;
 }
-.slide-thumbnail.dragging {
-  opacity: 0.4;
-  border: 2px dashed #06b6d4 !important;
+
+.dropdown-link:hover {
+  background: var(--surface-2, rgba(255,255,255,0.08));
+  color: var(--accent, #06b6d4) !important;
 }
 
 .theme-cyber-neon {
