@@ -1193,7 +1193,7 @@ export default function App() {
       id: `ai-pres-${Math.random().toString(36).substr(2, 6)}`,
       title: `AI Workspace: ${promptClean.length > 25 ? promptClean.slice(0, 25) + '...' : promptClean}`,
       updatedAt: new Date().toLocaleDateString(),
-      theme: 'neon',
+      theme: 'cyber-neon',
       slides: [
         {
           id: `ai-s1-${Math.random().toString(36).substr(2, 3)}`,

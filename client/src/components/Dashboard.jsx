@@ -145,7 +145,7 @@ export default function Dashboard({
       id: `pres-${Math.random().toString(36).substr(2, 6)}`,
       title: title,
       updatedAt: new Date().toLocaleDateString(),
-      theme: slideType === 'quiz' ? 'classic-slate' : slideType === 'brainstorm' ? 'forest-sage' : slideType === 'wordcloud' ? 'playroom' : 'neon',
+      theme: 'cyber-neon',
       slides: [
         {
           id: `s-${Math.random().toString(36).substr(2, 4)}`,
