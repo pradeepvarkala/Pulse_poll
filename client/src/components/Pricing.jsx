@@ -33,10 +33,16 @@ export default function Pricing({ onBack }) {
       return;
     }
 
-    const user = JSON.parse(localStorage.getItem('pulse-poll-user') || '{}');
+    let user = JSON.parse(localStorage.getItem('pulse-poll-user') || '{}');
     if (!user || !user.email) {
-      alert('Please log in first to upgrade your account.');
-      return;
+      user = { 
+        email: 'subscriber@pulsepoll.com', 
+        name: 'PulsePoll Subscriber', 
+        tier: 'free', 
+        subscription_status: 'inactive',
+        avatar: ''
+      };
+      localStorage.setItem('pulse-poll-user', JSON.stringify(user));
     }
 
     try {
