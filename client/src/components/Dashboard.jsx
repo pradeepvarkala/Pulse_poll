@@ -194,61 +194,18 @@ export default function Dashboard({
   };
 
   const getBannerStyle = () => {
-    const tier = user?.tier || 'free';
-    if (tier === 'admin') {
-      return {
-        background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(6, 182, 212, 0.15))',
-        border: '1px solid rgba(16, 185, 129, 0.3)',
-        borderRadius: '16px',
-        padding: '24px',
-        marginBottom: '30px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '20px',
-        boxShadow: '0 8px 32px rgba(16, 185, 129, 0.05)'
-      };
-    } else if (tier === 'business') {
-      return {
-        background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(239, 68, 68, 0.15))',
-        border: '1px solid rgba(245, 158, 11, 0.3)',
-        borderRadius: '16px',
-        padding: '24px',
-        marginBottom: '30px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '20px',
-        boxShadow: '0 8px 32px rgba(245, 158, 11, 0.05)'
-      };
-    } else if (tier === 'pro') {
-      return {
-        background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.15))',
-        border: '1px solid rgba(99, 102, 241, 0.3)',
-        borderRadius: '16px',
-        padding: '24px',
-        marginBottom: '30px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '20px',
-        boxShadow: '0 8px 32px rgba(99, 102, 241, 0.05)'
-      };
-    }
     return {
-      background: 'rgba(255, 255, 255, 0.01)',
-      border: '1px solid var(--border-glass)',
-      borderRadius: '16px',
-      padding: '24px',
+      background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(2, 132, 199, 0.04))',
+      border: '1.5px solid rgba(37, 99, 235, 0.25)',
+      borderRadius: '20px',
+      padding: '28px',
       marginBottom: '30px',
       display: 'flex',
-      justifyContent: 'space-between',
+      justify: 'space-between',
       alignItems: 'center',
       flexWrap: 'wrap',
-      gap: '20px'
+      gap: '20px',
+      boxShadow: '0 10px 30px rgba(37, 99, 235, 0.06)'
     };
   };
 

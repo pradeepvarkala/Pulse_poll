@@ -1400,7 +1400,7 @@ export default function App() {
               title={audioMuted ? "Unmute Audio Themes" : "Mute Audio Themes"}
               style={{ padding: '6px 10px', display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}
             >
-              {audioMuted ? <VolumeX size={15} color="#ef4444" /> : <Volume2 size={15} color="#06b6d4" />}
+              {audioMuted ? <VolumeX size={15} color="#ef4444" /> : <Volume2 size={15} color="#2563eb" />}
             </button>
 
             {/* Global Theme Mode Switcher (Dark Arcade vs Light Professional) */}
@@ -1417,22 +1417,22 @@ export default function App() {
                 gap: '6px',
                 flexShrink: 0,
                 background: isProTheme ? '#ffffff' : '#0f172a',
-                color: isProTheme ? '#0f172a' : '#06b6d4',
-                border: isProTheme ? '1px solid #2563eb' : '1px solid #06b6d4',
-                boxShadow: isProTheme ? '0 2px 10px rgba(37,99,235,0.15)' : '0 0 12px rgba(6,182,212,0.3)'
+                color: isProTheme ? '#2563eb' : '#38bdf8',
+                border: '1.5px solid #2563eb',
+                boxShadow: '0 2px 10px rgba(37,99,235,0.15)'
               }}
             >
-              {isProTheme ? <Sun size={14} color="#2563eb" /> : <Moon size={14} color="#06b6d4" />}
+              {isProTheme ? <Sun size={14} color="#2563eb" /> : <Moon size={14} color="#38bdf8" />}
               <span style={{ whiteSpace: 'nowrap' }}>{isProTheme ? '💼 Light Pro' : '🎮 Arcade Dark'}</span>
             </button>
 
             <button 
-              className="btn btn-primary animate-pulse" 
-              style={{ background: 'linear-gradient(135deg, #06b6d4, #3b82f6)', fontWeight: 800, display: 'flex', gap: '4px', alignItems: 'center', boxShadow: '0 0 15px rgba(6, 182, 212, 0.3)', border: '1px solid rgba(255,255,255,0.3)', flexShrink: 0, padding: '6px 12px', fontSize: '0.8rem' }}
+              className="btn btn-primary" 
+              style={{ background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', color: '#ffffff', fontWeight: 800, display: 'flex', gap: '5px', alignItems: 'center', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.25)', border: '1px solid #3b82f6', flexShrink: 0, padding: '6px 14px', fontSize: '0.8rem' }}
               onClick={() => handleTriggerContextualSlide('AI quiz generator', true)}
             >
               <span>🤖 PulseAI</span>
-              <span>⚡</span>
+              <span style={{ color: '#ffb700' }}>⚡</span>
             </button>
             <button className="btn btn-secondary" onClick={() => setView('pricing')} style={{ flexShrink: 0, padding: '6px 12px', fontSize: '0.8rem' }}>
               ⚡ Plans
@@ -1461,8 +1461,8 @@ export default function App() {
             </button>
 
             {user?.email === 'pradeepvarkala@gmail.com' && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#0f172a', padding: '4px 10px', borderRadius: '10px', border: '1px solid rgba(6, 182, 212, 0.4)', flexShrink: 0 }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#06b6d4' }}>Plan:</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(37,99,235,0.06)', padding: '4px 10px', borderRadius: '10px', border: '1px solid rgba(37, 99, 235, 0.3)', flexShrink: 0 }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#2563eb' }}>Plan:</span>
                 <select 
                   value={user.tier}
                   onChange={async (e) => {
@@ -1488,13 +1488,13 @@ export default function App() {
                     }
                   }}
                   style={{
-                    background: '#1e293b', border: '1px solid #334155', color: '#ffffff',
-                    fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', padding: '2px 6px', borderRadius: '6px', outline: 'none'
+                    background: 'transparent', border: 'none', color: '#2563eb',
+                    fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer', padding: '2px 4px', outline: 'none'
                   }}
                 >
-                  <option value="admin" style={{ background: '#0f172a', color: '#ffffff' }}>Admin</option>
-                  <option value="pro" style={{ background: '#0f172a', color: '#ffffff' }}>Pro</option>
-                  <option value="free" style={{ background: '#0f172a', color: '#ffffff' }}>Free</option>
+                  <option value="admin">Admin</option>
+                  <option value="pro">Pro</option>
+                  <option value="free">Free</option>
                 </select>
               </div>
             )}
@@ -1507,15 +1507,15 @@ export default function App() {
               onClick={() => setView('admin')}
               title="View Profile Settings"
               style={{
-                display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 10px',
-                borderRadius: '20px', border: '1px solid var(--border-glass)',
-                background: 'rgba(255,255,255,0.04)', flexShrink: 0
+                display: 'flex', alignItems: 'center', gap: '8px', padding: '5px 12px',
+                borderRadius: '20px', border: '1px solid rgba(37, 99, 235, 0.2)',
+                background: 'rgba(37, 99, 235, 0.05)', flexShrink: 0
               }}
             >
               <div 
                 style={{ 
-                  width: '28px', height: '28px', borderRadius: '50%',
-                  background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
+                  width: '26px', height: '26px', borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontWeight: 800, color: 'white', fontSize: '0.75rem', overflow: 'hidden'
                 }}
@@ -1526,23 +1526,23 @@ export default function App() {
                   (user?.name || user?.email || 'U').slice(0, 1).toUpperCase()
                 )}
               </div>
-              <span style={{ fontSize: '0.82rem', fontWeight: 800, maxWidth: '110px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--text-primary)', maxWidth: '110px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {user?.name || user?.email?.split('@')[0] || 'Profile'}
               </span>
             </button>
 
             <button 
-              className="btn btn-primary"
+              className="btn"
               onClick={handleLogout}
               title="Logout of PulsePoll"
               style={{
                 padding: '6px 14px', fontSize: '0.82rem', fontWeight: 800,
-                color: '#ffffff', background: 'linear-gradient(135deg, #ef4444, #dc2626)',
-                border: '1px solid #f87171', gap: '6px', flexShrink: 0,
-                boxShadow: '0 0 12px rgba(239, 68, 68, 0.4)'
+                color: '#dc2626', background: 'rgba(239, 68, 68, 0.08)',
+                border: '1.5px solid rgba(239, 68, 68, 0.3)', borderRadius: '10px',
+                display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0
               }}
             >
-              <LogOut size={15} />
+              <LogOut size={15} color="#dc2626" />
               <span>Logout</span>
             </button>
           </div>
