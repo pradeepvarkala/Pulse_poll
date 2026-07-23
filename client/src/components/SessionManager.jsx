@@ -54,11 +54,23 @@ const SAMPLE_SESSIONS = [
   }
 ];
 
-export default function SessionManager({ onLaunchPresenter, onBackToDashboard }) {
+export default function SessionManager({ onLaunchPresenter, onBackToDashboard, onViewCreator }) {
   const [sessions, setSessions] = useState(() => {
     const saved = localStorage.getItem('pulse-poll-training-sessions');
     return saved ? JSON.parse(saved) : SAMPLE_SESSIONS;
   });
+
+  const [userPresentations, setUserPresentations] = useState([]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('pulse-poll-presentations');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) setUserPresentations(parsed);
+      } catch (e) {}
+    }
+  }, []);
 
   const [activeSessionId, setActiveSessionId] = useState(sessions[0]?.id || null);
   const [activeTab, setActiveTab] = useState('workshops'); // 'workshops', 'schedule', 'lobby'
@@ -98,6 +110,14 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard })
       }
       return s;
     }));
+  };
+
+  const handleUpdateSectionDeck = (dayIdx, secIdx, newDeckId) => {
+    const updatedDays = [...activeSession.days];
+    const updatedSections = [...(updatedDays[dayIdx].sections || [])];
+    updatedSections[secIdx] = { ...updatedSections[secIdx], presentationId: newDeckId };
+    updatedDays[dayIdx] = { ...updatedDays[dayIdx], sections: updatedSections };
+    updateActiveSession({ days: updatedDays });
   };
 
   // Create Workshop Wizard Handler
@@ -219,7 +239,7 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard })
             </h1>
           </div>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '4px 0 0 38px', fontWeight: 400 }}>
-            Schedule multi-day event cards, assign separate presentation decks per time slot, and manage teacher programs.
+            Schedule multi-day event cards, link presentation decks per time slot, and launch live training sessions.
           </p>
         </div>
 
@@ -361,11 +381,11 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard })
           </div>
 
           <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-            Click on any <strong>Day Card (Day 1, Day 2, Day 3...)</strong> below to add or manage program sections, times, remarks, and attached presentation decks:
+            Click on any <strong>Day Card (Day 1, Day 2, Day 3...)</strong> below to add sections, link existing presentation decks, or create new decks:
           </div>
 
           {/* DAY CARDS GRID */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', alignItems: 'start' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '20px', alignItems: 'start' }}>
             {(activeSession.days || []).map((day, dIdx) => (
               <div 
                 key={day.dayNumber || dIdx}
@@ -387,17 +407,17 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard })
                 </div>
 
                 {/* Day Card Sections List */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {(day.sections || []).map((sec, sIdx) => (
                     <div 
                       key={sec.id || sIdx}
                       style={{
-                        padding: '12px', background: 'var(--surface-2)', border: '1px solid var(--border-soft)',
-                        borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '6px'
+                        padding: '14px', background: 'var(--surface-2)', border: '1px solid var(--border-soft)',
+                        borderRadius: '10px', display: 'flex', flexDirection: 'column', gap: '8px'
                       }}
                     >
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <div style={{ fontWeight: 600, fontSize: '0.88rem', color: 'var(--text-primary)' }}>{sec.title}</div>
+                        <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>{sec.title}</div>
                         <button className="btn btn-secondary btn-icon" onClick={() => handleDeleteSection(dIdx, sIdx)} title="Delete Section" style={{ padding: '3px' }}>
                           <Trash2 size={13} color="var(--danger)" />
                         </button>
@@ -414,25 +434,49 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard })
                         </div>
                       )}
 
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px', paddingTop: '6px', borderTop: '1px solid var(--border-soft)' }}>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--accent)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <FileText size={12} />
-                          {sec.customUrl ? (
-                            <a href={sec.customUrl} target="_blank" rel="noreferrer" style={{ color: 'var(--accent)', textDecoration: 'underline' }}>
-                              Screen Link: {sec.customUrl.slice(0, 22)}...
-                            </a>
-                          ) : (
-                            <span>Attached Deck: {sec.presentationId}</span>
-                          )}
-                        </div>
+                      {/* Interactive Presentation Deck Selector & Creation Controls */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '6px', paddingTop: '8px', borderTop: '1px solid var(--border-soft)' }}>
+                        <label style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+                          🔗 Linked Presentation Deck:
+                        </label>
 
-                        <button 
-                          className="btn btn-secondary"
-                          onClick={() => onLaunchPresenter(sec.presentationId || 'sample-pres-1')}
-                          style={{ padding: '4px 8px', fontSize: '0.72rem', fontWeight: 500, gap: '4px' }}
-                        >
-                          <Play size={11} /> Play Deck
-                        </button>
+                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                          <select 
+                            value={sec.presentationId || 'sample-pres-1'}
+                            onChange={(e) => handleUpdateSectionDeck(dIdx, sIdx, e.target.value)}
+                            style={{
+                              flex: 1, minWidth: '150px', padding: '6px 8px', borderRadius: '6px',
+                              background: '#0f172a', border: '1px solid var(--border-glass)',
+                              color: 'var(--text-primary)', fontSize: '0.78rem', fontWeight: 600, outline: 'none'
+                            }}
+                          >
+                            <option value="sample-pres-1">Deck 1: Executive STEM & Diagnostic Quiz</option>
+                            <option value="sample-pres-2">Deck 2: Escape Vault Cyber Challenge</option>
+                            <option value="sample-pres-3">Deck 3: Innovation 2x2 Grid & Word Cloud</option>
+                            {userPresentations.map(p => (
+                              <option key={p.id} value={p.id}>📁 {p.title || 'Untitled Presentation'}</option>
+                            ))}
+                          </select>
+
+                          <button 
+                            className="btn btn-secondary"
+                            onClick={() => {
+                              if (onViewCreator) onViewCreator(sec.presentationId || 'sample-pres-1');
+                            }}
+                            style={{ padding: '5px 8px', fontSize: '0.72rem', fontWeight: 600, gap: '4px' }}
+                            title="Edit or Add Slides to this Deck"
+                          >
+                            <Edit3 size={11} /> Edit Deck
+                          </button>
+
+                          <button 
+                            className="btn btn-primary"
+                            onClick={() => onLaunchPresenter(sec.presentationId || 'sample-pres-1')}
+                            style={{ padding: '5px 10px', fontSize: '0.72rem', fontWeight: 600, background: 'var(--accent)', color: '#08211E', border: 'none', gap: '4px' }}
+                          >
+                            <Play size={11} /> Play Deck
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -702,6 +746,9 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard })
                   <option value="sample-pres-1">Deck 1: Executive STEM & Diagnostic Quiz</option>
                   <option value="sample-pres-2">Deck 2: Escape Vault Cyber Challenge</option>
                   <option value="sample-pres-3">Deck 3: Innovation 2x2 Grid & Word Cloud</option>
+                  {userPresentations.map(p => (
+                    <option key={p.id} value={p.id}>📁 {p.title || 'Untitled Presentation'}</option>
+                  ))}
                 </select>
               </div>
 

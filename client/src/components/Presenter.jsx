@@ -584,6 +584,7 @@ export default function Presenter({ presentationId, onBack, user: userProp }) {
   const socketRef = useRef(null);
 
   const currentUser = userProp || JSON.parse(localStorage.getItem('pulse-poll-user') || '{}');
+  const user = currentUser;
   const userEmail = currentUser.email || 'guest@pulsepoll.com';
 
   useEffect(() => {

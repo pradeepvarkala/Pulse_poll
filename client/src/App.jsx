@@ -1657,6 +1657,10 @@ export default function App() {
                 setSelectedPresentationId(presId);
                 handleNavigateToPresenter();
               }}
+              onViewCreator={(presId) => {
+                if (presId) setSelectedPresentationId(presId);
+                setView('creator');
+              }}
               onBackToDashboard={handleNavigateToDashboard}
             />
           )}
@@ -1690,6 +1694,7 @@ export default function App() {
             <Presenter 
               presentationId={selectedPresentationId}
               onBack={handleNavigateToDashboard}
+              user={user}
             />
           )}
 
