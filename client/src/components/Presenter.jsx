@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import io from 'socket.io-client';
 import { 
   ChevronLeft, ChevronRight, Lock, Unlock, Eye, EyeOff, RotateCcw, 
-  Users, Trophy, Presentation as PresIcon, HelpCircle, ArrowLeft, CheckCircle2, QrCode, Edit3, MessageSquare, Shuffle, RefreshCw, Award, Sparkles 
+  Users, Trophy, Presentation as PresIcon, HelpCircle, ArrowLeft, CheckCircle2, QrCode, Edit3, MessageSquare, Shuffle, RefreshCw, Award, Sparkles,
+  BarChart3, PieChart, CircleDot, Activity
 } from 'lucide-react';
 import { solveGroupAllocation, GROUP_NAMING_THEMES, calculateInteractionCoverage } from '../utils/groupingAlgorithm';
 import { playClickSound, playHoverSound, playCorrectSound, playMultiplierSound, playSciFiBeep } from '../utils/soundEffects';
@@ -1688,7 +1689,7 @@ export default function Presenter({ presentationId, onBack, user: userProp }) {
                       title="Bar Chart"
                       style={{ padding: '6px', borderRadius: '10px', minWidth: 'unset', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: pollVizMode === 'bar' ? 'var(--accent)' : 'transparent', color: pollVizMode === 'bar' ? '#08211E' : 'var(--text-primary)', border: 'none' }}
                     >
-                      <span style={{ fontSize: '1.2rem' }}>📊</span>
+                      <BarChart3 size={18} />
                     </button>
                     <button 
                       className={`btn ${pollVizMode === 'pie' ? 'active' : ''}`} 
@@ -1696,7 +1697,7 @@ export default function Presenter({ presentationId, onBack, user: userProp }) {
                       title="Pie Chart"
                       style={{ padding: '6px', borderRadius: '10px', minWidth: 'unset', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: pollVizMode === 'pie' ? 'var(--accent)' : 'transparent', color: pollVizMode === 'pie' ? '#08211E' : 'var(--text-primary)', border: 'none' }}
                     >
-                      <span style={{ fontSize: '1.2rem' }}>🥧</span>
+                      <PieChart size={18} />
                     </button>
                     <button 
                       className={`btn ${pollVizMode === 'doughnut' ? 'active' : ''}`} 
@@ -1704,7 +1705,7 @@ export default function Presenter({ presentationId, onBack, user: userProp }) {
                       title="Doughnut Chart"
                       style={{ padding: '6px', borderRadius: '10px', minWidth: 'unset', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: pollVizMode === 'doughnut' ? 'var(--accent)' : 'transparent', color: pollVizMode === 'doughnut' ? '#08211E' : 'var(--text-primary)', border: 'none' }}
                     >
-                      <span style={{ fontSize: '1.2rem' }}>🍩</span>
+                      <CircleDot size={18} />
                     </button>
                     <button 
                       className={`btn ${pollVizMode === 'density' ? 'active' : ''}`} 
@@ -1712,7 +1713,7 @@ export default function Presenter({ presentationId, onBack, user: userProp }) {
                       title="Ball Density Mode"
                       style={{ padding: '6px', borderRadius: '10px', minWidth: 'unset', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: pollVizMode === 'density' ? 'var(--accent)' : 'transparent', color: pollVizMode === 'density' ? '#08211E' : 'var(--text-primary)', border: 'none' }}
                     >
-                      <span style={{ fontSize: '1.2rem' }}>⚽</span>
+                      <Activity size={18} />
                     </button>
                   </div>
 
@@ -1749,7 +1750,7 @@ export default function Presenter({ presentationId, onBack, user: userProp }) {
                               <span className="chart-bar-value">{votes}</span>
                             </div>
                             <span className="chart-bar-label">
-                              <span style={{ marginRight: '6px' }}>{opt.emoji || '🚀'}</span>
+                              {!/^\p{Emoji}/u.test(opt.text || '') && opt.emoji && <span style={{ marginRight: '6px' }}>{opt.emoji}</span>}
                               {opt.text}
                             </span>
                           </div>
@@ -1784,12 +1785,14 @@ export default function Presenter({ presentationId, onBack, user: userProp }) {
                           const hasCorrect = activeSlide.correctAnswerIndex !== undefined || (activeSlide.correctAnswerIndices || []).length > 0;
                           const isIncorrect = correctRevealed && hasCorrect && !isCorrect;
 
+                          const textStr = opt.text || '';
+                          const hasLeadingEmoji = /^\p{Emoji}/u.test(textStr);
                           return (
                             <div key={opt.id} className={`legend-item ${isIncorrect ? 'incorrect-answer' : ''}`}>
                               <div className="legend-color-box" style={{ backgroundColor: color }}></div>
-                              <span>
-                                <span style={{ marginRight: '6px' }}>{opt.emoji || '🚀'}</span>
-                                {opt.text} ({votes} / {percent}%) {isCorrect && correctRevealed && '✓'}
+                              <span style={{ fontSize: '0.92rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                                {!hasLeadingEmoji && opt.emoji && <span style={{ marginRight: '6px' }}>{opt.emoji}</span>}
+                                {textStr} ({votes} / {percent}%) {isCorrect && correctRevealed && '✓'}
                               </span>
                             </div>
                           );
