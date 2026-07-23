@@ -1344,9 +1344,10 @@ export default function App() {
 
             {/* Consolidated Explore Catalog Dropdown */}
             <div 
-              style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 600, color: activeDropdown ? 'var(--accent)' : 'var(--text-primary)' }}
+              style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 600, color: activeDropdown === 'explore' ? 'var(--accent)' : 'var(--text-primary)' }}
               onMouseEnter={() => setActiveDropdown('explore')}
               onMouseLeave={() => setActiveDropdown(null)}
+              onClick={() => setActiveDropdown(activeDropdown === 'explore' ? null : 'explore')}
             >
               <span>Explore Catalog</span>
               <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>▼</span>
@@ -1426,8 +1427,16 @@ export default function App() {
               style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 500, flexShrink: 0 }}
               onMouseEnter={() => setActiveDropdown('apps')}
               onMouseLeave={() => setActiveDropdown(null)}
+              onClick={() => setActiveDropdown(activeDropdown === 'apps' ? null : 'apps')}
             >
-              <button className="btn btn-secondary" style={{ padding: '6px 14px', fontSize: '0.82rem', fontWeight: 500, display: 'flex', gap: '6px', alignItems: 'center' }}>
+              <button 
+                className="btn btn-secondary" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveDropdown(activeDropdown === 'apps' ? null : 'apps');
+                }}
+                style={{ padding: '6px 14px', fontSize: '0.82rem', fontWeight: 500, display: 'flex', gap: '6px', alignItems: 'center' }}
+              >
                 <span>Workspace Apps</span>
                 <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>▼</span>
               </button>
