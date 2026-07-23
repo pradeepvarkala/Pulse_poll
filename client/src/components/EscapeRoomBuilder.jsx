@@ -24,8 +24,8 @@ export default function EscapeRoomBuilder({ presentation, onBack, user, onReques
   ];
 
   const [rooms, setRooms] = useState([
-    { id: 'room-1', name: ROOM_NAMES[0], key: 'PUZZLE-904', status: 'LOCKED', progress: 0, participants: 8, currentChallenge: 'Decipher Binary Cipher', micMuted: false, videoOn: true },
-    { id: 'room-2', name: ROOM_NAMES[1], key: 'ALPHA-772', status: 'SOLVING', progress: 45, participants: 7, currentChallenge: 'Solve Quadratic Equation', micMuted: true, videoOn: false }
+    { id: 'room-1', name: ROOM_NAMES[0], key: 'PUZZLE-904', status: 'LOCKED', progress: 0, participants: 0, currentChallenge: 'Decipher Binary Cipher', micMuted: false, videoOn: true },
+    { id: 'room-2', name: ROOM_NAMES[1], key: 'ALPHA-772', status: 'SOLVING', progress: 0, participants: 0, currentChallenge: 'Solve Quadratic Equation', micMuted: true, videoOn: false }
   ]);
 
   const handleAddRoom = () => {
@@ -193,7 +193,7 @@ export default function EscapeRoomBuilder({ presentation, onBack, user, onReques
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                    👥 <strong>{room.participants} members</strong>
+                    👥 <strong>{room.participants > 0 ? `${room.participants} live members` : '0 members'}</strong>
                   </span>
                   <button 
                     className="btn btn-secondary" 

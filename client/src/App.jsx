@@ -1319,15 +1319,23 @@ export default function App() {
       {view !== 'presenter' && view !== 'audience' && (
         <header className="app-header" style={{ position: 'relative', zIndex: 1000 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <button 
+              className="btn btn-secondary btn-icon" 
+              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
+              title={isSidebarCollapsed ? "Expand Sidebar Menu" : "Collapse Sidebar Menu"}
+              style={{ width: '38px', height: '38px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Menu size={18} />
+            </button>
+
             <div 
               className="logo" 
-              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
-              style={{ marginRight: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', userSelect: 'none' }}
-              title="Click logo to toggle navigation menu"
+              onClick={() => setView('dashboard')} 
+              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', userSelect: 'none' }}
+              title="PulsePoll Interactive Platform"
             >
-              <div className="logo-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                <Menu size={15} color="white" />
-                <PresIcon size={16} color="white" />
+              <div className="logo-icon">
+                <PresIcon size={18} color="white" />
               </div>
               <span style={{ fontWeight: 800 }}>PulsePoll</span>
             </div>
