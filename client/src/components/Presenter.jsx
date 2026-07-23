@@ -1568,8 +1568,25 @@ export default function Presenter({ presentationId, onBack, user: userProp }) {
           </div>
         </div>
 
-        {/* Live Real-time Metrics Badge */}
+        {/* Live Real-time Metrics & Timer Badge */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* Universal Time Limit display moved to Top Header Bar */}
+          {quizTimer > 0 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(15, 23, 42, 0.85)', padding: '5px 14px', borderRadius: '30px', border: '1px solid var(--border-glass)' }}>
+              <span 
+                className={quizRunning && quizTimer <= 5 ? "timer-warning-pulse" : ""}
+                style={{ fontWeight: 800, fontSize: '0.9rem', color: quizTimer > 5 ? 'var(--text-primary)' : 'var(--accent-red)', display: 'flex', alignItems: 'center', gap: '4px' }}
+              >
+                ⏱️ {quizTimer}s
+              </span>
+              {!quizRunning && (
+                <button className="btn btn-primary" style={{ padding: '3px 10px', fontSize: '0.78rem', borderRadius: '12px', background: 'var(--accent)', color: '#08211E', fontWeight: 700, border: 'none' }} onClick={startQuizTimer}>
+                  Start Timer
+                </button>
+              )}
+            </div>
+          )}
+
           <div style={{
             display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(15, 23, 42, 0.85)',
             padding: '6px 16px', borderRadius: '30px', border: '1px solid var(--border-glass)',
@@ -1592,7 +1609,7 @@ export default function Presenter({ presentationId, onBack, user: userProp }) {
       <div className="presenter-body" style={{ display: 'flex', gap: '20px', padding: '12px 30px', height: 'calc(100vh - 75px)', overflow: 'hidden' }}>
         
         {/* Left Area: Slide Content Canvas */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', paddingRight: '6px' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'hidden', paddingRight: '6px' }}>
           {confettiActive && (
           <div className="confetti-overlay">
             {Array.from({ length: 60 }).map((_, i) => {
@@ -1619,23 +1636,6 @@ export default function Presenter({ presentationId, onBack, user: userProp }) {
           </div>
         )}
         <h1 className="presenter-question" style={{ fontSize: 'clamp(1.3rem, 2.2vw, 1.8rem)', marginBottom: '10px', lineHeight: 1.3, color: '#ffffff', textShadow: '0 2px 12px rgba(0,0,0,0.95)', maxWidth: '900px', margin: '0 auto 10px auto' }}>{activeSlide.question}</h1>
-
-        {/* Universal Time Limit display */}
-        {quizTimer > 0 && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '1.5rem', background: 'var(--bg-card-dark)', padding: '6px 16px', borderRadius: '20px', border: '1px solid var(--border-glass)', width: 'fit-content', margin: '0 auto 1.5rem auto' }}>
-            <span 
-              className={quizRunning && quizTimer <= 5 ? "timer-warning-pulse" : ""}
-              style={{ fontWeight: 800, fontSize: '1.2rem', color: quizTimer > 5 ? 'var(--text-primary)' : 'var(--accent-red)', display: 'flex', alignItems: 'center', gap: '8px', transition: 'transform 0.15s ease' }}
-            >
-              ⏱️ {quizTimer}s
-            </span>
-            {!quizRunning && quizTimer > 0 && (
-              <button className="btn btn-primary" style={{ padding: '4px 12px', fontSize: '0.8rem', borderRadius: '12px' }} onClick={startQuizTimer}>
-                Start Timer
-              </button>
-            )}
-          </div>
-        )}
 
         <div className="presenter-visualization">
           {!answersVisible ? (
@@ -1674,18 +1674,51 @@ export default function Presenter({ presentationId, onBack, user: userProp }) {
             <>
               {/* 1. Multiple Choice */}
               {activeSlide.type === 'poll' && (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-                  {/* Chart visualization mode toggle */}
-                  <div className="viz-toggle-bar">
-                    <button className={`viz-toggle-btn ${pollVizMode === 'bar' ? 'active' : ''}`} onClick={() => setPollVizMode('bar')}>Bar</button>
-                    <button className={`viz-toggle-btn ${pollVizMode === 'pie' ? 'active' : ''}`} onClick={() => setPollVizMode('pie')}>Pie</button>
-                    <button className={`viz-toggle-btn ${pollVizMode === 'doughnut' ? 'active' : ''}`} onClick={() => setPollVizMode('doughnut')}>Doughnut</button>
-                    <button className={`viz-toggle-btn ${pollVizMode === 'density' ? 'active' : ''}`} onClick={() => setPollVizMode('density')}>Ball Density</button>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', position: 'relative', height: '100%', justifyContent: 'center' }}>
+                  {/* Vertical Icon-Only Sidebar Dock (📊 🥧 🍩 ⚽) */}
+                  <div style={{
+                    position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)',
+                    display: 'flex', flexDirection: 'column', gap: '8px', zIndex: 10,
+                    background: 'rgba(15, 23, 42, 0.85)', padding: '6px', borderRadius: '14px',
+                    border: '1px solid var(--border-glass)', boxShadow: '0 8px 25px rgba(0,0,0,0.4)'
+                  }}>
+                    <button 
+                      className={`btn ${pollVizMode === 'bar' ? 'active' : ''}`} 
+                      onClick={() => setPollVizMode('bar')}
+                      title="Bar Chart"
+                      style={{ padding: '6px', borderRadius: '10px', minWidth: 'unset', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: pollVizMode === 'bar' ? 'var(--accent)' : 'transparent', color: pollVizMode === 'bar' ? '#08211E' : 'var(--text-primary)', border: 'none' }}
+                    >
+                      <span style={{ fontSize: '1.2rem' }}>📊</span>
+                    </button>
+                    <button 
+                      className={`btn ${pollVizMode === 'pie' ? 'active' : ''}`} 
+                      onClick={() => setPollVizMode('pie')}
+                      title="Pie Chart"
+                      style={{ padding: '6px', borderRadius: '10px', minWidth: 'unset', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: pollVizMode === 'pie' ? 'var(--accent)' : 'transparent', color: pollVizMode === 'pie' ? '#08211E' : 'var(--text-primary)', border: 'none' }}
+                    >
+                      <span style={{ fontSize: '1.2rem' }}>🥧</span>
+                    </button>
+                    <button 
+                      className={`btn ${pollVizMode === 'doughnut' ? 'active' : ''}`} 
+                      onClick={() => setPollVizMode('doughnut')}
+                      title="Doughnut Chart"
+                      style={{ padding: '6px', borderRadius: '10px', minWidth: 'unset', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: pollVizMode === 'doughnut' ? 'var(--accent)' : 'transparent', color: pollVizMode === 'doughnut' ? '#08211E' : 'var(--text-primary)', border: 'none' }}
+                    >
+                      <span style={{ fontSize: '1.2rem' }}>🍩</span>
+                    </button>
+                    <button 
+                      className={`btn ${pollVizMode === 'density' ? 'active' : ''}`} 
+                      onClick={() => setPollVizMode('density')}
+                      title="Ball Density Mode"
+                      style={{ padding: '6px', borderRadius: '10px', minWidth: 'unset', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: pollVizMode === 'density' ? 'var(--accent)' : 'transparent', color: pollVizMode === 'density' ? '#08211E' : 'var(--text-primary)', border: 'none' }}
+                    >
+                      <span style={{ fontSize: '1.2rem' }}>⚽</span>
+                    </button>
                   </div>
 
                   {/* Render based on mode */}
                   {pollVizMode === 'bar' && (
-                    <div className="bar-chart-container animate-fade">
+                    <div className="bar-chart-container animate-fade" style={{ height: 'calc(100vh - 220px)', minHeight: '320px', width: '100%', maxWidth: '920px', margin: '0 auto', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: '24px', paddingBottom: '20px' }}>
                       {activeSlide.options?.map((opt, idx) => {
                         const responses = activeSlide.responses || {};
                         const votes = responses[opt.id] || 0;
