@@ -1276,6 +1276,214 @@ export default function Presenter({ presentationId, onBack }) {
         backgroundPosition: 'center'
       }}
     >
+      {/* 🚀 FUTURE MINDS ESPORTS CYBER ARENA LIVE HUD VIEW */}
+      {(theme === 'future-minds' || isEsportsArenaMode) && (
+        <div className="theme-future-minds animate-fade" style={{
+          position: 'fixed', inset: 0, zIndex: 9999, background: '#030712',
+          backgroundImage: `radial-gradient(at 50% 0%, rgba(0, 240, 255, 0.18) 0px, transparent 65%), radial-gradient(at 100% 100%, rgba(255, 183, 0, 0.15) 0px, transparent 65%), linear-gradient(rgba(3, 7, 18, 0.88), rgba(3, 7, 18, 0.96)), url(${activeSlide.bgImage || '/assets/theme_cyber_neon.jpg'})`,
+          backgroundSize: 'cover', backgroundPosition: 'center', padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: '20px', overflowY: 'auto'
+        }}>
+          {/* TOP HEADER HUD BAR */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1.5px solid rgba(0, 240, 255, 0.3)', paddingBottom: '16px', flexWrap: 'wrap', gap: '15px' }}>
+            
+            {/* Left Title & Round info */}
+            <div>
+              <div style={{ fontSize: '1.9rem', fontWeight: 900, fontFamily: 'Outfit, sans-serif', letterSpacing: '1.5px', background: 'linear-gradient(135deg, #00f0ff, #3b82f6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                FUTURE MINDS CHALLENGE <span style={{ color: '#ffb700', WebkitTextFillColor: '#ffb700', fontSize: '1.1rem', padding: '2px 10px', background: 'rgba(255,183,0,0.15)', border: '1px solid #ffb700', borderRadius: '6px' }}>LIVE</span>
+              </div>
+              <div style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 800, marginTop: '4px', letterSpacing: '1px' }}>
+                SEASON 3 | ROUND 4 • <span style={{ color: '#00f0ff' }}>SPECTATORS: 15,482</span> • <span style={{ color: '#34d399' }}>{participantsCount} SCANNED</span>
+              </div>
+            </div>
+
+            {/* Center Circular Concentric Neon SVG Timer Gauge */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
+              <div className="cyber-timer-ring" style={{
+                width: '115px', height: '115px', borderRadius: '50%', border: '4px solid #00f0ff',
+                boxShadow: '0 0 30px rgba(0, 240, 255, 0.6), inset 0 0 20px rgba(0, 240, 255, 0.4)',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(5, 15, 30, 0.9)'
+              }}>
+                <span style={{ fontSize: '0.62rem', color: '#94a3b8', fontWeight: 800, letterSpacing: '1px' }}>TIME REMAINING:</span>
+                <span style={{ fontSize: '1.65rem', fontWeight: 900, color: '#ffffff', fontFamily: 'monospace', textShadow: '0 0 10px #00f0ff' }}>
+                  00:{quizTimer > 0 ? quizTimer.toString().padStart(2, '0') : '15'}
+                </span>
+                <span style={{ fontSize: '0.65rem', color: '#ef4444', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ef4444', boxShadow: '0 0 8px #ef4444' }}></span> LIVE
+                </span>
+              </div>
+            </div>
+
+            {/* Right Multiplier & User Gold Profile Badge */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{
+                padding: '10px 20px', background: 'linear-gradient(135deg, rgba(255, 183, 0, 0.22), rgba(255, 140, 0, 0.12))',
+                border: '1.5px solid #ffb700', borderRadius: '14px', textAlign: 'center', boxShadow: '0 0 25px rgba(255, 183, 0, 0.35)'
+              }}>
+                <div style={{ fontSize: '1.7rem', fontWeight: 900, color: '#ffb700', lineHeight: 1 }}>4x</div>
+                <div style={{ fontSize: '0.65rem', fontWeight: 900, color: '#ffffff', letterSpacing: '0.5px' }}>POINTS MULTIPLIER</div>
+                <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#34d399', marginTop: '2px' }}>STREAK: +200%</div>
+              </div>
+
+              <div style={{
+                padding: '10px 16px', background: 'rgba(10, 25, 48, 0.9)', border: '1px solid rgba(0, 240, 255, 0.4)',
+                borderRadius: '14px', display: 'flex', alignItems: 'center', gap: '12px'
+              }}>
+                <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, #00f0ff, #9d4edf)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', boxShadow: '0 0 12px rgba(0,240,255,0.5)' }}>
+                  🧙‍♂️
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 900, color: '#ffffff' }}>CYBER_RAVEN</div>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#ffb700' }}>💰 1,250 G</div>
+                </div>
+                <button 
+                  onClick={() => setIsEsportsArenaMode(false)} 
+                  title="Toggle Standard Mode" 
+                  style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#ffffff', cursor: 'pointer', marginLeft: '6px', borderRadius: '8px', padding: '4px 8px', fontSize: '0.75rem', fontWeight: 800 }}
+                >
+                  Exit HUD ✕
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* MAIN ARENA SPLIT (2 COLUMNS) */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1.35fr 1fr', gap: '28px', flex: 1, alignItems: 'stretch' }}>
+            
+            {/* Left Column: Slanted Question Card & Choice Buttons */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '22px', justifyContent: 'space-between' }}>
+              
+              {/* Question Banner */}
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(10, 25, 50, 0.92), rgba(5, 12, 25, 0.96))',
+                border: '1.5px solid #00f0ff', borderRadius: '18px', padding: '28px 34px', textAlign: 'center',
+                boxShadow: '0 0 40px rgba(0, 240, 255, 0.28)', clipPath: 'polygon(22px 0%, calc(100% - 22px) 0%, 100% 50%, calc(100% - 22px) 100%, 22px 100%, 0% 50%)'
+              }}>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#ffffff', letterSpacing: '0.5px', margin: 0, textTransform: 'uppercase', lineHeight: 1.4 }}>
+                  {activeSlide.question || 'WHICH EXOPLANET HAS A THIN ATMOSPHERE OF METHANE AND ARGON?'}
+                </h2>
+              </div>
+
+              {/* Slanted Hexagonal Choice Buttons (2x2 Grid) */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px' }}>
+                {(activeSlide.options || [
+                  { id: 'opt-a', text: 'PROXIMA B' },
+                  { id: 'opt-b', text: 'KEPLER-1649c' },
+                  { id: 'opt-c', text: 'TRAPPIST-1d' },
+                  { id: 'opt-d', text: 'LTT 1445Ab' }
+                ]).map((opt, oIdx) => {
+                  const label = String.fromCharCode(65 + oIdx);
+                  const responses = activeSlide.responses || {};
+                  const votes = typeof responses === 'object' && !Array.isArray(responses) ? (responses[opt.id] || 0) : 0;
+                  
+                  return (
+                    <button 
+                      key={opt.id || oIdx}
+                      className="cyber-option-btn"
+                      onClick={() => {
+                        playClickSound();
+                        playMultiplierSound();
+                        handleVote(opt.id);
+                      }}
+                      onMouseEnter={() => playHoverSound()}
+                    >
+                      <span style={{ fontSize: '1.2rem', fontWeight: 900, color: '#00f0ff' }}>{label}.</span>
+                      <span style={{ fontSize: '1.05rem', fontWeight: 800, flex: 1, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{opt.text}</span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 900, color: '#ffb700', padding: '3px 10px', background: 'rgba(255,183,0,0.15)', borderRadius: '6px' }}>{votes} votes</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Bottom XP Score & Live Chat Ticker */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', background: 'rgba(10,25,48,0.85)', padding: '12px 20px', borderRadius: '16px', border: '1px solid rgba(0, 240, 255, 0.4)', boxShadow: '0 0 20px rgba(0,240,255,0.15)' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', border: '2px solid #00f0ff', background: 'rgba(0,240,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
+                    🧙‍♂️
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 900, color: '#ffffff' }}>
+                      YOUR SCORE: <span style={{ color: '#ffb700', fontSize: '1.15rem' }}>24,900</span>
+                    </div>
+                    <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#00f0ff' }}>LEVEL 20</div>
+                  </div>
+                </div>
+
+                <div style={{ flex: 1, background: 'rgba(5, 12, 25, 0.9)', border: '1px solid rgba(0, 240, 255, 0.3)', borderRadius: '14px', padding: '10px 16px', fontSize: '0.82rem', color: '#94a3b8' }}>
+                  <span style={{ fontWeight: 900, color: '#00f0ff' }}>Chat: </span>
+                  <span style={{ color: '#ffb700', fontWeight: 800 }}>NEON_WITCH:</span> "Close race!" • <span style={{ color: '#ffb700', fontWeight: 800 }}>VOID_WALKER:</span> "Wow, only 15s!"
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: 3D Holographic Live Rankings Podium & Top 8 Standings */}
+            <div style={{ padding: '24px', borderRadius: '22px', background: 'rgba(7, 14, 28, 0.88)', border: '1.5px solid rgba(0, 240, 255, 0.4)', display: 'flex', flexDirection: 'column', gap: '18px', boxShadow: '0 0 40px rgba(0, 240, 255, 0.15)' }}>
+              <div style={{ fontSize: '1.2rem', fontWeight: 900, textAlign: 'center', color: '#00f0ff', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
+                LIVE RANKINGS
+              </div>
+
+              {/* 3D Gold/Silver/Bronze Cylinder Podium */}
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: '12px', height: '185px', paddingBottom: '10px', borderBottom: '1px solid rgba(0, 240, 255, 0.2)' }}>
+                {/* 2nd Silver Left */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '30%' }}>
+                  <div style={{ width: '42px', height: '42px', borderRadius: '50%', border: '2px solid #cbd5e1', background: 'rgba(203, 213, 225, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '6px', fontSize: '1.2rem' }}>👤</div>
+                  <div style={{ height: '95px', width: '100%', background: 'linear-gradient(180deg, rgba(203,213,225,0.4), rgba(148,163,184,0.1))', border: '1px solid #cbd5e1', borderRadius: '10px 10px 0 0', textAlign: 'center', padding: '6px 2px' }}>
+                    <div style={{ fontSize: '0.95rem', fontWeight: 900, color: '#cbd5e1' }}>#2</div>
+                    <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>STAR_GAZER</div>
+                    <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>42,100 pts</div>
+                  </div>
+                </div>
+
+                {/* 1st Gold Center */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '36%' }}>
+                  <div style={{ fontSize: '1.2rem', color: '#ffb700', marginBottom: '2px' }}>👑</div>
+                  <div style={{ width: '48px', height: '48px', borderRadius: '50%', border: '2.5px solid #ffb700', background: 'rgba(255, 183, 0, 0.25)', boxShadow: '0 0 20px rgba(255, 183, 0, 0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '6px', fontSize: '1.4rem' }}>🧙‍♂️</div>
+                  <div style={{ height: '125px', width: '100%', background: 'linear-gradient(180deg, rgba(255,183,0,0.5), rgba(217,119,6,0.15))', border: '1.5px solid #ffb700', borderRadius: '12px 12px 0 0', textAlign: 'center', padding: '8px 2px', boxShadow: '0 0 25px rgba(255, 183, 0, 0.35)' }}>
+                    <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffb700' }}>#1</div>
+                    <div style={{ fontSize: '0.78rem', fontWeight: 900, color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>CYBER_RAVEN</div>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#ffb700' }}>48,750 pts</div>
+                  </div>
+                </div>
+
+                {/* 3rd Bronze Right */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '30%' }}>
+                  <div style={{ width: '42px', height: '42px', borderRadius: '50%', border: '2px solid #b45309', background: 'rgba(180, 83, 9, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '6px', fontSize: '1.2rem' }}>👩</div>
+                  <div style={{ height: '80px', width: '100%', background: 'linear-gradient(180deg, rgba(180,83,9,0.4), rgba(120,53,15,0.1))', border: '1px solid #b45309', borderRadius: '10px 10px 0 0', textAlign: 'center', padding: '6px 2px' }}>
+                    <div style={{ fontSize: '0.95rem', fontWeight: 900, color: '#f59e0b' }}>#3</div>
+                    <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>NEON_WITCH</div>
+                    <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>39,400 pts</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Top 8 Standings List */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {[
+                  { rank: 4, name: 'VOID_WALKER', score: 36250, delta: '+15', avatar: '👾' },
+                  { rank: 5, name: 'QUANTUM_LEAP', score: 33800, delta: '+20', avatar: '🔬' },
+                  { rank: 6, name: 'PIXEL_DUST', score: 31500, delta: '+40', avatar: '⚡' },
+                  { rank: 7, name: 'ORBIT_SCOUT', score: 29100, delta: '+25', avatar: '🛸' },
+                  { rank: 8, name: 'DATA_STREAK', score: 27650, delta: '+50', avatar: '💻' }
+                ].map(r => (
+                  <div key={r.rank} style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 14px',
+                    background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(0, 240, 255, 0.18)', borderRadius: '12px'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 900, color: '#00f0ff', width: '22px' }}>#{r.rank}</span>
+                      <span style={{ fontSize: '0.95rem' }}>{r.avatar}</span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#ffffff' }}>{r.name}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 900, color: '#ffb700' }}>{r.score.toLocaleString()}</span>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#34d399' }}>{r.delta}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="ambient-bg">
         <div className="ambient-circle circle-1"></div>
         <div className="ambient-circle circle-2"></div>
