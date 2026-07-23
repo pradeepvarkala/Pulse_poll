@@ -350,7 +350,7 @@ export default function Dashboard({
             onClick={onLogout}
           >
             <span style={{ fontSize: '1.1rem' }}>🚪</span>
-            {!isCollapsed && <span style={{ color: '#f87171', fontWeight: 800 }}>Logout</span>}
+            {!isCollapsed && <span style={{ color: '#f87171', fontWeight: 600 }}>Logout</span>}
           </button>
         </div>
       </div>

@@ -498,7 +498,7 @@ select option:checked {
 }
 
 body {
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
   background-color: var(--bg-dark);
   color: var(--text-primary);
   min-height: 100vh;
@@ -507,12 +507,13 @@ body {
   background-image: var(--bg-gradient);
   background-attachment: fixed;
   transition: background-color 0.5s ease, background-image 0.5s ease;
+  -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Outfit', sans-serif;
+h1, h2, h3, h4, h5, h6, .font-display {
+  font-family: 'Sora', 'Inter', sans-serif !important;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.015em;
 }
 
 /* Scrollbar Styling */
@@ -530,26 +531,30 @@ h1, h2, h3, h4, h5, h6 {
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* World-Class Standardized Button System */
+/* Standardized Button & Nav System (Normal weight 500/600) */
+.btn, button, input, select {
+  font-family: 'Inter', sans-serif !important;
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 10px 20px;
-  height: 42px;
+  padding: 8px 16px;
   border-radius: var(--radius-md);
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-weight: 700;
-  font-size: 0.88rem;
-  line-height: 1;
-  letter-spacing: -0.01em;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 600;
+  font-size: 13.5px;
+  line-height: 1.4;
   border: 1px solid transparent;
   cursor: pointer;
   transition: var(--transition-smooth);
   user-select: none;
   white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .btn-sm {

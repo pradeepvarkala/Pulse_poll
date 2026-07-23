@@ -1423,27 +1423,27 @@ export default function App() {
 
             <button 
               className="btn btn-primary" 
-              style={{ background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', color: '#ffffff', fontWeight: 800, display: 'flex', gap: '5px', alignItems: 'center', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.25)', border: '1px solid #3b82f6', flexShrink: 0, padding: '6px 14px', fontSize: '0.8rem' }}
+              style={{ background: 'var(--accent)', color: '#06211D', fontWeight: 600, display: 'flex', gap: '5px', alignItems: 'center', border: 'none', flexShrink: 0, padding: '6px 14px', fontSize: '0.82rem' }}
               onClick={() => handleTriggerContextualSlide('AI quiz generator', true)}
             >
               <span>🤖 PulseAI</span>
-              <span style={{ color: '#ffb700' }}>⚡</span>
+              <span>⚡</span>
             </button>
-            <button className="btn btn-secondary" onClick={() => setView('pricing')} style={{ flexShrink: 0, padding: '6px 12px', fontSize: '0.8rem' }}>
+            <button className="btn btn-secondary" onClick={() => setView('pricing')} style={{ flexShrink: 0, padding: '6px 12px', fontSize: '0.82rem', fontWeight: 500 }}>
               ⚡ Plans
             </button>
             <button 
               className={`btn ${view === 'sessions' ? 'btn-primary' : 'btn-secondary'}`}
               onClick={() => setView('sessions')}
               title="Multi-Day Training Workshop Manager"
-              style={{ fontWeight: 800, flexShrink: 0, padding: '6px 12px', fontSize: '0.8rem' }}
+              style={{ fontWeight: 500, flexShrink: 0, padding: '6px 12px', fontSize: '0.82rem' }}
             >
               📅 Workshops
             </button>
-            <button className="btn btn-secondary" onClick={() => setView('remote')} title="Launch Trainer Companion Mobile App" style={{ flexShrink: 0, padding: '6px 12px', fontSize: '0.8rem' }}>
+            <button className="btn btn-secondary" onClick={() => setView('remote')} title="Launch Trainer Companion Mobile App" style={{ flexShrink: 0, padding: '6px 12px', fontSize: '0.82rem', fontWeight: 500 }}>
               📱 Trainer App
             </button>
-            <button className="btn btn-secondary" onClick={handleNavigateToAudience} style={{ flexShrink: 0, padding: '6px 12px', fontSize: '0.8rem' }}>
+            <button className="btn btn-secondary" onClick={handleNavigateToAudience} style={{ flexShrink: 0, padding: '6px 12px', fontSize: '0.82rem', fontWeight: 500 }}>
               Join a Room
             </button>
             <button 
@@ -1456,8 +1456,8 @@ export default function App() {
             </button>
 
             {user?.email === 'pradeepvarkala@gmail.com' && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(37,99,235,0.06)', padding: '4px 10px', borderRadius: '10px', border: '1px solid rgba(37, 99, 235, 0.3)', flexShrink: 0 }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#2563eb' }}>Plan:</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--surface-2)', padding: '4px 10px', borderRadius: '10px', border: '1px solid var(--border-soft)', flexShrink: 0 }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-muted)' }}>Plan:</span>
                 <select 
                   value={user.tier}
                   onChange={async (e) => {
@@ -1483,8 +1483,8 @@ export default function App() {
                     }
                   }}
                   style={{
-                    background: 'transparent', border: 'none', color: '#2563eb',
-                    fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer', padding: '2px 4px', outline: 'none'
+                    background: 'transparent', border: 'none', color: 'var(--text-primary)',
+                    fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', padding: '2px 4px', outline: 'none'
                   }}
                 >
                   <option value="admin">Admin</option>
@@ -1503,16 +1503,16 @@ export default function App() {
               title="View Profile Settings"
               style={{
                 display: 'flex', alignItems: 'center', gap: '8px', padding: '5px 12px',
-                borderRadius: '20px', border: '1px solid rgba(37, 99, 235, 0.2)',
-                background: 'rgba(37, 99, 235, 0.05)', flexShrink: 0
+                borderRadius: '20px', border: '1px solid var(--border-soft)',
+                background: 'var(--surface-2)', flexShrink: 0
               }}
             >
               <div 
                 style={{ 
                   width: '26px', height: '26px', borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
+                  background: 'linear-gradient(135deg, #7C6FF0, #4C7CF0)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontWeight: 800, color: 'white', fontSize: '0.75rem', overflow: 'hidden'
+                  fontWeight: 600, color: 'white', fontSize: '0.75rem', overflow: 'hidden'
                 }}
               >
                 {user?.avatar ? (
@@ -1521,7 +1521,7 @@ export default function App() {
                   (user?.name || user?.email || 'U').slice(0, 1).toUpperCase()
                 )}
               </div>
-              <span style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--text-primary)', maxWidth: '110px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-primary)', maxWidth: '110px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {user?.name || user?.email?.split('@')[0] || 'Profile'}
               </span>
             </button>
@@ -1531,13 +1531,13 @@ export default function App() {
               onClick={handleLogout}
               title="Logout of PulsePoll"
               style={{
-                padding: '6px 14px', fontSize: '0.82rem', fontWeight: 800,
-                color: '#dc2626', background: 'rgba(239, 68, 68, 0.08)',
-                border: '1.5px solid rgba(239, 68, 68, 0.3)', borderRadius: '10px',
+                padding: '6px 14px', fontSize: '0.82rem', fontWeight: 500,
+                color: 'var(--danger)', background: 'var(--danger-soft)',
+                border: '1px solid transparent', borderRadius: '10px',
                 display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0
               }}
             >
-              <LogOut size={15} color="#dc2626" />
+              <LogOut size={15} color="var(--danger)" />
               <span>Logout</span>
             </button>
           </div>
