@@ -74,6 +74,34 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
 
   const [activeSessionId, setActiveSessionId] = useState(sessions[0]?.id || null);
   const [activeTab, setActiveTab] = useState('workshops'); // 'workshops', 'schedule', 'lobby'
+
+  // Listen for browser back button popstate within workshops!
+  useEffect(() => {
+    const handlePopState = (e) => {
+      if (e.state && e.state.tab) {
+        setActiveTab(e.state.tab);
+      } else {
+        setActiveTab('workshops');
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const handleOpenWorkshopSchedule = (sessionId) => {
+    setActiveSessionId(sessionId);
+    setActiveTab('schedule');
+    window.history.pushState({ view: 'sessions', tab: 'schedule' }, '', '#sessions-schedule');
+  };
+
+  const handleHeaderBack = () => {
+    if (activeTab === 'schedule' || activeTab === 'lobby') {
+      setActiveTab('workshops');
+      window.history.pushState({ view: 'sessions', tab: 'workshops' }, '', '#sessions');
+    } else {
+      onBackToDashboard();
+    }
+  };
   
   // Wizard Modal States
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -231,7 +259,7 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px', marginBottom: '24px' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <button className="btn btn-secondary btn-icon" onClick={onBackToDashboard} title="Back to Dashboard">
+            <button className="btn btn-secondary btn-icon" onClick={handleHeaderBack} title="Back">
               <ArrowLeft size={18} />
             </button>
             <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -317,10 +345,7 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                   <button 
                     className="btn btn-secondary"
-                    onClick={() => {
-                      setActiveSessionId(sess.id);
-                      setActiveTab('schedule');
-                    }}
+                    onClick={() => handleOpenWorkshopSchedule(sess.id)}
                     style={{ fontSize: '0.82rem', fontWeight: 500 }}
                   >
                     <Edit3 size={14} /> Edit Schedule & Day Cards
