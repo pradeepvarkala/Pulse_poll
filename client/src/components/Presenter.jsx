@@ -1735,41 +1735,65 @@ export default function Presenter({ presentationId, onBack }) {
 
               {/* 2. Word Cloud */}
               {activeSlide.type === 'wordcloud' && (
-                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {(activeSlide.responses || []).length === 0 ? (
-                    <div style={{ color: 'var(--text-muted)' }}>Waiting for submissions...</div>
-                  ) : (
-                    <svg className="word-cloud-svg">
-                      {(() => {
-                        const words = activeSlide.responses || [];
-                        const freqMap = {};
-                        words.forEach(w => { freqMap[w] = (freqMap[w] || 0) + 1; });
-                        const entries = Object.entries(freqMap)
-                          .map(([text, count]) => ({ text, weight: count }))
-                          .sort((a,b) => b.weight - a.weight);
-                        
-                        return entries.map((word, i) => {
-                          const angle = i * 2.4;
-                          const radius = Math.min(80 + i * 25, 200);
-                          const x = 500 + Math.cos(angle) * radius;
-                          const y = 200 + Math.sin(angle) * radius * 0.7;
-                          const fontSize = 16 + word.weight * 10;
-                          const colors = ['#6366f1', '#ec4899', '#10b981', '#f59e0b', '#8b5cf6', '#a5b4fc', '#f472b6'];
-                          return (
-                            <text
-                              key={word.text}
-                              x={x}
-                              y={y}
-                              className="cloud-word"
-                              style={{ fontSize: `${fontSize}px`, fill: colors[i % colors.length], opacity: 0.9 }}
-                            >
-                              {word.text}
-                            </text>
-                          );
-                        });
-                      })()}
-                    </svg>
-                  )}
+                <div style={{ width: '100%', height: '100%', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '20px', padding: '30px' }}>
+                  {(() => {
+                    const raw = activeSlide.responses;
+                    let entries = [];
+                    if (Array.isArray(raw)) {
+                      const freq = {};
+                      raw.forEach(item => {
+                        let word = typeof item === 'string' ? item : item?.text || item?.word || '';
+                        word = word.trim();
+                        if (word) freq[word] = (freq[word] || 0) + 1;
+                      });
+                      entries = Object.entries(freq).map(([text, count]) => ({ text, weight: count }));
+                    } else if (raw && typeof raw === 'object') {
+                      entries = Object.entries(raw).map(([text, count]) => ({ text, weight: Number(count) || 1 }));
+                    } else if (typeof raw === 'string' && raw.trim()) {
+                      entries = [{ text: raw.trim(), weight: 1 }];
+                    }
+
+                    if (entries.length === 0) {
+                      return (
+                        <div style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500, fontStyle: 'italic', textAlign: 'center' }}>
+                          ☁️ Waiting for live audience word submissions...
+                        </div>
+                      );
+                    }
+
+                    const colors = [
+                      '#38bdf8', '#f43f5e', '#10b981', '#fbbf24', 
+                      '#a855f7', '#ec4899', '#06b6d4', '#f97316', 
+                      '#34d399', '#c084fc', '#e11d48', '#0284c7'
+                    ];
+
+                    return entries.map((word, i) => {
+                      const fontSize = Math.min(3.8, Math.max(1.5, 1.4 + word.weight * 0.5));
+                      const color = colors[i % colors.length];
+                      return (
+                        <span
+                          key={word.text}
+                          className="cloud-word animate-pulse"
+                          style={{
+                            fontSize: `${fontSize}rem`,
+                            color: color,
+                            fontWeight: 700,
+                            padding: '6px 14px',
+                            borderRadius: '12px',
+                            background: 'rgba(255, 255, 255, 0.04)',
+                            border: `1px solid ${color}33`,
+                            boxShadow: `0 4px 20px ${color}22`,
+                            textShadow: `0 0 12px ${color}66`,
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            userSelect: 'none',
+                            display: 'inline-block'
+                          }}
+                        >
+                          {word.text}
+                        </span>
+                      );
+                    });
+                  })()}
                 </div>
               )}
 

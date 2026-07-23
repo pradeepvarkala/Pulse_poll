@@ -881,10 +881,36 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
               )}
 
               {activeSlide.type === 'wordcloud' && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', justifyContent: 'center' }}>
-                  <span style={{ fontSize: '1.8rem', color: 'var(--primary)', fontWeight: 800 }}>Culture</span>
-                  <span style={{ fontSize: '1.2rem', color: 'var(--secondary)', opacity: 0.8 }}>Teamwork</span>
-                  <span style={{ fontSize: '1.5rem', color: 'var(--accent-green)', fontWeight: 700 }}>Fun</span>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
+                  {(activeSlide.responses && (Array.isArray(activeSlide.responses) ? activeSlide.responses.length > 0 : Object.keys(activeSlide.responses).length > 0)) ? (
+                    (() => {
+                      let entries = [];
+                      if (Array.isArray(activeSlide.responses)) {
+                        const freq = {};
+                        activeSlide.responses.forEach(w => { if (typeof w === 'string' && w.trim()) freq[w.trim()] = (freq[w.trim()] || 0) + 1; });
+                        entries = Object.entries(freq).map(([text, count]) => ({ text, weight: count }));
+                      } else if (typeof activeSlide.responses === 'object') {
+                        entries = Object.entries(activeSlide.responses).map(([text, count]) => ({ text, weight: Number(count) || 1 }));
+                      }
+                      const palette = ['#38bdf8', '#f43f5e', '#10b981', '#fbbf24', '#a855f7', '#ec4899', '#06b6d4', '#f97316'];
+                      return entries.map((item, idx) => (
+                        <span key={idx} style={{
+                          fontSize: `${Math.min(2.8, 1.2 + item.weight * 0.4)}rem`,
+                          color: palette[idx % palette.length],
+                          fontWeight: 700,
+                          padding: '4px 10px',
+                          textShadow: '0 2px 10px rgba(0,0,0,0.3)',
+                          transition: 'all 0.3s ease'
+                        }}>
+                          {item.text}
+                        </span>
+                      ));
+                    })()
+                  ) : (
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.88rem', fontStyle: 'italic' }}>
+                      ☁️ Live Word Cloud — Audience submitted words will appear here in real-time in vibrant colors!
+                    </div>
+                  )}
                 </div>
               )}
 
