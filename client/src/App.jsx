@@ -1421,39 +1421,64 @@ export default function App() {
               </div>
             </div>
 
-            <button 
-              className="btn btn-primary" 
-              style={{ background: 'var(--accent)', color: '#06211D', fontWeight: 600, display: 'flex', gap: '5px', alignItems: 'center', border: 'none', flexShrink: 0, padding: '6px 14px', fontSize: '0.82rem' }}
-              onClick={() => handleTriggerContextualSlide('AI quiz generator', true)}
+            {/* Consolidated Apps & Workspace Dropdown Menu */}
+            <div 
+              style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 500, flexShrink: 0 }}
+              onMouseEnter={() => setActiveDropdown('apps')}
+              onMouseLeave={() => setActiveDropdown(null)}
             >
-              <span>🤖 PulseAI</span>
-              <span>⚡</span>
-            </button>
-            <button className="btn btn-secondary" onClick={() => setView('pricing')} style={{ flexShrink: 0, padding: '6px 12px', fontSize: '0.82rem', fontWeight: 500 }}>
-              ⚡ Plans
-            </button>
-            <button 
-              className={`btn ${view === 'sessions' ? 'btn-primary' : 'btn-secondary'}`}
-              onClick={() => setView('sessions')}
-              title="Multi-Day Training Workshop Manager"
-              style={{ fontWeight: 500, flexShrink: 0, padding: '6px 12px', fontSize: '0.82rem' }}
-            >
-              📅 Workshops
-            </button>
-            <button className="btn btn-secondary" onClick={() => setView('remote')} title="Launch Trainer Companion Mobile App" style={{ flexShrink: 0, padding: '6px 12px', fontSize: '0.82rem', fontWeight: 500 }}>
-              📱 Trainer App
-            </button>
-            <button className="btn btn-secondary" onClick={handleNavigateToAudience} style={{ flexShrink: 0, padding: '6px 12px', fontSize: '0.82rem', fontWeight: 500 }}>
-              Join a Room
-            </button>
-            <button 
-              className={`btn btn-icon ${view === 'admin' ? 'btn-primary' : 'btn-secondary'}`}
-              style={{ width: '34px', height: '34px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
-              onClick={() => setView('admin')}
-              title="Admin Settings Panel"
-            >
-              <Settings size={16} />
-            </button>
+              <button className="btn btn-secondary" style={{ padding: '6px 14px', fontSize: '0.82rem', fontWeight: 500, display: 'flex', gap: '6px', alignItems: 'center' }}>
+                <span>Workspace Apps</span>
+                <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>▼</span>
+              </button>
+
+              {activeDropdown === 'apps' && (
+                <div style={{ position: 'absolute', top: '100%', right: 0, paddingTop: '8px', zIndex: 1002 }}>
+                  <div className="glass-card" style={{
+                    width: '240px', padding: '8px', background: 'var(--surface)', border: '1px solid var(--border)',
+                    borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '4px',
+                    boxShadow: '0 15px 35px rgba(0,0,0,0.3)', textAlign: 'left'
+                  }}>
+                    <div 
+                      className="dropdown-link" 
+                      style={{ padding: '8px 12px', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+                      onClick={() => { handleTriggerContextualSlide('AI quiz generator', true); setActiveDropdown(null); }}
+                    >
+                      <span>🤖 PulseAI Quiz Generator ⚡</span>
+                    </div>
+                    <div 
+                      className="dropdown-link" 
+                      style={{ padding: '8px 12px', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+                      onClick={() => { setView('sessions'); setActiveDropdown(null); }}
+                    >
+                      <span>📅 Multi-Day Workshops</span>
+                    </div>
+                    <div 
+                      className="dropdown-link" 
+                      style={{ padding: '8px 12px', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+                      onClick={() => { setView('remote'); setActiveDropdown(null); }}
+                    >
+                      <span>📱 Trainer Companion App</span>
+                    </div>
+                    <div 
+                      className="dropdown-link" 
+                      style={{ padding: '8px 12px', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+                      onClick={() => { handleNavigateToAudience(); setActiveDropdown(null); }}
+                    >
+                      <span>🧩 Join Audience Room</span>
+                    </div>
+                    <div style={{ height: '1px', background: 'var(--border-soft)', margin: '4px 0' }} />
+                    <div 
+                      className="dropdown-link" 
+                      style={{ padding: '8px 12px', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: 'var(--accent)' }}
+                      onClick={() => { setView('pricing'); setActiveDropdown(null); }}
+                    >
+                      <span>⚡ View Subscriptions & Plans</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {user?.email === 'pradeepvarkala@gmail.com' && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--surface-2)', padding: '4px 10px', borderRadius: '10px', border: '1px solid var(--border-soft)', flexShrink: 0 }}>
@@ -1584,7 +1609,7 @@ export default function App() {
 
           {view === 'analytics' && (
             <AnalyticsReport 
-              presentation={CATEGORY_TEMPLATES[0]}
+              presentation={presentations.find(p => p.id === selectedPresentationId) || userPresentations[0] || presentations[0]}
               onBack={handleNavigateToDashboard}
               user={user}
             />

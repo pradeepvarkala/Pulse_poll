@@ -78,7 +78,7 @@ export default function AnalyticsReport({ presentation, onBack, user }) {
         <div style={{ display: 'flex', gap: '10px' }}>
           <button 
             className="btn btn-secondary"
-            onClick={() => alert('Exporting complete PDF Analytics Report...')}
+            onClick={() => window.print()}
             style={{ fontSize: '0.82rem', fontWeight: 500, display: 'flex', gap: '6px', alignItems: 'center' }}
           >
             <Download size={14} /> Export PDF Report
