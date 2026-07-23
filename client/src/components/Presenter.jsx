@@ -1253,6 +1253,20 @@ export default function Presenter({ presentationId, onBack }) {
   const pointsAverages = activeSlide.type === 'points' ? getPointsAverages() : {};
   const gridAverages = activeSlide.type === 'grid' ? getGridAverages() : {};
 
+  const getAnsweredCount = () => {
+    if (!activeSlide || !activeSlide.responses) return 0;
+    if (Array.isArray(activeSlide.responses)) return activeSlide.responses.length;
+    if (typeof activeSlide.responses === 'object') {
+      return Object.values(activeSlide.responses).reduce((sum, val) => {
+        if (typeof val === 'number') return sum + val;
+        if (Array.isArray(val)) return sum + val.length;
+        return sum + 1;
+      }, 0);
+    }
+    return 0;
+  };
+  const answeredCount = getAnsweredCount();
+
   return (
     <div 
       className={`presenter-viewport theme-${theme}`}
@@ -1302,9 +1316,23 @@ export default function Presenter({ presentationId, onBack }) {
           </div>
         </div>
 
-        <div className="participant-count-badge">
-          <Users size={16} />
-          <span>{participantsCount}</span>
+        {/* Live Real-time Metrics Badge */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(15, 23, 42, 0.85)',
+            padding: '6px 16px', borderRadius: '30px', border: '1px solid var(--border-glass)',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 800, color: '#38bdf8' }} title="Scanned & Connected Participants">
+              <Users size={16} color="#38bdf8" />
+              <span>{participantsCount} Scanned</span>
+            </div>
+            <span style={{ color: 'var(--text-muted)' }}>|</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 800, color: '#34d399' }} title="Participants Who Submitted Answers">
+              <CheckCircle2 size={16} color="#34d399" />
+              <span>{answeredCount} Answered</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -2393,67 +2421,7 @@ export default function Presenter({ presentationId, onBack }) {
           )}
         </div>
       </div>
-
-        {/* Right Area: Giant Scan to Join Sidebar */}
-        <div className="glass-card" style={{
-          width: '260px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '20px',
-          borderRadius: '20px',
-          border: '1px solid var(--border-glass)',
-          background: 'rgba(9, 13, 22, 0.45)',
-          textAlign: 'center',
-          flexShrink: 0,
-          maxHeight: '100%',
-          alignSelf: 'center',
-          boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)'
-        }}>
-          <h3 style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--primary)', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Scan to Join 📱
-          </h3>
-          <div style={{
-            background: 'white',
-            padding: '12px',
-            borderRadius: '16px',
-            boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
-            marginBottom: '15px',
-            display: 'inline-block'
-          }}>
-            <img 
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(joinUrl)}`} 
-              alt="Giant Join QR Code" 
-              style={{ width: '180px', height: '180px', display: 'block' }} 
-            />
-          </div>
-          
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
-            Go to: <strong style={{ color: 'var(--text-primary)' }}>{window.location.host}/join</strong>
-          </span>
-          <div style={{
-            background: 'var(--primary-glow)',
-            border: '1px solid var(--border-glass)',
-            padding: '6px 12px',
-            borderRadius: '10px',
-            fontWeight: 900,
-            fontSize: '1.15rem',
-            color: 'var(--primary)',
-            letterSpacing: '1px',
-            marginTop: '6px',
-            width: '100%'
-          }}>
-            {roomCode.slice(0,3)} {roomCode.slice(3)}
-          </div>
-
-          <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-            <Users size={12} />
-            <span>{participantsCount} joined</span>
-          </div>
-        </div>
-
-      </div>
+    </div>
 
       {/* Hover Floating Controls Toolbar */}
       <div className="presenter-controls-wrapper">
