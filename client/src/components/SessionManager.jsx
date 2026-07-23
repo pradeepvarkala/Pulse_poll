@@ -305,20 +305,36 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard })
               </button>
             </div>
 
-            {/* Quick Lock Registration Toggle */}
-            <button 
-              className={`btn ${activeSession.registrationLocked ? 'btn-secondary' : 'btn-primary'}`}
-              onClick={handleToggleRegistrationLock}
-              style={{
-                background: activeSession.registrationLocked ? 'rgba(239, 68, 68, 0.2)' : 'linear-gradient(135deg, #10b981, #059669)',
-                border: activeSession.registrationLocked ? '1px solid #ef4444' : 'none',
-                color: activeSession.registrationLocked ? '#f87171' : '#ffffff',
-                fontWeight: 800, gap: '6px', fontSize: '0.85rem'
-              }}
-            >
-              {activeSession.registrationLocked ? <Lock size={16} /> : <Unlock size={16} />}
-              {activeSession.registrationLocked ? 'Registration Locked' : 'Lock Registration'}
-            </button>
+            {/* Quick Actions: Lock Registration + Start Presentation */}
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button 
+                className={`btn ${activeSession.registrationLocked ? 'btn-secondary' : 'btn-primary'}`}
+                onClick={handleToggleRegistrationLock}
+                style={{
+                  background: activeSession.registrationLocked ? 'rgba(239, 68, 68, 0.2)' : 'linear-gradient(135deg, #10b981, #059669)',
+                  border: activeSession.registrationLocked ? '1px solid #ef4444' : 'none',
+                  color: activeSession.registrationLocked ? '#f87171' : '#ffffff',
+                  fontWeight: 800, gap: '6px', fontSize: '0.85rem'
+                }}
+              >
+                {activeSession.registrationLocked ? <Lock size={16} /> : <Unlock size={16} />}
+                {activeSession.registrationLocked ? 'Registration Locked' : 'Lock Registration'}
+              </button>
+
+              <button 
+                className="btn btn-primary"
+                onClick={() => {
+                  const firstDeckId = activeSession.days?.[0]?.programs?.[0]?.presentationId || 'sample-pres-1';
+                  onLaunchPresenter(firstDeckId);
+                }}
+                style={{
+                  background: 'linear-gradient(135deg, #06b6d4, #2563eb)',
+                  fontWeight: 800, gap: '6px', fontSize: '0.85rem', boxShadow: '0 0 15px rgba(6, 182, 212, 0.4)'
+                }}
+              >
+                <Play size={16} /> Start Presentation
+              </button>
+            </div>
           </div>
 
           {/* TAB 1: Multi-Day Schedule (Horizontal Level Grid Layout) */}
@@ -469,9 +485,24 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard })
                   <button 
                     className="btn btn-primary"
                     onClick={handleReshuffleTeams}
-                    style={{ width: '100%', background: 'linear-gradient(135deg, #06b6d4, #2563eb)', fontWeight: 800, gap: '6px' }}
+                    style={{ width: '100%', background: 'linear-gradient(135deg, #06b6d4, #2563eb)', fontWeight: 800, gap: '6px', marginBottom: '10px' }}
                   >
                     <Shuffle size={16} /> Reshuffle & Solve Teams (CSP)
+                  </button>
+
+                  <button 
+                    className="btn btn-primary animate-pulse"
+                    onClick={() => {
+                      const firstDeckId = activeSession.days?.[0]?.programs?.[0]?.presentationId || 'sample-pres-1';
+                      onLaunchPresenter(firstDeckId);
+                    }}
+                    style={{
+                      width: '100%', background: 'linear-gradient(135deg, #10b981, #059669)',
+                      fontWeight: 800, gap: '8px', padding: '12px', fontSize: '0.9rem',
+                      boxShadow: '0 4px 20px rgba(16, 185, 129, 0.4)'
+                    }}
+                  >
+                    <Play size={18} /> 🚀 Start Workshop Presentation Now
                   </button>
                 </div>
               </div>
