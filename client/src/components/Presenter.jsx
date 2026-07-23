@@ -5,6 +5,7 @@ import {
   Users, Trophy, Presentation as PresIcon, HelpCircle, ArrowLeft, CheckCircle2, QrCode, Edit3, MessageSquare, Shuffle, RefreshCw, Award, Sparkles 
 } from 'lucide-react';
 import { solveGroupAllocation, GROUP_NAMING_THEMES, calculateInteractionCoverage } from '../utils/groupingAlgorithm';
+import { playClickSound, playHoverSound, playCorrectSound, playMultiplierSound, playSciFiBeep } from '../utils/soundEffects';
 
 const OPTION_COLORS = ['#4ecdc4', '#cbe86b', '#9adefa', '#ff6b6b', '#6b7c85', '#1e90ff', '#1dd1a1', '#ffb936', '#ffb8b8', '#8e44ad'];
 
@@ -410,6 +411,7 @@ export default function Presenter({ presentationId, onBack }) {
   const [theme, setTheme] = useState('corporate');
   const [leaderboard, setLeaderboard] = useState({});
   const [pollVizMode, setPollVizMode] = useState('bar'); // bar, pie, doughnut, density
+  const [isEsportsArenaMode, setIsEsportsArenaMode] = useState(false);
   
   // Controls state
   const [votingLocked, setVotingLocked] = useState(false);
@@ -1276,6 +1278,7 @@ export default function Presenter({ presentationId, onBack }) {
             onChange={(e) => handleThemeChange(e.target.value)}
             style={{ padding: '6px 12px', fontSize: '0.85rem', width: '150px', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', border: '1px solid var(--border-glass)' }}
           >
+            <option value="future-minds">🚀 Future Minds Cyber Arena</option>
             <option value="cyber-neon">🌌 Cyber Neon Art</option>
             <option value="midnight-gold">👑 Midnight Gold Art</option>
             <option value="cosmic-nebula">✨ Cosmic Nebula Art</option>

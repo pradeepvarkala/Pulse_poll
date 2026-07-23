@@ -260,6 +260,54 @@ select option:checked {
                  radial-gradient(at 50% 50%, rgba(6, 182, 212, 0.05) 0px, transparent 50%);
 }
 
+.theme-future-minds {
+  --bg-dark: #030712;
+  --bg-card-dark: rgba(10, 18, 38, 0.88);
+  --primary: #00f0ff;
+  --primary-glow: rgba(0, 240, 255, 0.35);
+  --secondary: #ffb700;
+  --secondary-glow: rgba(255, 183, 0, 0.35);
+  --accent-purple: #9d4edf;
+  --text-primary: #f8fafc;
+  --text-secondary: #00f0ff;
+  --text-muted: #64748b;
+  --border-glass: rgba(0, 240, 255, 0.35);
+  --shadow-glow: 0 0 45px rgba(0, 240, 255, 0.3);
+  --bg-gradient: radial-gradient(at 50% 0%, rgba(0, 240, 255, 0.18) 0px, transparent 65%),
+                 radial-gradient(at 100% 100%, rgba(255, 183, 0, 0.15) 0px, transparent 65%),
+                 linear-gradient(rgba(3, 7, 18, 0.85), rgba(3, 7, 18, 0.95)),
+                 url('/assets/theme_cyber_neon.jpg');
+}
+
+.cyber-option-btn {
+  background: linear-gradient(135deg, rgba(10, 25, 48, 0.85), rgba(6, 15, 30, 0.95));
+  border: 1.5px solid rgba(0, 240, 255, 0.4);
+  clip-path: polygon(14px 0%, calc(100% - 14px) 0%, 100% 50%, calc(100% - 14px) 100%, 14px 100%, 0% 50%);
+  color: #ffffff;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  padding: 16px 24px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: inset 0 0 15px rgba(0, 240, 255, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cyber-option-btn:hover {
+  border-color: #ffb700;
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.25), rgba(255, 183, 0, 0.2));
+  box-shadow: 0 0 30px rgba(0, 240, 255, 0.6), inset 0 0 20px rgba(255, 183, 0, 0.3);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.cyber-option-btn.active {
+  border-color: #00f0ff;
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.4), rgba(0, 180, 216, 0.5));
+  box-shadow: 0 0 40px rgba(0, 240, 255, 0.8);
+}
+
 .theme-playroom {
   --bg-dark: #fffdf0;
   --bg-card-dark: #ffffff;
@@ -678,7 +726,7 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 2rem;
+  padding: 0 1.2rem;
   border-bottom: 1px solid var(--border-glass);
   backdrop-filter: blur(8px);
   z-index: 100;

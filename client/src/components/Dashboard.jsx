@@ -4,7 +4,7 @@ import { Plus, Play, Edit3, Trash2, Users, Presentation as PresentationIcon, Che
 export default function Dashboard({ 
   user, onViewCreator, onViewPresenter, onJoinAudience, onOpenAiGenerator, 
   onViewAnalytics, onViewEscapeRoom, onViewMeetingScheduler,
-  isSidebarCollapsed: propIsCollapsed, onToggleSidebar 
+  isSidebarCollapsed: propIsCollapsed, onToggleSidebar, onLogout
 }) {
   const [presentations, setPresentations] = useState([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);

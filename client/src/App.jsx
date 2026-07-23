@@ -1340,112 +1340,54 @@ export default function App() {
               <span style={{ fontWeight: 800 }}>PulsePoll</span>
             </div>
 
-            {/* Logged-In Submenu Nav Bar */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px', fontSize: '0.9rem', fontWeight: 600 }}>
-              
-              {/* Education Dropdown */}
-              <div 
-                style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', color: activeDropdown === 'education' ? 'var(--primary)' : 'var(--text-primary)' }}
-                onMouseEnter={() => setActiveDropdown('education')}
-                onMouseLeave={() => setActiveDropdown(null)}
-              >
-                <span>Education</span>
-                <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>▼</span>
+            {/* Consolidated Explore Catalog Dropdown */}
+            <div 
+              style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 800, color: activeDropdown ? 'var(--primary)' : 'var(--text-primary)' }}
+              onMouseEnter={() => setActiveDropdown('explore')}
+              onMouseLeave={() => setActiveDropdown(null)}
+            >
+              <span>Explore Catalog</span>
+              <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>▼</span>
 
-                {activeDropdown === 'education' && (
-                  <div style={{ position: 'absolute', top: '100%', left: 0, paddingTop: '10px', zIndex: 1001 }}>
-                    <div className="glass-card" style={{
-                      width: '180px', padding: '12px', background: '#0b0f19', border: '1px solid var(--border-glass)',
-                      borderRadius: '10px', display: 'flex', flexDirection: 'column', gap: '10px',
-                      boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
-                    }}>
-                      <span className="dropdown-link" style={{ fontSize: '0.8rem' }} onClick={() => { handleTriggerContextualSlide('K-12 Education', false); setActiveDropdown(null); }}>K-12 Education</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.8rem' }} onClick={() => { handleTriggerContextualSlide('Higher Education', false); setActiveDropdown(null); }}>Higher Education</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.8rem' }} onClick={() => { handleTriggerContextualSlide('Student Activities', false); setActiveDropdown(null); }}>Student Activities</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Enterprise Dropdown */}
-              <div 
-                style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', color: activeDropdown === 'enterprise' ? 'var(--primary)' : 'var(--text-primary)' }}
-                onMouseEnter={() => setActiveDropdown('enterprise')}
-                onMouseLeave={() => setActiveDropdown(null)}
-              >
-                <span>Enterprise</span>
-                <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>▼</span>
-
-                {activeDropdown === 'enterprise' && (
-                  <div style={{ position: 'absolute', top: '100%', left: 0, paddingTop: '10px', zIndex: 1001 }}>
-                    <div className="glass-card" style={{
-                      width: '200px', padding: '12px', background: '#0b0f19', border: '1px solid var(--border-glass)',
-                      borderRadius: '10px', display: 'flex', flexDirection: 'column', gap: '10px',
-                      boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
-                    }}>
-                      <span className="dropdown-link" style={{ fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} onClick={() => { handleTriggerContextualSlide('Corporate Training', true); setActiveDropdown(null); }}>
-                        <span>Corporate Training</span>
-                        <span style={{ fontSize: '0.75rem', opacity: 0.7 }}>🔒</span>
-                      </span>
-                      <span className="dropdown-link" style={{ fontSize: '0.8rem' }} onClick={() => { handleTriggerContextualSlide('Staff Meetings', false); setActiveDropdown(null); }}>Staff Meetings</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} onClick={() => { handleTriggerContextualSlide('Security & Compliance', true); setActiveDropdown(null); }}>
-                        <span>Security & Compliance</span>
-                        <span style={{ fontSize: '0.75rem', opacity: 0.7 }}>🔒</span>
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Learn Dropdown */}
-              <div 
-                style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', color: activeDropdown === 'learn' ? 'var(--primary)' : 'var(--text-primary)' }}
-                onMouseEnter={() => setActiveDropdown('learn')}
-                onMouseLeave={() => setActiveDropdown(null)}
-              >
-                <span>Learn</span>
-                <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>▼</span>
-
-                {activeDropdown === 'learn' && (
-                  <div style={{ position: 'absolute', top: '100%', left: '-100px', paddingTop: '10px', zIndex: 1001 }}>
-                    <div className="glass-card" style={{
-                      width: '420px', padding: '20px', background: '#0b0f19', border: '1px solid var(--border-glass)',
-                      borderRadius: '14px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px',
-                      boxShadow: '0 20px 40px rgba(0,0,0,0.6)', textAlign: 'left'
-                    }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <div style={{ fontWeight: 800, fontSize: '0.85rem', color: '#f8fafc', borderBottom: '1px solid var(--border-glass)', paddingBottom: '4px', marginBottom: '2px' }}>
-                          Features
-                        </div>
-                        <span className="dropdown-link" style={{ fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} onClick={() => { handleTriggerContextualSlide('AI quiz generator', true); setActiveDropdown(null); }}>
-                          <span>🤖 AI Quiz Generator ⚡</span>
-                          <span style={{ fontSize: '0.75rem', opacity: 0.7 }}>🔒</span>
-                        </span>
-                        <span className="dropdown-link" style={{ fontSize: '0.8rem' }} onClick={() => { handleTriggerContextualSlide('Live polling', false); setActiveDropdown(null); }}>Live polling</span>
-                        <span className="dropdown-link" style={{ fontSize: '0.8rem' }} onClick={() => { handleTriggerContextualSlide('Word cloud', false); setActiveDropdown(null); }}>Word cloud</span>
-                        <span className="dropdown-link" style={{ fontSize: '0.8rem' }} onClick={() => { handleTriggerContextualSlide('Quiz', false); setActiveDropdown(null); }}>Quiz</span>
-                        <span className="dropdown-link" style={{ fontSize: '0.8rem' }} onClick={() => { handleTriggerContextualSlide('Survey', false); setActiveDropdown(null); }}>Survey</span>
-                        <span className="dropdown-link" style={{ fontSize: '0.8rem' }} onClick={() => { handleTriggerContextualSlide('Q&A', false); setActiveDropdown(null); }}>Q&A</span>
+              {activeDropdown === 'explore' && (
+                <div style={{ position: 'absolute', top: '100%', left: 0, paddingTop: '10px', zIndex: 1001 }}>
+                  <div className="glass-card" style={{
+                    width: '450px', padding: '20px', background: '#0b0f19', border: '1.5px solid var(--border-glass)',
+                    borderRadius: '16px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px',
+                    boxShadow: '0 20px 40px rgba(0,0,0,0.6)', textAlign: 'left'
+                  }}>
+                    {/* Education */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ fontWeight: 900, fontSize: '0.85rem', color: '#06b6d4', borderBottom: '1px solid var(--border-glass)', paddingBottom: '4px' }}>
+                        🎓 Education
                       </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <div style={{ fontWeight: 800, fontSize: '0.85rem', color: '#f8fafc', borderBottom: '1px solid var(--border-glass)', paddingBottom: '4px', marginBottom: '2px' }}>
-                          Learning Hub & resources
-                        </div>
-                        <span className="dropdown-link" style={{ fontSize: '0.8rem' }} onClick={() => { handleTriggerContextualSlide('PulseAcademy', false); setActiveDropdown(null); }}>PulseAcademy</span>
-                        <span className="dropdown-link" style={{ fontSize: '0.8rem' }} onClick={() => { handleTriggerContextualSlide('Templates', false); setActiveDropdown(null); }}>Templates Catalog</span>
-                        <span className="dropdown-link" style={{ fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} onClick={() => { handleTriggerContextualSlide('Webinars', true); setActiveDropdown(null); }}>
-                          <span>Webinars</span>
-                          <span style={{ fontSize: '0.75rem', opacity: 0.7 }}>🔒</span>
-                        </span>
-                        <span className="dropdown-link" style={{ fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} onClick={() => { handleTriggerContextualSlide('Integrations', true); setActiveDropdown(null); }}>
-                          <span>Integrations</span>
-                          <span style={{ fontSize: '0.75rem', opacity: 0.7 }}>🔒</span>
-                        </span>
+                      <span className="dropdown-link" style={{ fontSize: '0.78rem' }} onClick={() => { handleTriggerContextualSlide('K-12 Education', false); setActiveDropdown(null); }}>K-12 Education</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.78rem' }} onClick={() => { handleTriggerContextualSlide('Higher Education', false); setActiveDropdown(null); }}>Higher Ed</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.78rem' }} onClick={() => { handleTriggerContextualSlide('Student Activities', false); setActiveDropdown(null); }}>Student Activities</span>
+                    </div>
+
+                    {/* Enterprise */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ fontWeight: 900, fontSize: '0.85rem', color: '#8b5cf6', borderBottom: '1px solid var(--border-glass)', paddingBottom: '4px' }}>
+                        💼 Enterprise
                       </div>
+                      <span className="dropdown-link" style={{ fontSize: '0.78rem' }} onClick={() => { handleTriggerContextualSlide('Corporate Training', true); setActiveDropdown(null); }}>Corporate 🔒</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.78rem' }} onClick={() => { handleTriggerContextualSlide('Staff Meetings', false); setActiveDropdown(null); }}>Staff Meetings</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.78rem' }} onClick={() => { handleTriggerContextualSlide('Security & Compliance', true); setActiveDropdown(null); }}>Security 🔒</span>
+                    </div>
+
+                    {/* Features */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ fontWeight: 900, fontSize: '0.85rem', color: '#f59e0b', borderBottom: '1px solid var(--border-glass)', paddingBottom: '4px' }}>
+                        ⚡ Features
+                      </div>
+                      <span className="dropdown-link" style={{ fontSize: '0.78rem' }} onClick={() => { handleTriggerContextualSlide('AI quiz generator', true); setActiveDropdown(null); }}>PulseAI 🔒</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.78rem' }} onClick={() => { handleTriggerContextualSlide('PulseAcademy', false); setActiveDropdown(null); }}>PulseAcademy</span>
+                      <span className="dropdown-link" style={{ fontSize: '0.78rem' }} onClick={() => { handleTriggerContextualSlide('Templates', false); setActiveDropdown(null); }}>Templates Catalog</span>
                     </div>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
 
