@@ -1667,36 +1667,39 @@ export default function App() {
       {activeSubmenuTemplateCategory && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(5, 8, 16, 0.85)', backdropFilter: 'blur(8px)',
+          background: 'rgba(3, 7, 18, 0.92)', backdropFilter: 'blur(12px)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000,
           padding: '20px'
         }}>
-          <div className="glass-card animate-fade" style={{
-            width: '100%', maxWidth: '850px', background: '#0b0f19', border: '1px solid var(--border-glass)',
-            borderRadius: '24px', padding: '30px', position: 'relative', overflowY: 'auto', maxHeight: '90vh'
+          <div className="animate-fade" style={{
+            width: '100%', maxWidth: '900px', background: '#090d16', border: '1.5px solid rgba(6, 182, 212, 0.4)',
+            borderRadius: '24px', padding: '32px', position: 'relative', overflowY: 'auto', maxHeight: '90vh',
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(6, 182, 212, 0.2)'
           }}>
             <button 
               onClick={() => setActiveSubmenuTemplateCategory(null)}
               style={{
-                position: 'absolute', top: '20px', right: '20px', background: 'transparent',
-                border: 'none', color: 'var(--text-secondary)', fontSize: '1.5rem', cursor: 'pointer'
+                position: 'absolute', top: '20px', right: '20px', background: 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.2)', color: '#ffffff', fontSize: '1.2rem', cursor: 'pointer',
+                width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center'
               }}
+              title="Close Explorer Modal"
             >
               ✕
             </button>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px' }}>
-              <span style={{ fontSize: '1.5rem' }}>📁</span>
-              <h2 style={{ fontSize: '1.8rem', margin: 0, fontWeight: 800 }}>
-                Category: <span style={{ color: 'var(--primary)' }}>{activeSubmenuTemplateCategory}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+              <span style={{ fontSize: '1.8rem' }}>📁</span>
+              <h2 style={{ fontSize: '1.8rem', margin: 0, fontWeight: 900, color: '#ffffff' }}>
+                Category: <span style={{ color: '#06b6d4' }}>{activeSubmenuTemplateCategory}</span>
               </h2>
             </div>
             
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '30px', fontSize: '0.95rem' }}>
-              Explore high-quality templates and interactive configurations built for <strong>{activeSubmenuTemplateCategory}</strong>. Launch or clone any setup instantly.
+            <p style={{ color: '#cbd5e1', marginBottom: '28px', fontSize: '0.95rem', lineHeight: 1.5 }}>
+              Explore high-quality templates and interactive configurations built for <strong style={{ color: '#ffffff' }}>{activeSubmenuTemplateCategory}</strong>. Launch or clone any setup instantly.
             </p>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '20px' }}>
               {CATEGORY_TEMPLATES.filter(tpl => {
                 if (!activeSubmenuTemplateCategory) return false;
                 const term = activeSubmenuTemplateCategory.trim().toLowerCase();
@@ -1707,34 +1710,36 @@ export default function App() {
                 const isPremiumLocked = tpl.isPremium && !isFeatureUnlocked(tpl.id.includes('template-5') ? 'stopwatch' : 'brainstorm');
 
                 return (
-                  <div key={tpl.id} className="glass-card" style={{
-                    padding: '24px', borderRadius: '16px', border: '1px solid var(--border-glass)',
-                    background: 'rgba(255,255,255,0.01)', display: 'flex', flexDirection: 'column',
-                    justifyContent: 'space-between', transition: 'var(--transition-smooth)'
+                  <div key={tpl.id} style={{
+                    padding: '24px', borderRadius: '18px', border: '1px solid rgba(255, 255, 255, 0.12)',
+                    background: 'rgba(15, 23, 42, 0.95)', display: 'flex', flexDirection: 'column',
+                    justify: 'space-between', boxShadow: '0 8px 24px rgba(0,0,0,0.4)'
                   }}>
                     <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                        <h4 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0 }}>{tpl.title}</h4>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', gap: '10px' }}>
+                        <h4 style={{ fontSize: '1.15rem', fontWeight: 900, margin: 0, color: '#ffffff' }}>{tpl.title}</h4>
                         {tpl.isPremium && (
                           <span style={{ 
-                            fontSize: '0.65rem', fontWeight: 800, background: isPremiumLocked ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.15)',
-                            color: isPremiumLocked ? '#f87171' : '#34d399', padding: '3px 8px', borderRadius: '20px',
-                            border: isPremiumLocked ? '1px solid rgba(239,68,68,0.3)' : '1px solid rgba(16,185,129,0.3)'
+                            fontSize: '0.7rem', fontWeight: 800, background: isPremiumLocked ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)',
+                            color: isPremiumLocked ? '#f87171' : '#34d399', padding: '4px 10px', borderRadius: '20px', whiteSpace: 'nowrap',
+                            border: isPremiumLocked ? '1px solid rgba(239,68,68,0.4)' : '1px solid rgba(16,185,129,0.4)'
                           }}>
                             {isPremiumLocked ? '🔒 Premium' : '🔓 Active'}
                           </span>
                         )}
                       </div>
-                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '16px' }}>
-                        Visual Theme: <strong style={{ textTransform: 'capitalize', color: 'var(--primary)' }}>{tpl.theme}</strong>
+                      <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '16px' }}>
+                        Visual Theme: <strong style={{ textTransform: 'capitalize', color: '#38bdf8' }}>{tpl.theme}</strong>
                       </p>
 
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px' }}>
-                        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Slides:</span>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '24px', background: 'rgba(0,0,0,0.3)', padding: '14px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 900, color: '#06b6d4', textTransform: 'uppercase', letterSpacing: '0.5px' }}>SLIDES DECK:</span>
                         {tpl.slides.map((s, idx) => (
-                          <div key={idx} style={{ fontSize: '0.8rem', display: 'flex', gap: '6px', alignItems: 'center', color: 'var(--text-secondary)' }}>
-                            <span>🔹</span>
-                            <span style={{ textTransform: 'capitalize', fontWeight: 600, color: 'var(--text-primary)' }}>{s.type}</span>: {s.question.slice(0, 45)}...
+                          <div key={idx} style={{ fontSize: '0.82rem', display: 'flex', gap: '8px', alignItems: 'center', color: '#e2e8f0' }}>
+                            <span style={{ color: '#38bdf8' }}>🔹</span>
+                            <span style={{ textTransform: 'capitalize', fontWeight: 800, color: '#38bdf8' }}>{s.type}</span>
+                            <span style={{ color: '#94a3b8' }}>:</span>
+                            <span style={{ color: '#f1f5f9', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.question}</span>
                           </div>
                         ))}
                       </div>
@@ -1742,7 +1747,7 @@ export default function App() {
 
                     <button 
                       className={`btn ${isPremiumLocked ? 'btn-secondary' : 'btn-primary'}`} 
-                      style={{ width: '100%', fontWeight: 700 }}
+                      style={{ width: '100%', fontWeight: 800, padding: '12px', fontSize: '0.9rem' }}
                       onClick={() => handleUseSubmenuTemplate(tpl)}
                     >
                       {isPremiumLocked ? 'Unlock Template ⚡' : 'Launch Workspace 🚀'}
