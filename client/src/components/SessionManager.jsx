@@ -175,6 +175,40 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard })
     updateActiveSession({ days: updatedDays });
   };
 
+  const handleUpdateDayTitle = (dayIdx, title) => {
+    const updatedDays = [...activeSession.days];
+    updatedDays[dayIdx] = { ...updatedDays[dayIdx], title };
+    updateActiveSession({ days: updatedDays });
+  };
+
+  const handleUpdateProgramTitle = (dayIdx, progIdx, title) => {
+    const updatedDays = [...activeSession.days];
+    const programs = [...updatedDays[dayIdx].programs];
+    programs[progIdx] = { ...programs[progIdx], title };
+    updatedDays[dayIdx] = { ...updatedDays[dayIdx], programs };
+    updateActiveSession({ days: updatedDays });
+  };
+
+  const handleUpdateProgramDeck = (dayIdx, progIdx, presentationId) => {
+    const updatedDays = [...activeSession.days];
+    const programs = [...updatedDays[dayIdx].programs];
+    programs[progIdx] = { ...programs[progIdx], presentationId };
+    updatedDays[dayIdx] = { ...updatedDays[dayIdx], programs };
+    updateActiveSession({ days: updatedDays });
+  };
+
+  const handleDeleteProgram = (dayIdx, progIdx) => {
+    const updatedDays = [...activeSession.days];
+    const programs = updatedDays[dayIdx].programs.filter((_, i) => i !== progIdx);
+    updatedDays[dayIdx] = { ...updatedDays[dayIdx], programs };
+    updateActiveSession({ days: updatedDays });
+  };
+
+  const handleDeleteDay = (dayIdx) => {
+    const updatedDays = activeSession.days.filter((_, i) => i !== dayIdx);
+    updateActiveSession({ days: updatedDays });
+  };
+
   const handleToggleRegistrationLock = () => {
     updateActiveSession(s => ({ ...s, registrationLocked: !s.registrationLocked }));
   };
@@ -287,54 +321,107 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard })
             </button>
           </div>
 
-          {/* TAB 1: Multi-Day Schedule */}
+          {/* TAB 1: Multi-Day Schedule (Horizontal Level Grid Layout) */}
           {activeTab === 'schedule' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {(activeSession.days || []).map((day, dIdx) => (
-                <div key={day.dayNumber} className="glass-card" style={{ padding: '24px', borderRadius: '20px', background: 'rgba(11, 15, 25, 0.65)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid var(--border-glass)', paddingBottom: '10px' }}>
-                    <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#06b6d4', margin: 0 }}>
-                      📅 {day.title}
-                    </h3>
-                    <button className="btn btn-secondary" onClick={() => handleAddProgram(dIdx)} style={{ fontSize: '0.75rem', padding: '4px 10px' }}>
-                      <Plus size={14} /> Add Program
-                    </button>
-                  </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 800 }}>
+                  📅 Workshop Schedule Level Grid (Days Aligned Side-by-Side)
+                </span>
+                <button 
+                  className="btn btn-secondary"
+                  onClick={handleAddDay}
+                  style={{ fontWeight: 800, gap: '6px', fontSize: '0.85rem' }}
+                >
+                  <Plus size={16} /> Add Workshop Day
+                </button>
+              </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {(day.programs || []).map((prog) => (
-                      <div key={prog.id} style={{
-                        display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px',
-                        padding: '14px 18px', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-glass)',
-                        borderRadius: '14px'
-                      }}>
-                        <div>
-                          <div style={{ fontSize: '1rem', fontWeight: 800, color: '#ffffff' }}>{prog.title}</div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                            Linked Deck: {prog.presentationId} • 2-Code Access Persistent
+              {/* Side-by-Side Horizontal Level Grid for Day 1, Day 2, Day 3... */}
+              <div style={{
+                display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '20px', alignItems: 'start'
+              }}>
+                {(activeSession.days || []).map((day, dIdx) => (
+                  <div key={day.dayNumber || dIdx} className="glass-card animate-fade" style={{
+                    padding: '20px', borderRadius: '20px', background: 'rgba(11, 15, 25, 0.75)', border: '1.5px solid var(--border-glass)',
+                    display: 'flex', flexDirection: 'column', gap: '16px'
+                  }}>
+                    {/* Day Header with Inline Title Edit */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', borderBottom: '1px solid var(--border-glass)', paddingBottom: '12px' }}>
+                      <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '1.2rem' }}>📅</span>
+                        <input 
+                          type="text"
+                          className="input-text"
+                          value={day.title}
+                          onChange={(e) => handleUpdateDayTitle(dIdx, e.target.value)}
+                          style={{
+                            fontWeight: 900, fontSize: '1rem', color: '#06b6d4', padding: '6px 10px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-glass)', borderRadius: '8px'
+                          }}
+                        />
+                      </div>
+                      <button className="btn btn-secondary btn-icon" onClick={() => handleDeleteDay(dIdx)} title="Delete Day" style={{ padding: '6px' }}>
+                        <Trash2 size={14} color="#ef4444" />
+                      </button>
+                    </div>
+
+                    {/* Programs List with Assignable Deck & Title Inputs */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {(day.programs || []).map((prog, pIdx) => (
+                        <div key={prog.id || pIdx} style={{
+                          padding: '14px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-glass)',
+                          borderRadius: '14px', display: 'flex', flexDirection: 'column', gap: '10px'
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                            <input 
+                              type="text"
+                              className="input-text"
+                              value={prog.title}
+                              onChange={(e) => handleUpdateProgramTitle(dIdx, pIdx, e.target.value)}
+                              placeholder="Assign Program Name..."
+                              style={{ fontWeight: 800, fontSize: '0.9rem', color: '#ffffff', padding: '6px 10px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-glass)', borderRadius: '8px' }}
+                            />
+                            <button className="btn btn-secondary btn-icon" onClick={() => handleDeleteProgram(dIdx, pIdx)} title="Remove Program" style={{ padding: '4px' }}>
+                              <Trash2 size={12} color="var(--text-muted)" />
+                            </button>
+                          </div>
+
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <select 
+                              value={prog.presentationId}
+                              onChange={(e) => handleUpdateProgramDeck(dIdx, pIdx, e.target.value)}
+                              style={{
+                                flex: 1, padding: '6px 10px', background: '#0f172a', border: '1px solid var(--border-glass)',
+                                borderRadius: '8px', color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 700, outline: 'none'
+                              }}
+                            >
+                              <option value="sample-pres-1">Deck 1: Executive STEM & Diagnostic</option>
+                              <option value="sample-pres-2">Deck 2: Escape Vault Cyber Challenge</option>
+                              <option value="sample-pres-3">Deck 3: Innovation Grid & Prioritization</option>
+                            </select>
+
+                            <button 
+                              className="btn btn-primary"
+                              onClick={() => onLaunchPresenter(prog.presentationId)}
+                              style={{ padding: '6px 12px', fontSize: '0.75rem', fontWeight: 800, background: 'linear-gradient(135deg, #10b981, #059669)', gap: '4px', whiteSpace: 'nowrap' }}
+                            >
+                              <Play size={12} /> Launch
+                            </button>
                           </div>
                         </div>
+                      ))}
+                    </div>
 
-                        <button 
-                          className="btn btn-primary"
-                          onClick={() => onLaunchPresenter(prog.presentationId)}
-                          style={{ padding: '8px 16px', fontSize: '0.8rem', fontWeight: 800, background: 'linear-gradient(135deg, #10b981, #059669)', gap: '6px' }}
-                        >
-                          <Play size={14} /> Launch Program Presentation
-                        </button>
-                      </div>
-                    ))}
+                    <button 
+                      className="btn btn-secondary"
+                      onClick={() => handleAddProgram(dIdx)}
+                      style={{ padding: '10px', fontSize: '0.8rem', fontWeight: 800, borderStyle: 'dashed', justifyContent: 'center', gap: '6px', marginTop: '6px' }}
+                    >
+                      <Plus size={14} /> Add Program to Day {day.dayNumber || dIdx + 1}
+                    </button>
                   </div>
-                </div>
-              ))}
-
-              <button 
-                className="btn btn-secondary"
-                onClick={handleAddDay}
-                style={{ padding: '16px', borderRadius: '16px', fontWeight: 800, borderStyle: 'dashed', justifyContent: 'center', gap: '8px' }}
-              >
-                <Plus size={18} /> Add Workshop Day Schedule
-              </button>
+                ))}
+              </div>
             </div>
           )}
 
