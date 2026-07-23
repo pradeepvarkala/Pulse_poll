@@ -400,7 +400,46 @@ function PenCanvasOverlay({ isActive, penTool, penColor, penSize, onSaveStroke, 
   );
 }
 
-export default function Presenter({ presentationId, onBack }) {
+const PREMIUM_SLIDE_TYPES = ['wordcloud', 'brainstorm', 'grid', 'scales', 'stopwatch', 'focus_mode', 'ranking', 'points', 'guess'];
+
+const isSlideAllowedForUser = (slide, user) => {
+  if (!slide) return true;
+  
+  // Non-premium slides (standard Multiple Choice polls, basic quizzes) are ALWAYS allowed!
+  if (!PREMIUM_SLIDE_TYPES.includes(slide.type)) {
+    return true;
+  }
+
+  // Retrieve user object from localStorage if not passed in props
+  const currentUser = user || JSON.parse(localStorage.getItem('pulse-poll-user') || '{}');
+  const tier = (currentUser?.tier || 'free').toLowerCase();
+  const isSubscriptionActive = currentUser?.subscription_status === 'active' || tier === 'admin';
+
+  if (tier === 'admin') return true;
+  if ((tier === 'pro' || tier === 'business') && isSubscriptionActive) return true;
+
+  // Check active referral coin unlocks
+  let unlocks = [];
+  try {
+    unlocks = typeof currentUser?.unlocked_modules === 'string'
+      ? JSON.parse(currentUser.unlocked_modules || '[]')
+      : (currentUser?.unlocked_modules || []);
+  } catch(e) { unlocks = []; }
+
+  const moduleKeyMap = {
+    'wordcloud': 'wordcloud',
+    'brainstorm': 'brainstorm',
+    'stopwatch': 'stopwatch',
+    'focus_mode': 'focus_mode'
+  };
+
+  const requiredModule = moduleKeyMap[slide.type] || 'pro_slides';
+  const hasActiveUnlock = unlocks.some(u => u.module === requiredModule && new Date(u.expiresAt) > new Date());
+
+  return hasActiveUnlock;
+};
+
+export default function Presenter({ presentationId, onBack, user: userProp }) {
   const [presentation, setPresentation] = useState(null);
   const [roomCode, setRoomCode] = useState('');
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
@@ -544,8 +583,8 @@ export default function Presenter({ presentationId, onBack }) {
 
   const socketRef = useRef(null);
 
-  const user = JSON.parse(localStorage.getItem('pulse-poll-user') || '{}');
-  const userEmail = user.email || 'guest@pulsepoll.com';
+  const currentUser = userProp || JSON.parse(localStorage.getItem('pulse-poll-user') || '{}');
+  const userEmail = currentUser.email || 'guest@pulsepoll.com';
 
   useEffect(() => {
     const fetchPresentation = async () => {
@@ -1599,6 +1638,32 @@ export default function Presenter({ presentationId, onBack }) {
               <EyeOff size={48} style={{ marginBottom: '12px', opacity: 0.5 }} />
               <h3>Results are hidden</h3>
               <p>Hover controls below to reveal results to the audience.</p>
+            </div>
+          ) : !isSlideAllowedForUser(activeSlide, user) ? (
+            <div className="animate-fade" style={{
+              padding: '36px 24px', background: 'var(--surface)', border: '2px solid var(--danger)',
+              borderRadius: '20px', textAlign: 'center', maxWidth: '600px', margin: '30px auto',
+              boxShadow: '0 10px 30px rgba(240, 101, 61, 0.2)'
+            }}>
+              <div style={{ fontSize: '3rem', marginBottom: '12px' }}>🔒</div>
+              <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--danger)', marginBottom: '8px' }}>
+                Premium Feature Slide Locked
+              </h2>
+              <div style={{ fontSize: '0.95rem', color: 'var(--text-primary)', fontWeight: 600, marginBottom: '8px' }}>
+                Slide Type: "{activeSlide.type?.toUpperCase()}"
+              </div>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '20px' }}>
+                Your active subscription plan has expired or does not include premium feature access for <strong>{activeSlide.type}</strong> slides. Standard multiple choice polls and basic quizzes in this deck remain playable. Upgrade your plan or redeem referral coins to present this slide!
+              </p>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                <button 
+                  className="btn btn-primary"
+                  onClick={onBack}
+                  style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 600, border: 'none', padding: '10px 20px' }}
+                >
+                  Upgrade Subscription / Unlock
+                </button>
+              </div>
             </div>
           ) : (
             <>
