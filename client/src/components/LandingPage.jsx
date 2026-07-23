@@ -187,69 +187,200 @@ export default function LandingPage({ onStartAuth, onJoinRoom, onStartDemo }) {
           </div>
         </div>
 
-        {/* Visual Preview Dashboard Panel Mockup */}
-        <div style={{ position: 'relative', marginBottom: '100px' }}>
+        {/* Visual Preview Dashboard Panel Mockup with Realistic Corporate Photography */}
+        <div style={{ position: 'relative', marginBottom: '80px' }}>
           <div className="glass-card" style={{
-            padding: '30px', border: '1px solid var(--border-glass)',
-            boxShadow: '0 30px 60px -15px rgba(0,0,0,0.3)', background: 'var(--bg-card-dark)',
+            padding: '24px', border: '1.5px solid rgba(6, 182, 212, 0.4)',
+            boxShadow: '0 30px 60px -15px rgba(0,0,0,0.6), 0 0 30px rgba(6,182,212,0.15)', background: '#090d16',
             borderRadius: '24px', overflow: 'hidden'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-glass)', paddingBottom: '16px', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '14px', marginBottom: '20px' }}>
               <div style={{ display: 'flex', gap: '6px' }}>
                 <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#ef4444' }}></div>
                 <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#eab308' }}></div>
                 <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#22c55e' }}></div>
               </div>
-              <div style={{ fontSize: '0.8rem', opacity: 0.5, letterSpacing: '0.05em' }}>PREVIEW MODE // PRESENTATION HOST</div>
+              <div style={{ fontSize: '0.8rem', color: '#06b6d4', fontWeight: 800, letterSpacing: '0.08em' }}>🏢 REAL-TIME CORPORATE TOWNHALL PRESENTATION</div>
             </div>
             
-            {/* Split layout inside mockup */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '30px' }}>
-              <div style={{ flex: 1, minWidth: '280px' }}>
-                <h3 style={{ fontSize: '1.4rem', marginBottom: '8px' }}>Who should win the 2026 Space Hackathon?</h3>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '20px' }}>Live Poll responses (2,045 participants registered)</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {/* Split layout inside mockup: Photo + Interactive Data Overlay */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: '24px', alignItems: 'center' }}>
+              
+              {/* Left Column: Realistic Corporate Townhall Photo Showcase */}
+              <div style={{ borderRadius: '18px', overflow: 'hidden', border: '1.5px solid rgba(255, 255, 255, 0.15)', position: 'relative', height: '340px' }}>
+                <img 
+                  src="/assets/corporate_townhall.jpg" 
+                  alt="Realistic Corporate Townhall Presentation" 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                />
+                <div style={{
+                  position: 'absolute', bottom: '16px', left: '16px', right: '16px',
+                  background: 'rgba(5, 12, 25, 0.88)', backdropFilter: 'blur(10px)', border: '1px solid rgba(0, 240, 255, 0.4)',
+                  borderRadius: '12px', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                }}>
                   <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '4px' }}>
-                      <span>🚀 Team Nebula (AI Propulsion)</span>
-                      <strong>64%</strong>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 900, color: '#ffffff' }}>Global Q3 Strategy Townhall</div>
+                    <div style={{ fontSize: '0.75rem', color: '#38bdf8' }}>1,850 Executive Attendees Connected</div>
+                  </div>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 900, color: '#34d399', background: 'rgba(52, 211, 153, 0.15)', padding: '4px 10px', borderRadius: '20px', border: '1px solid #34d399' }}>
+                    🔴 LIVE VOTING
+                  </span>
+                </div>
+              </div>
+
+              {/* Right Column: Live Data Overlay Metrics */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ background: 'rgba(15, 23, 42, 0.85)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(6, 182, 212, 0.3)' }}>
+                  <h4 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ffffff', marginBottom: '8px' }}>
+                    Which strategic initiative should be prioritized in Q4?
+                  </h4>
+                  <p style={{ color: '#94a3b8', fontSize: '0.8rem', marginBottom: '16px' }}>Live Poll responses (1,850 participants connected)</p>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '4px', fontWeight: 700 }}>
+                        <span style={{ color: '#e2e8f0' }}>🚀 AI Automation & Enterprise Workflow</span>
+                        <strong style={{ color: '#06b6d4' }}>68%</strong>
+                      </div>
+                      <div style={{ width: '100%', height: '8px', backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '4px', overflow: 'hidden' }}>
+                        <div style={{ width: '68%', height: '100%', backgroundColor: '#06b6d4' }}></div>
+                      </div>
                     </div>
-                    <div style={{ width: '100%', height: '10px', backgroundColor: 'var(--border-glass)', borderRadius: '5px', overflow: 'hidden' }}>
-                      <div style={{ width: '64%', height: '100%', backgroundColor: 'var(--primary)' }}></div>
+
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '4px', fontWeight: 700 }}>
+                        <span style={{ color: '#e2e8f0' }}>🌐 Global Market Expansion</span>
+                        <strong style={{ color: '#3b82f6' }}>24%</strong>
+                      </div>
+                      <div style={{ width: '100%', height: '8px', backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '4px', overflow: 'hidden' }}>
+                        <div style={{ width: '24%', height: '100%', backgroundColor: '#3b82f6' }}></div>
+                      </div>
                     </div>
                   </div>
+                </div>
+
+                <div style={{ padding: '16px', background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.3)', borderRadius: '14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ fontSize: '1.4rem' }}>🛡️</div>
                   <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '4px' }}>
-                      <span>🛰️ OrbitGuard (Satellite Defense)</span>
-                      <strong>28%</strong>
-                    </div>
-                    <div style={{ width: '100%', height: '10px', backgroundColor: 'var(--border-glass)', borderRadius: '5px', overflow: 'hidden' }}>
-                      <div style={{ width: '28%', height: '100%', backgroundColor: 'var(--secondary)' }}></div>
-                    </div>
-                  </div>
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '4px' }}>
-                      <span>☄️ StarDust (Mineral Mining)</span>
-                      <strong>8%</strong>
-                    </div>
-                    <div style={{ width: '100%', height: '10px', backgroundColor: 'var(--border-glass)', borderRadius: '5px', overflow: 'hidden' }}>
-                      <div style={{ width: '8%', height: '100%', backgroundColor: 'var(--text-muted)' }}></div>
-                    </div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 900, color: '#fbbf24' }}>ENTERPRISE ANTI-CHEAT FOCUS MODE</div>
+                    <div style={{ fontSize: '0.78rem', color: '#cbd5e1', marginTop: '2px' }}>Logs tab-switching, prevents proxy impersonation & locks voting on exit.</div>
                   </div>
                 </div>
               </div>
-              <div style={{ width: '320px', padding: '20px', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-glass)', borderRadius: '16px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', color: '#fbbf24', fontWeight: 700, fontSize: '0.85rem' }}>
-                  <span>⚠️ REAL-TIME FOCUS FLAG</span>
+
+            </div>
+          </div>
+        </div>
+
+        {/* REALISTIC CORPORATE WORLD SHOWCASE SECTION */}
+        <div style={{ marginBottom: '100px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '50px' }}>
+            <div className="eyebrow" style={{ color: '#06b6d4', fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '12px', fontSize: '0.85rem' }}>
+              🏢 ENTERPRISE & CORPORATE WORLD PREVIEW
+            </div>
+            <h2 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', margin: 0 }}>
+              Empower Global Teams, Executive Boardrooms & Enterprise Workshops
+            </h2>
+            <p style={{ color: '#94a3b8', fontSize: '1.1rem', maxWidth: '750px', margin: '14px auto 0', lineHeight: 1.6 }}>
+              From high-stakes executive townhalls to global corporate training and interactive staff syncs.
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '30px' }}>
+            
+            {/* Corporate Townhall Card */}
+            <div className="glass-card" style={{
+              borderRadius: '24px', overflow: 'hidden', border: '1.5px solid rgba(6, 182, 212, 0.3)',
+              background: 'rgba(9, 14, 28, 0.85)', display: 'flex', flexDirection: 'column'
+            }}>
+              <div style={{ height: '240px', overflow: 'hidden', position: 'relative' }}>
+                <img 
+                  src="/assets/corporate_townhall.jpg" 
+                  alt="Executive Townhall Presentation" 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                />
+                <div style={{ position: 'absolute', top: '16px', left: '16px', background: 'rgba(6,182,212,0.9)', color: '#ffffff', padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase' }}>
+                  🏢 Executive Townhalls
                 </div>
-                <div style={{ fontSize: '0.9rem', lineHeight: 1.5 }}>
-                  <strong>Participant "AlexR" switched tabs!</strong> Overlay warning locked. Attempt flagged inside final quiz slide.
+              </div>
+              <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between' }}>
+                <div>
+                  <h3 style={{ fontSize: '1.35rem', fontWeight: 900, color: '#ffffff', marginBottom: '10px' }}>
+                    Interactive Executive Townhalls
+                  </h3>
+                  <p style={{ color: '#cbd5e1', fontSize: '0.92rem', lineHeight: 1.6, marginBottom: '20px' }}>
+                    Stream real-time Q&A, live polling, and executive feedback directly onto boardroom displays with instant response tracking across thousand-person audiences.
+                  </p>
                 </div>
-                <div style={{ marginTop: '16px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                  🔒 Focus Mode actively logs browser exit violations.
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#38bdf8', fontWeight: 800, fontSize: '0.85rem' }}>
+                  <CheckCircle size={16} color="#38bdf8" />
+                  <span>Zero Latency Live Polling</span>
                 </div>
               </div>
             </div>
+
+            {/* Corporate Training Workshops Card */}
+            <div className="glass-card" style={{
+              borderRadius: '24px', overflow: 'hidden', border: '1.5px solid rgba(59, 130, 246, 0.3)',
+              background: 'rgba(9, 14, 28, 0.85)', display: 'flex', flexDirection: 'column'
+            }}>
+              <div style={{ height: '240px', overflow: 'hidden', position: 'relative' }}>
+                <img 
+                  src="/assets/corporate_training.jpg" 
+                  alt="Corporate Training Workshop" 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                />
+                <div style={{ position: 'absolute', top: '16px', left: '16px', background: 'rgba(59,130,246,0.9)', color: '#ffffff', padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase' }}>
+                  🎓 Corporate Training
+                </div>
+              </div>
+              <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between' }}>
+                <div>
+                  <h3 style={{ fontSize: '1.35rem', fontWeight: 900, color: '#ffffff', marginBottom: '10px' }}>
+                    Multi-Day Training Workshops
+                  </h3>
+                  <p style={{ color: '#cbd5e1', fontSize: '0.92rem', lineHeight: 1.6, marginBottom: '20px' }}>
+                    Run multi-day employee onboarding, compliance workshops, and team-building sessions with intelligent group solver algorithms and persistent scoreboards.
+                  </p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#60a5fa', fontWeight: 800, fontSize: '0.85rem' }}>
+                  <CheckCircle size={16} color="#60a5fa" />
+                  <span>Intelligent Group & Team Manager</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Enterprise Analytics Card */}
+            <div className="glass-card" style={{
+              borderRadius: '24px', overflow: 'hidden', border: '1.5px solid rgba(245, 158, 11, 0.3)',
+              background: 'rgba(9, 14, 28, 0.85)', display: 'flex', flexDirection: 'column'
+            }}>
+              <div style={{ height: '240px', overflow: 'hidden', position: 'relative' }}>
+                <img 
+                  src="/assets/enterprise_analytics.jpg" 
+                  alt="Enterprise Analytics Dashboard" 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                />
+                <div style={{ position: 'absolute', top: '16px', left: '16px', background: 'rgba(245,158,11,0.9)', color: '#ffffff', padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase' }}>
+                  📈 Enterprise Analytics
+                </div>
+              </div>
+              <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between' }}>
+                <div>
+                  <h3 style={{ fontSize: '1.35rem', fontWeight: 900, color: '#ffffff', marginBottom: '10px' }}>
+                    Executive Analytics & Sentiment Audit
+                  </h3>
+                  <p style={{ color: '#cbd5e1', fontSize: '0.92rem', lineHeight: 1.6, marginBottom: '20px' }}>
+                    Export instant post-presentation CSV reports, heatmaps, engagement percentages, and participant focus anti-cheat logs for executive compliance.
+                  </p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fbbf24', fontWeight: 800, fontSize: '0.85rem' }}>
+                  <CheckCircle size={16} color="#fbbf24" />
+                  <span>1-Click Post-Session CSV Export</span>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 
