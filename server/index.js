@@ -751,7 +751,7 @@ io.on('connection', (socket) => {
   });
 
   // 2. Join Room
-  socket.on('join_room', ({ roomCode, nickname }, callback) => {
+  socket.on('join_room', ({ roomCode, nickname, gender }, callback) => {
     const room = rooms[roomCode];
     if (!room) {
       return callback({ success: false, message: 'Room not found. Please check the code.' });
@@ -771,7 +771,7 @@ io.on('connection', (socket) => {
     }
 
     socket.join(roomCode);
-    room.participants[socket.id] = nickname || 'Anonymous';
+    room.participants[socket.id] = { nickname: nickname || 'Anonymous', gender: gender || 'M' };
 
     const currentSlide = room.slides[room.currentSlideIndex];
     callback({
@@ -787,10 +787,12 @@ io.on('connection', (socket) => {
 
     io.to(room.presenterSocketId).emit('participant_joined', {
       count: Object.keys(room.participants).length,
-      nickname: nickname
+      nickname: nickname,
+      gender: gender || 'M',
+      socketId: socket.id
     });
 
-    console.log(`Participant Joined: ${nickname || 'Anonymous'} in ${roomCode}`);
+    console.log(`Participant Joined: ${nickname || 'Anonymous'} (${gender || 'M'}) in ${roomCode}`);
   });
 
   // Focus Mode (Anti-Cheat) notification
@@ -825,6 +827,16 @@ io.on('connection', (socket) => {
         leaderboardVisible: room.leaderboardVisible
       });
       console.log(`Slide index in room ${roomCode} changed to ${index}`);
+    }
+  });
+
+  // 3.5 Groups Manager Broadcast
+  socket.on('groups_updated', ({ roomCode, groups, coverage }) => {
+    const room = rooms[roomCode];
+    if (room && room.presenterSocketId === socket.id) {
+      room.groups = groups;
+      socket.to(roomCode).emit('groups_updated', { groups, coverage });
+      console.log(`Groups updated in room ${roomCode}: ${groups.length} groups created.`);
     }
   });
 

@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import io from 'socket.io-client';
 import { 
   ChevronLeft, ChevronRight, Lock, Unlock, Eye, EyeOff, RotateCcw, 
-  Users, Trophy, Presentation as PresIcon, HelpCircle, ArrowLeft, CheckCircle2, QrCode, Edit3, MessageSquare 
+  Users, Trophy, Presentation as PresIcon, HelpCircle, ArrowLeft, CheckCircle2, QrCode, Edit3, MessageSquare, Shuffle, RefreshCw, Award, Sparkles 
 } from 'lucide-react';
+import { solveGroupAllocation, GROUP_NAMING_THEMES, calculateInteractionCoverage } from '../utils/groupingAlgorithm';
 
 const OPTION_COLORS = ['#4ecdc4', '#cbe86b', '#9adefa', '#ff6b6b', '#6b7c85', '#1e90ff', '#1dd1a1', '#ffb936', '#ffb8b8', '#8e44ad'];
 
@@ -431,6 +432,49 @@ export default function Presenter({ presentationId, onBack }) {
     { id: '1', sender: 'Participant (Alex)', text: 'Hello host, I submitted my answer!', timestamp: '11:22 AM' }
   ]);
 
+  // Intelligent Team & Group Manager State
+  const [showGroupManagerModal, setShowGroupManagerModal] = useState(false);
+  const [groupCount, setGroupCount] = useState(4);
+  const [groupThemeKey, setGroupThemeKey] = useState('indian_rivers');
+  const [groupAllocations, setGroupAllocations] = useState([]);
+  const [pairHistoryMatrix, setPairHistoryMatrix] = useState({});
+  const [interactionCoverage, setInteractionCoverage] = useState(0);
+  const [repeatPairCount, setRepeatPairCount] = useState(0);
+  const [participantRoster, setParticipantRoster] = useState([]);
+
+  const handleSolveAndAssignGroups = () => {
+    const activeRoster = participantRoster.length >= 2 ? participantRoster : [
+      { id: 'p-1', name: 'Alex Rivers', gender: 'M' },
+      { id: 'p-2', name: 'Rahul Sharma', gender: 'M' },
+      { id: 'p-3', name: 'Ananya Verma', gender: 'F' },
+      { id: 'p-4', name: 'Priya Patel', gender: 'F' },
+      { id: 'p-5', name: 'David Miller', gender: 'M' },
+      { id: 'p-6', name: 'Sara Khan', gender: 'F' },
+      { id: 'p-7', name: 'Vikram Singh', gender: 'M' },
+      { id: 'p-8', name: 'Deepa Nair', gender: 'F' }
+    ];
+
+    const result = solveGroupAllocation(
+      activeRoster,
+      groupCount,
+      pairHistoryMatrix,
+      groupThemeKey
+    );
+
+    setGroupAllocations(result.groups);
+    setPairHistoryMatrix(result.pairHistory);
+    setInteractionCoverage(result.coveragePercentage);
+    setRepeatPairCount(result.repeatCount);
+
+    if (socketRef.current) {
+      socketRef.current.emit('groups_updated', {
+        roomCode,
+        groups: result.groups,
+        coverage: result.coveragePercentage
+      });
+    }
+  };
+
   // New Reveal/Results States
   const [correctRevealed, setCorrectRevealed] = useState(false);
   const [resultsVisible, setResultsVisible] = useState(true);
@@ -707,8 +751,14 @@ export default function Presenter({ presentationId, onBack }) {
       }
     });
 
-    socket.on('participant_joined', ({ count }) => {
+    socket.on('participant_joined', ({ count, nickname, gender, socketId }) => {
       setParticipantsCount(count);
+      if (nickname) {
+        setParticipantRoster(prev => {
+          if (prev.some(p => p.name === nickname || p.id === socketId)) return prev;
+          return [...prev, { id: socketId || `p-${Math.random().toString(36).substr(2, 6)}`, name: nickname, gender: gender || 'M' }];
+        });
+      }
     });
 
     socket.on('participant_left', ({ count }) => {
@@ -2310,6 +2360,20 @@ export default function Presenter({ presentationId, onBack }) {
             {votingLocked ? <Lock size={20} /> : <Unlock size={20} />}
           </button>
 
+          <button 
+            className="btn btn-secondary btn-icon" 
+            style={{ border: 'none', color: showGroupManagerModal ? '#06b6d4' : 'white' }}
+            onClick={() => {
+              if (groupAllocations.length === 0) {
+                handleSolveAndAssignGroups();
+              }
+              setShowGroupManagerModal(true);
+            }}
+            title="Intelligent Team & Group Manager"
+          >
+            <Users size={20} />
+          </button>
+
           {['quiz', 'poll'].includes(activeSlide.type) && (activeSlide.correctAnswerIndex !== undefined || (activeSlide.correctAnswerIndices || []).length > 0) && (
             <button 
               className="btn btn-secondary btn-icon" 
@@ -2793,6 +2857,157 @@ export default function Presenter({ presentationId, onBack }) {
           </div>
         ))}
       </div>
+
+      {/* Intelligent Dynamic Group & Team Manager Modal */}
+      {showGroupManagerModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(5, 8, 16, 0.85)', backdropFilter: 'blur(8px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000,
+          padding: '20px'
+        }}>
+          <div className="glass-card animate-fade" style={{
+            width: '100%', maxWidth: '900px', background: '#0b0f19', border: '1px solid var(--border-glass)',
+            borderRadius: '24px', padding: '30px', position: 'relative', overflowY: 'auto', maxHeight: '90vh'
+          }}>
+            <button 
+              onClick={() => setShowGroupManagerModal(false)}
+              style={{
+                position: 'absolute', top: '20px', right: '20px', background: 'transparent',
+                border: 'none', color: 'var(--text-secondary)', fontSize: '1.5rem', cursor: 'pointer'
+              }}
+            >
+              ✕
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+              <div style={{ padding: '10px', background: 'rgba(6, 182, 212, 0.15)', borderRadius: '12px', color: '#06b6d4' }}>
+                <Users size={28} />
+              </div>
+              <div>
+                <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, color: '#ffffff' }}>
+                  👥 Intelligent Team & Group Manager
+                </h2>
+                <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                  Gender-balanced allocation, non-repeating pair shuffling (CSP algorithm), and thematic team naming.
+                </p>
+              </div>
+            </div>
+
+            {/* Config Toolbar */}
+            <div style={{
+              display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px',
+              background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '16px', border: '1px solid var(--border-glass)',
+              marginBottom: '24px'
+            }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                  Number of Groups (Y)
+                </label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <input 
+                    type="range" min="1" max="10" 
+                    value={groupCount}
+                    onChange={(e) => setGroupCount(Number(e.target.value))}
+                    style={{ flex: 1, accentColor: '#06b6d4' }}
+                  />
+                  <span style={{ fontWeight: 800, fontSize: '1.1rem', color: '#06b6d4', minWidth: '30px' }}>{groupCount}</span>
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '6px' }}>
+                  Naming Theme
+                </label>
+                <select 
+                  value={groupThemeKey}
+                  onChange={(e) => setGroupThemeKey(e.target.value)}
+                  style={{
+                    width: '100%', padding: '8px 12px', background: '#0f172a', border: '1px solid var(--border-glass)',
+                    borderRadius: '8px', color: '#ffffff', fontSize: '0.85rem', fontWeight: 700, outline: 'none'
+                  }}
+                >
+                  <option value="indian_rivers">🌊 Indian Rivers (Ganga, Yamuna...)</option>
+                  <option value="greek">🏛️ Greek Alphabets (Alpha, Beta...)</option>
+                  <option value="cosmic">✨ Cosmic Constellations (Orion, Phoenix...)</option>
+                  <option value="numeric">🔢 Team Numbers (Team 1, Team 2...)</option>
+                </select>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+                <button 
+                  className="btn btn-primary"
+                  onClick={handleSolveAndAssignGroups}
+                  style={{ width: '100%', background: 'linear-gradient(135deg, #06b6d4, #2563eb)', fontWeight: 800, gap: '6px' }}
+                >
+                  <Shuffle size={16} /> Reshuffle Groups (CSP)
+                </button>
+              </div>
+            </div>
+
+            {/* Interaction Matrix & Coverage Indicator */}
+            <div style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px',
+              padding: '12px 16px', background: 'rgba(6, 182, 212, 0.1)', border: '1px solid rgba(6, 182, 212, 0.3)',
+              borderRadius: '12px', marginBottom: '24px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Sparkles size={18} color="#06b6d4" />
+                <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#ffffff' }}>
+                  Class Interaction Coverage: <span style={{ color: '#06b6d4' }}>{interactionCoverage}%</span>
+                </span>
+              </div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                {repeatPairCount === 0 
+                  ? '✨ 0 Repeat Pairings (100% Unique Interaction)' 
+                  : `⚠️ ${repeatPairCount} Repeat Pairings (Exhaustion Limit Minimal Overlap)`}
+              </div>
+            </div>
+
+            {/* Group Cards Grid */}
+            <div style={{
+              display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px'
+            }}>
+              {groupAllocations.map(g => (
+                <div key={g.id} className="glass-card" style={{
+                  padding: '18px', borderRadius: '16px', border: '1.5px solid rgba(6, 182, 212, 0.3)',
+                  background: 'rgba(15, 23, 42, 0.65)'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0, color: '#ffffff' }}>{g.name}</h3>
+                    <span style={{ fontSize: '0.75rem', background: '#06b6d4', color: '#ffffff', padding: '2px 8px', borderRadius: '10px', fontWeight: 800 }}>
+                      {g.code}
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {g.members.map(m => (
+                      <div key={m.id} style={{
+                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                        padding: '8px 12px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-glass)',
+                        borderRadius: '8px', fontSize: '0.85rem'
+                      }}>
+                        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                          {(m.gender || 'M').toUpperCase() === 'F' ? '👩' : '👨'} {m.name}
+                        </span>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                          {(m.gender || 'M').toUpperCase() === 'F' ? 'Female' : 'Male'}
+                        </span>
+                      </div>
+                    ))}
+                    {g.members.length === 0 && (
+                      <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textAlign: 'center', padding: '12px' }}>
+                        No members assigned yet
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 }

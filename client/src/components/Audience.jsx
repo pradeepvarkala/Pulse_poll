@@ -78,6 +78,10 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
     { id: '1', sender: 'Admin (Host)', text: 'Welcome to the session! You can send direct questions to the host here.', timestamp: '11:20 AM' }
   ]);
 
+  // Intelligent Grouping & Team Assignment State
+  const [gender, setGender] = useState('M'); // 'M' or 'F'
+  const [assignedTeamCard, setAssignedTeamCard] = useState(null);
+
   useEffect(() => {
     if (participantVideoOn && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices.getUserMedia({ video: true, audio: !participantMicMuted })
@@ -179,7 +183,7 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
     const socket = io();
     socketRef.current = socket;
 
-    socket.emit('join_room', { roomCode: roomCode.trim(), nickname: nickname.trim() }, (response) => {
+    socket.emit('join_room', { roomCode: roomCode.trim(), nickname: nickname.trim(), gender }, (response) => {
       if (response.success) {
         setSlide(response.slide);
         setSlideIndex(response.currentSlideIndex);
@@ -326,6 +330,16 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
 
     socket.on('theme_changed', ({ theme: nextTheme }) => {
       setTheme(nextTheme);
+    });
+
+    socket.on('groups_updated', ({ groups }) => {
+      if (groups && Array.isArray(groups)) {
+        const myName = nickname || localStorage.getItem('pulse-poll-nickname');
+        const myGroup = groups.find(g => (g.members || []).some(m => m.name === myName || m.id === myName));
+        if (myGroup) {
+          setAssignedTeamCard(myGroup);
+        }
+      }
     });
 
     socket.on('responses_cleared', () => {
@@ -618,6 +632,30 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
               />
             </div>
 
+            <div className="settings-group">
+              <label style={{ fontSize: '0.8rem', fontWeight: 800, textAlign: 'center', display: 'block', color: 'var(--text-secondary)' }}>
+                Gender (For Equal Group Balance)
+              </label>
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                <button 
+                  type="button" 
+                  className={`btn ${gender === 'M' ? 'btn-primary' : 'btn-secondary'}`}
+                  style={{ flex: 1, padding: '8px 12px', fontSize: '0.85rem' }}
+                  onClick={() => setGender('M')}
+                >
+                  👨 Male
+                </button>
+                <button 
+                  type="button" 
+                  className={`btn ${gender === 'F' ? 'btn-primary' : 'btn-secondary'}`}
+                  style={{ flex: 1, padding: '8px 12px', fontSize: '0.85rem' }}
+                  onClick={() => setGender('F')}
+                >
+                  👩 Female
+                </button>
+              </div>
+            </div>
+
             <button type="submit" className="btn btn-primary" style={{ padding: '14px' }}>
               Register & Join
             </button>
@@ -713,6 +751,28 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
       </div>
 
       <div className="glass-card audience-card animate-fade" style={{ flex: 1, justifyContent: 'flex-start', minHeight: '420px' }}>
+        {/* Assigned Group & Team Card */}
+        {assignedTeamCard && (
+          <div style={{
+            width: '100%', padding: '12px 16px', background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.18), rgba(37, 99, 235, 0.18))',
+            border: '1.5px solid #06b6d4', borderRadius: '14px', marginBottom: '16px',
+            boxShadow: '0 4px 15px rgba(6, 182, 212, 0.25)', animation: 'slideInDown 0.4s ease-out'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+              <span style={{ fontSize: '1rem', fontWeight: 800, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span>👥 Team:</span>
+                <strong style={{ color: '#06b6d4' }}>{assignedTeamCard.name}</strong>
+              </span>
+              <span style={{ fontSize: '0.75rem', background: '#06b6d4', color: '#ffffff', padding: '3px 10px', borderRadius: '12px', fontWeight: 800 }}>
+                CODE: {assignedTeamCard.code}
+              </span>
+            </div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+              Teammates: {assignedTeamCard.members?.map(m => `${(m.gender || 'M').toUpperCase() === 'F' ? '👩' : '👨'} ${m.name}`).join(', ')}
+            </div>
+          </div>
+        )}
+
         {slide?.focusMode && (
           <div style={{
             width: '100%', padding: '8px 12px', background: 'rgba(37, 99, 235, 0.1)',
