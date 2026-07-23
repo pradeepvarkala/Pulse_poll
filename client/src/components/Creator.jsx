@@ -134,18 +134,47 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
           if (parsedFound.slides.length > 0) {
             setActiveSlideId(parsedFound.slides[0].id);
           }
-        } else {
-          const saved = localStorage.getItem('pulse-poll-presentations');
-          if (saved) {
-            const presentations = JSON.parse(saved);
-            const localFound = presentations.find(p => p.id === presentationId);
-            if (localFound) {
-              setPresentation(localFound);
-              if (localFound.slides.length > 0) {
-                setActiveSlideId(localFound.slides[0].id);
-              }
+          return;
+        }
+
+        const saved = localStorage.getItem('pulse-poll-presentations');
+        if (saved) {
+          const presentations = JSON.parse(saved);
+          const localFound = presentations.find(p => p.id === presentationId);
+          if (localFound) {
+            setPresentation(localFound);
+            if (localFound.slides.length > 0) {
+              setActiveSlideId(localFound.slides[0].id);
             }
+            return;
           }
+        }
+
+        // Fallback sample deck
+        const sampleDeck = {
+          id: presentationId || 'pres-sample-default',
+          title: 'Interactive Presentation Deck',
+          theme: 'cyber-neon',
+          slides: [
+            { 
+              type: 'poll', 
+              question: 'Which concept best explains the primary core fundamentals of interactive polling?', 
+              options: [
+                { id: 'opt-1', text: 'Real-Time Audience Engagement', emoji: '🚀' },
+                { id: 'opt-2', text: 'Visual Analytics & Charts', emoji: '📊' },
+                { id: 'opt-3', text: 'Gamified Competitive Quizzes', emoji: '🏆' },
+                { id: 'opt-4', text: 'Instant Feedback Loops', emoji: '⚡' }
+              ] 
+            },
+            {
+              type: 'wordcloud',
+              question: 'In one word, what makes live presentations memorable?'
+            }
+          ]
+        };
+        setPresentation(sampleDeck);
+        if (sampleDeck.slides.length > 0) {
+          setActiveSlideId(sampleDeck.slides[0].id);
         }
       } catch (err) {
         console.error('Error fetching presentation in creator:', err);
@@ -158,7 +187,27 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
             if (localFound.slides.length > 0) {
               setActiveSlideId(localFound.slides[0].id);
             }
+            return;
           }
+        }
+        const sampleDeck = {
+          id: presentationId || 'pres-sample-default',
+          title: 'Interactive Presentation Deck',
+          theme: 'cyber-neon',
+          slides: [
+            { 
+              type: 'poll', 
+              question: 'Which concept best explains the primary core fundamentals of interactive polling?', 
+              options: [
+                { id: 'opt-1', text: 'Real-Time Audience Engagement', emoji: '🚀' },
+                { id: 'opt-2', text: 'Visual Analytics & Charts', emoji: '📊' }
+              ] 
+            }
+          ]
+        };
+        setPresentation(sampleDeck);
+        if (sampleDeck.slides.length > 0) {
+          setActiveSlideId(sampleDeck.slides[0].id);
         }
       }
     };
@@ -1037,104 +1086,90 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
             <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div className="settings-group">
                 <label>Question Type</label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                   <button 
-                    className={`btn btn-secondary ${activeSlide.type === 'poll' ? 'btn-primary' : ''}`}
-                    style={{ padding: '6px 8px', fontSize: '0.75rem', gap: '4px' }}
+                    className={`btn-type-option ${activeSlide.type === 'poll' ? 'active' : ''}`}
                     onClick={() => handleChangeSlideType('poll')}
                   >
-                    <BarChart3 size={12} /> Multiple Choice
+                    <BarChart3 size={14} /> Multiple Choice
                   </button>
                   <button 
-                    className={`btn btn-secondary ${activeSlide.type === 'wordcloud' ? 'btn-primary' : ''}`}
-                    style={{ padding: '6px 8px', fontSize: '0.75rem', gap: '4px' }}
+                    className={`btn-type-option ${activeSlide.type === 'wordcloud' ? 'active' : ''}`}
                     onClick={() => handleChangeSlideType('wordcloud')}
                   >
-                    <Cloud size={12} /> Word Cloud
+                    <Cloud size={14} /> Word Cloud
                   </button>
                   <button 
-                    className={`btn btn-secondary ${activeSlide.type === 'openended' ? 'btn-primary' : ''}`}
-                    style={{ padding: '6px 8px', fontSize: '0.75rem', gap: '4px' }}
+                    className={`btn-type-option ${activeSlide.type === 'openended' ? 'active' : ''}`}
                     onClick={() => handleChangeSlideType('openended')}
                   >
-                    <AlignLeft size={12} /> Open Ended
+                    <AlignLeft size={14} /> Open Ended
                   </button>
                   <button 
-                    className={`btn btn-secondary ${activeSlide.type === 'scales' ? 'btn-primary' : ''}`}
-                    style={{ padding: '6px 8px', fontSize: '0.75rem', gap: '4px' }}
+                    className={`btn-type-option ${activeSlide.type === 'scales' ? 'active' : ''}`}
                     onClick={() => handleChangeSlideType('scales')}
                   >
-                    <Sliders size={12} /> Scales
+                    <Sliders size={14} /> Scales
                   </button>
                   <button 
-                    className={`btn btn-secondary ${activeSlide.type === 'ranking' ? 'btn-primary' : ''}`}
-                    style={{ padding: '6px 8px', fontSize: '0.75rem', gap: '4px' }}
+                    className={`btn-type-option ${activeSlide.type === 'ranking' ? 'active' : ''}`}
                     onClick={() => handleChangeSlideType('ranking')}
                   >
-                    <ArrowDownUp size={12} /> Ranking
+                    <ArrowDownUp size={14} /> Ranking
                   </button>
                   <button 
-                    className={`btn btn-secondary ${activeSlide.type === 'qa' ? 'btn-primary' : ''}`}
-                    style={{ padding: '6px 8px', fontSize: '0.75rem', gap: '4px' }}
+                    className={`btn-type-option ${activeSlide.type === 'qa' ? 'active' : ''}`}
                     onClick={() => handleChangeSlideType('qa')}
                   >
-                    <HelpCircle size={12} /> Q&A
+                    <HelpCircle size={14} /> Q&A
                   </button>
                   <button 
-                    className={`btn btn-secondary ${activeSlide.type === 'guess' ? 'btn-primary' : ''}`}
-                    style={{ padding: '6px 8px', fontSize: '0.75rem', gap: '4px' }}
+                    className={`btn-type-option ${activeSlide.type === 'guess' ? 'active' : ''}`}
                     onClick={() => handleChangeSlideType('guess')}
                   >
-                    <Hash size={12} /> Guess Number
+                    <Hash size={14} /> Guess Number
                   </button>
                   <button 
-                    className={`btn btn-secondary ${activeSlide.type === 'points' ? 'btn-primary' : ''}`}
-                    style={{ padding: '6px 8px', fontSize: '0.75rem', gap: '4px' }}
+                    className={`btn-type-option ${activeSlide.type === 'points' ? 'active' : ''}`}
                     onClick={() => handleChangeSlideType('points')}
                   >
-                    <Sliders size={12} /> 100 Points
+                    <Sliders size={14} /> 100 Points
                   </button>
                   <button 
-                    className={`btn btn-secondary ${activeSlide.type === 'grid' ? 'btn-primary' : ''}`}
-                    style={{ padding: '6px 8px', fontSize: '0.75rem', gap: '4px' }}
+                    className={`btn-type-option ${activeSlide.type === 'grid' ? 'active' : ''}`}
                     onClick={() => handleChangeSlideType('grid')}
                   >
-                    <Grid3X3 size={12} /> 2x2 Grid
+                    <Grid3X3 size={14} /> 2x2 Grid
                   </button>
                   <button 
-                    className={`btn btn-secondary ${activeSlide.type === 'form' ? 'btn-primary' : ''}`}
-                    style={{ padding: '6px 8px', fontSize: '0.75rem', gap: '4px' }}
+                    className={`btn-type-option ${activeSlide.type === 'form' ? 'active' : ''}`}
                     onClick={() => handleChangeSlideType('form')}
                   >
-                    <FileSpreadsheet size={12} /> Quick Form
+                    <FileSpreadsheet size={14} /> Quick Form
                   </button>
                   <button 
-                    className={`btn btn-secondary ${activeSlide.type === 'pin' ? 'btn-primary' : ''}`}
-                    style={{ padding: '6px 8px', fontSize: '0.75rem', gap: '4px' }}
+                    className={`btn-type-option ${activeSlide.type === 'pin' ? 'active' : ''}`}
                     onClick={() => handleChangeSlideType('pin')}
                   >
-                    <MapPin size={12} /> Pin on Image
+                    <MapPin size={14} /> Pin on Image
                   </button>
                   <button 
-                    className={`btn btn-secondary ${activeSlide.type === 'quiz' ? 'btn-primary' : ''}`}
-                    style={{ padding: '6px 8px', fontSize: '0.75rem', gap: '4px' }}
+                    className={`btn-type-option ${activeSlide.type === 'quiz' ? 'active' : ''}`}
                     onClick={() => handleChangeSlideType('quiz')}
                   >
-                    <Trophy size={12} /> Quiz
+                    <Trophy size={14} /> Quiz
                   </button>
                   <button 
-                    className={`btn btn-secondary ${activeSlide.type === 'stopwatch' ? 'btn-primary' : ''}`}
-                    style={{ padding: '6px 8px', fontSize: '0.75rem', gap: '4px' }}
+                    className={`btn-type-option ${activeSlide.type === 'stopwatch' ? 'active' : ''}`}
                     onClick={() => handleChangeSlideType('stopwatch')}
                   >
-                    <Timer size={12} /> Stopwatch
+                    <Timer size={14} /> Stopwatch
                   </button>
                   <button 
-                    className={`btn btn-secondary ${activeSlide.type === 'brainstorm' ? 'btn-primary' : ''}`}
-                    style={{ padding: '6px 8px', fontSize: '0.75rem', gap: '4px' }}
+                    className={`btn-type-option ${activeSlide.type === 'brainstorm' ? 'active' : ''}`}
                     onClick={() => handleChangeSlideType('brainstorm')}
                   >
-                    <Grid3X3 size={12} /> Brainstorm Grids
+                    <Grid3X3 size={14} /> Brainstorm Grids
                   </button>
                 </div>
               </div>

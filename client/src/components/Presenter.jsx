@@ -496,18 +496,57 @@ export default function Presenter({ presentationId, onBack }) {
           setPresentation(parsedFound);
           setSlides(parsedFound.slides);
           setTheme(parsedFound.theme || 'corporate');
-        } else {
-          const saved = localStorage.getItem('pulse-poll-presentations');
-          if (saved) {
-            const presentations = JSON.parse(saved);
-            const localFound = presentations.find(p => p.id === presentationId);
-            if (localFound) {
-              setPresentation(localFound);
-              setSlides(localFound.slides);
-              setTheme(localFound.theme || 'corporate');
-            }
+          return;
+        }
+
+        const saved = localStorage.getItem('pulse-poll-presentations');
+        if (saved) {
+          const presentations = JSON.parse(saved);
+          const localFound = presentations.find(p => p.id === presentationId);
+          if (localFound) {
+            setPresentation(localFound);
+            setSlides(localFound.slides);
+            setTheme(localFound.theme || 'corporate');
+            return;
           }
         }
+
+        // Fallback sample presentation
+        const sampleDeck = {
+          id: presentationId || 'pres-sample-default',
+          title: 'Interactive Presentation Deck',
+          theme: 'cyber-neon',
+          slides: [
+            { 
+              type: 'poll', 
+              question: 'Which concept best explains the primary core fundamentals of interactive polling?', 
+              options: [
+                { id: 'opt-1', text: 'Real-Time Audience Engagement', emoji: '🚀' },
+                { id: 'opt-2', text: 'Visual Analytics & Charts', emoji: '📊' },
+                { id: 'opt-3', text: 'Gamified Competitive Quizzes', emoji: '🏆' },
+                { id: 'opt-4', text: 'Instant Feedback Loops', emoji: '⚡' }
+              ] 
+            },
+            {
+              type: 'wordcloud',
+              question: 'In one word, what makes live presentations memorable?'
+            },
+            {
+              type: 'quiz',
+              question: 'Which biological process converts sunlight and carbon dioxide into oxygen? 🌿',
+              timeLimit: 15,
+              correctAnswerIndex: 0,
+              options: [
+                { id: 'opt-1', text: 'Photosynthesis (Correct)', emoji: '🌿' },
+                { id: 'opt-2', text: 'Cellular Respiration', emoji: '💨' },
+                { id: 'opt-3', text: 'Evaporation', emoji: '💧' }
+              ]
+            }
+          ]
+        };
+        setPresentation(sampleDeck);
+        setSlides(sampleDeck.slides);
+        setTheme(sampleDeck.theme);
       } catch (err) {
         console.error('Error fetching presentation in presenter:', err);
         const saved = localStorage.getItem('pulse-poll-presentations');
@@ -518,8 +557,29 @@ export default function Presenter({ presentationId, onBack }) {
             setPresentation(localFound);
             setSlides(localFound.slides);
             setTheme(localFound.theme || 'corporate');
+            return;
           }
         }
+        const sampleDeck = {
+          id: presentationId || 'pres-sample-default',
+          title: 'Interactive Presentation Deck',
+          theme: 'cyber-neon',
+          slides: [
+            { 
+              type: 'poll', 
+              question: 'Which concept best explains the primary core fundamentals of interactive polling?', 
+              options: [
+                { id: 'opt-1', text: 'Real-Time Audience Engagement', emoji: '🚀' },
+                { id: 'opt-2', text: 'Visual Analytics & Charts', emoji: '📊' },
+                { id: 'opt-3', text: 'Gamified Competitive Quizzes', emoji: '🏆' },
+                { id: 'opt-4', text: 'Instant Feedback Loops', emoji: '⚡' }
+              ] 
+            }
+          ]
+        };
+        setPresentation(sampleDeck);
+        setSlides(sampleDeck.slides);
+        setTheme(sampleDeck.theme);
       }
     };
 
