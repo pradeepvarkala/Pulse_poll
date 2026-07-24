@@ -92,6 +92,8 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
   const [isAiGenerating, setIsAiGenerating] = useState(false);
   const [draggedSlideIndex, setDraggedSlideIndex] = useState(null);
   const [isRightSidebarCollapsed, setIsRightSidebarCollapsed] = useState(false);
+  const [isRadialPickerOpen, setIsRadialPickerOpen] = useState(false);
+  const [typePickerViewMode, setTypePickerViewMode] = useState('radial'); // 'radial' or 'grid'
 
 
   const handleImportPptFile = (e) => {
@@ -684,65 +686,116 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
         className="creator-container"
         style={{
           display: 'grid',
-          gridTemplateColumns: isRightSidebarCollapsed ? '170px 1fr 44px' : '170px 1fr 320px',
+          gridTemplateColumns: isRightSidebarCollapsed ? '82px 1fr 44px' : '82px 1fr 320px',
           flex: 1,
           overflow: 'hidden',
           transition: 'grid-template-columns 0.35s cubic-bezier(0.16, 1, 0.3, 1)'
         }}
       >
-        {/* Left Side: Slide List (Thumbnails) */}
-        <div className="sidebar-left" style={{ padding: '1rem 0.8rem' }}>
-          <h3 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Slides</h3>
-          {slides.map((slide, index) => (
-            <div 
-              key={slide.id} 
-              draggable={true}
-              onDragStart={(e) => {
-                setDraggedSlideIndex(index);
-                e.dataTransfer.effectAllowed = 'move';
-              }}
-              onDragOver={(e) => {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = 'move';
-              }}
-              onDrop={(e) => {
-                e.preventDefault();
-                handleReorderSlides(draggedSlideIndex, index);
-                setDraggedSlideIndex(null);
-              }}
-              className={`slide-thumbnail ${slide.id === activeSlideId ? 'active' : ''} ${draggedSlideIndex === index ? 'dragging' : ''}`}
-              onClick={() => setActiveSlideId(slide.id)}
-              title="Drag up/down to reorder slides"
-            >
-              <span className="thumbnail-number">{index + 1}</span>
-              <div className="thumbnail-type">{slide.type}</div>
-              <div className="thumbnail-title">{slide.question || '(No Question)'}</div>
+        {/* Left Side: Icon-Only Slide List (Thumbnails) with Tooltips */}
+        <div className="sidebar-left" style={{ padding: '1rem 0.4rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+          <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            Slides
+          </span>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', alignItems: 'center', overflowY: 'auto', maxHeight: 'calc(100vh - 220px)', padding: '4px' }}>
+            {slides.map((slide, index) => {
+              const IconComp = SLIDE_TYPE_ITEMS.find(t => t.type === slide.type)?.icon || BarChart3;
+              const iconColor = SLIDE_TYPE_ITEMS.find(t => t.type === slide.type)?.color || '#38bdf8';
+              const isPpt = slide.type === 'ppt';
               
-              <button 
-                className="btn btn-secondary btn-icon" 
-                style={{ 
-                  position: 'absolute', bottom: '6px', right: '6px', 
-                  width: '24px', height: '24px', opacity: 0.7,
-                  border: 'none', background: 'transparent'
-                }}
-                onClick={(e) => handleDeleteSlide(slide.id, e)}
-                title="Delete Slide"
-              >
-                <Trash2 size={12} color="var(--accent-red)" />
-              </button>
-            </div>
-          ))}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '10px' }}>
-            <button className="btn btn-secondary" onClick={handleAddSlide} style={{ fontSize: '0.82rem' }}>
-              <Plus size={16} /> Add Interactive Slide
-            </button>
-            <label 
-              className="btn btn-secondary" 
-              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '0.78rem', border: '1px dashed var(--accent)', color: 'var(--accent)', background: 'rgba(6, 182, 212, 0.06)' }}
-              title="Import PowerPoint PPTX or PDF slides (Non-Interactive Slide Mode - Pro Plan)"
+              return (
+                <div 
+                  key={slide.id} 
+                  draggable={true}
+                  onDragStart={(e) => {
+                    setDraggedSlideIndex(index);
+                    e.dataTransfer.effectAllowed = 'move';
+                  }}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    handleReorderSlides(draggedSlideIndex, index);
+                    setDraggedSlideIndex(null);
+                  }}
+                  className={`slide-thumbnail ${slide.id === activeSlideId ? 'active' : ''} ${draggedSlideIndex === index ? 'dragging' : ''}`}
+                  onClick={() => setActiveSlideId(slide.id)}
+                  title={`Slide ${index + 1}: ${slide.question || '(No Question)'} [${slide.type.toUpperCase()}]`}
+                  style={{
+                    width: '54px',
+                    height: '54px',
+                    minHeight: '54px',
+                    borderRadius: '14px',
+                    position: 'relative',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: 0,
+                    margin: 0,
+                    cursor: 'pointer',
+                    background: slide.id === activeSlideId ? 'rgba(6, 182, 212, 0.18)' : 'rgba(255, 255, 255, 0.03)',
+                    border: slide.id === activeSlideId ? '2px solid var(--accent)' : '1px solid var(--border-glass)',
+                    boxShadow: slide.id === activeSlideId ? '0 0 14px rgba(6, 182, 212, 0.35)' : 'none',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  {/* Number Badge */}
+                  <span style={{
+                    position: 'absolute',
+                    top: '4px',
+                    left: '5px',
+                    fontSize: '0.68rem',
+                    fontWeight: 800,
+                    color: slide.id === activeSlideId ? 'var(--accent)' : 'var(--text-muted)'
+                  }}>
+                    {index + 1}
+                  </span>
+
+                  {/* Icon */}
+                  {isPpt ? <FileUp size={20} color="#3b82f6" /> : <IconComp size={20} color={iconColor} />}
+
+                  {/* Delete Button on Hover */}
+                  <button 
+                    className="btn-icon" 
+                    style={{ 
+                      position: 'absolute', top: '-4px', right: '-4px', 
+                      width: '18px', height: '18px', borderRadius: '50%',
+                      background: 'rgba(239, 68, 68, 0.85)', color: '#ffffff',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      border: 'none', cursor: 'pointer', opacity: 0.85
+                    }}
+                    onClick={(e) => handleDeleteSlide(slide.id, e)}
+                    title="Delete Slide"
+                  >
+                    <Trash2 size={10} />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: 'auto', alignItems: 'center' }}>
+            {/* Add Slide Icon Button */}
+            <button 
+              className="btn btn-secondary btn-icon" 
+              onClick={handleAddSlide} 
+              title="Add Interactive Slide (+)"
+              style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--accent-soft)', color: 'var(--accent)', border: '1px solid var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
-              <FileUp size={14} /> Import PPTX / PDF
-              <span style={{ fontSize: '0.68rem', background: 'var(--accent)', color: '#08211E', padding: '1px 5px', borderRadius: '4px', fontWeight: 800 }}>PRO</span>
+              <Plus size={22} />
+            </button>
+
+            {/* Import PPTX / PDF Icon Button */}
+            <label 
+              className="btn btn-secondary btn-icon" 
+              style={{ width: '48px', height: '48px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed var(--accent)', color: 'var(--accent)', background: 'rgba(6, 182, 212, 0.08)' }}
+              title="Import PowerPoint PPTX or PDF document (PRO)"
+            >
+              <FileUp size={20} />
               <input 
                 type="file" 
                 accept=".pptx,.ppt,.pdf,.png,.jpg,.jpeg" 
@@ -1296,95 +1349,83 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
 
           {/* 1. TYPE TAB */}
           {activeSidebarTab === 'type' && (
-            <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <div className="settings-group">
-                <label>Question Type</label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
+              <div className="settings-group" style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '14px' }}>
+                  <label style={{ margin: 0 }}>Question Type Selector</label>
                   <button 
-                    className={`btn-type-option ${activeSlide.type === 'poll' ? 'active' : ''}`}
-                    onClick={() => handleChangeSlideType('poll')}
+                    type="button" 
+                    onClick={() => setTypePickerViewMode(typePickerViewMode === 'radial' ? 'grid' : 'radial')}
+                    style={{ background: 'none', border: 'none', color: 'var(--accent)', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
                   >
-                    <BarChart3 size={14} /> Multiple Choice
-                  </button>
-                  <button 
-                    className={`btn-type-option ${activeSlide.type === 'wordcloud' ? 'active' : ''}`}
-                    onClick={() => handleChangeSlideType('wordcloud')}
-                  >
-                    <Cloud size={14} /> Word Cloud
-                  </button>
-                  <button 
-                    className={`btn-type-option ${activeSlide.type === 'openended' ? 'active' : ''}`}
-                    onClick={() => handleChangeSlideType('openended')}
-                  >
-                    <AlignLeft size={14} /> Open Ended
-                  </button>
-                  <button 
-                    className={`btn-type-option ${activeSlide.type === 'scales' ? 'active' : ''}`}
-                    onClick={() => handleChangeSlideType('scales')}
-                  >
-                    <Sliders size={14} /> Scales
-                  </button>
-                  <button 
-                    className={`btn-type-option ${activeSlide.type === 'ranking' ? 'active' : ''}`}
-                    onClick={() => handleChangeSlideType('ranking')}
-                  >
-                    <ArrowDownUp size={14} /> Ranking
-                  </button>
-                  <button 
-                    className={`btn-type-option ${activeSlide.type === 'qa' ? 'active' : ''}`}
-                    onClick={() => handleChangeSlideType('qa')}
-                  >
-                    <HelpCircle size={14} /> Q&A
-                  </button>
-                  <button 
-                    className={`btn-type-option ${activeSlide.type === 'guess' ? 'active' : ''}`}
-                    onClick={() => handleChangeSlideType('guess')}
-                  >
-                    <Hash size={14} /> Guess Number
-                  </button>
-                  <button 
-                    className={`btn-type-option ${activeSlide.type === 'points' ? 'active' : ''}`}
-                    onClick={() => handleChangeSlideType('points')}
-                  >
-                    <Sliders size={14} /> 100 Points
-                  </button>
-                  <button 
-                    className={`btn-type-option ${activeSlide.type === 'grid' ? 'active' : ''}`}
-                    onClick={() => handleChangeSlideType('grid')}
-                  >
-                    <Grid3X3 size={14} /> 2x2 Grid
-                  </button>
-                  <button 
-                    className={`btn-type-option ${activeSlide.type === 'form' ? 'active' : ''}`}
-                    onClick={() => handleChangeSlideType('form')}
-                  >
-                    <FileSpreadsheet size={14} /> Quick Form
-                  </button>
-                  <button 
-                    className={`btn-type-option ${activeSlide.type === 'pin' ? 'active' : ''}`}
-                    onClick={() => handleChangeSlideType('pin')}
-                  >
-                    <MapPin size={14} /> Pin on Image
-                  </button>
-                  <button 
-                    className={`btn-type-option ${activeSlide.type === 'quiz' ? 'active' : ''}`}
-                    onClick={() => handleChangeSlideType('quiz')}
-                  >
-                    <Trophy size={14} /> Quiz
-                  </button>
-                  <button 
-                    className={`btn-type-option ${activeSlide.type === 'stopwatch' ? 'active' : ''}`}
-                    onClick={() => handleChangeSlideType('stopwatch')}
-                  >
-                    <Timer size={14} /> Stopwatch
-                  </button>
-                  <button 
-                    className={`btn-type-option ${activeSlide.type === 'brainstorm' ? 'active' : ''}`}
-                    onClick={() => handleChangeSlideType('brainstorm')}
-                  >
-                    <Grid3X3 size={14} /> Brainstorm Grids
+                    {typePickerViewMode === 'radial' ? '🔳 Switch to Grid View' : '⭕ Switch to Radial Wheel'}
                   </button>
                 </div>
+
+                {typePickerViewMode === 'radial' ? (
+                  /* Circular Radial Trigger Hub (Image 3 Style) */
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', width: '100%', margin: '10px 0' }}>
+                    <div 
+                      onClick={() => setIsRadialPickerOpen(true)}
+                      style={{
+                        width: '130px',
+                        height: '130px',
+                        borderRadius: '50%',
+                        background: 'radial-gradient(circle, rgba(6, 182, 212, 0.25) 0%, rgba(15, 23, 42, 0.95) 75%)',
+                        border: '3px solid var(--accent)',
+                        boxShadow: '0 0 30px rgba(6, 182, 212, 0.45)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                        position: 'relative'
+                      }}
+                      className="radial-hub-trigger hover-scale"
+                      title="Click to open full Circular Radial Arc Selector Wheel"
+                    >
+                      {/* Active Type Icon */}
+                      {(() => {
+                        const IconComp = SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.icon || BarChart3;
+                        const iconColor = SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.color || '#38bdf8';
+                        return <IconComp size={34} color={iconColor} />;
+                      })()}
+                      
+                      <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#ffffff', marginTop: '6px', textAlign: 'center', padding: '0 8px' }}>
+                        {SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.label || 'Multiple Choice'}
+                      </span>
+                      <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--accent)', marginTop: '2px' }}>
+                        ⚡ Click to Expand
+                      </span>
+                    </div>
+
+                    <button 
+                      type="button" 
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => setIsRadialPickerOpen(true)}
+                      style={{ borderRadius: '20px', fontSize: '0.78rem', padding: '6px 16px', gap: '6px', border: '1px solid var(--accent)', color: 'var(--accent)', background: 'rgba(6, 182, 212, 0.08)' }}
+                    >
+                      ⭕ Expand Radial Selector Wheel (Image 3)
+                    </button>
+                  </div>
+                ) : (
+                  /* Standard Grid View */
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', width: '100%' }}>
+                    {SLIDE_TYPE_ITEMS.map((item) => {
+                      const IconComp = item.icon;
+                      return (
+                        <button 
+                          key={item.type}
+                          className={`btn-type-option ${activeSlide.type === item.type ? 'active' : ''}`}
+                          onClick={() => handleChangeSlideType(item.type)}
+                        >
+                          <IconComp size={14} color={item.color} /> {item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -1834,6 +1875,114 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
               {emoji}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Radial Wheel Arc Selector Dial Modal Overlay (Image 3) */}
+      {isRadialPickerOpen && (
+        <div 
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 999999,
+            background: 'rgba(11, 15, 25, 0.85)',
+            backdropFilter: 'blur(12px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+          className="animate-fade-in"
+          onClick={() => setIsRadialPickerOpen(false)}
+        >
+          <div 
+            style={{
+              position: 'relative',
+              width: '420px',
+              height: '420px',
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(15, 23, 42, 0.95) 30%, rgba(30, 41, 59, 0.92) 100%)',
+              border: '2px solid rgba(6, 182, 212, 0.4)',
+              boxShadow: '0 0 60px rgba(6, 182, 212, 0.4), inset 0 0 40px rgba(0,0,0,0.8)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Center Hub */}
+            <div style={{
+              width: '130px',
+              height: '130px',
+              borderRadius: '50%',
+              background: '#0f172a',
+              border: '2px solid var(--accent)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 10,
+              boxShadow: '0 0 25px rgba(6, 182, 212, 0.5)'
+            }}>
+              <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Selected Type</span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 900, color: '#ffffff', textAlign: 'center', padding: '0 4px', margin: '2px 0' }}>
+                {SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.label}
+              </span>
+              <button 
+                type="button" 
+                onClick={() => setIsRadialPickerOpen(false)}
+                style={{ marginTop: '4px', background: 'rgba(239, 68, 68, 0.2)', border: '1px solid #ef4444', color: '#ef4444', borderRadius: '10px', fontSize: '0.7rem', padding: '3px 10px', fontWeight: 800, cursor: 'pointer' }}
+              >
+                Close ✕
+              </button>
+            </div>
+
+            {/* Radial Sectors placed around 360 Degree Circle (Image 3) */}
+            {SLIDE_TYPE_ITEMS.map((item, idx) => {
+              const total = SLIDE_TYPE_ITEMS.length;
+              const angle = (idx / total) * (2 * Math.PI) - (Math.PI / 2);
+              const radius = 150; // 150px radius
+              const x = Math.round(210 + radius * Math.cos(angle) - 28);
+              const y = Math.round(210 + radius * Math.sin(angle) - 28);
+              const IconComp = item.icon;
+              const isActive = activeSlide.type === item.type;
+
+              return (
+                <div 
+                  key={item.type}
+                  onClick={() => {
+                    handleChangeSlideType(item.type);
+                    setIsRadialPickerOpen(false);
+                  }}
+                  title={item.label}
+                  style={{
+                    position: 'absolute',
+                    left: `${x}px`,
+                    top: `${y}px`,
+                    width: '56px',
+                    height: '56px',
+                    borderRadius: '50%',
+                    background: isActive ? item.color : 'rgba(15, 23, 42, 0.95)',
+                    border: `2px solid ${isActive ? '#ffffff' : item.color}`,
+                    color: isActive ? '#08211E' : '#ffffff',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    boxShadow: isActive ? `0 0 24px ${item.color}` : '0 4px 14px rgba(0,0,0,0.5)',
+                    transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                    zIndex: 20
+                  }}
+                  className="hover-scale"
+                >
+                  <IconComp size={20} color={isActive ? '#08211E' : item.color} />
+                  <span style={{ fontSize: '0.58rem', fontWeight: 800, marginTop: '2px', textAlign: 'center', lineHeight: 1, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '50px' }}>
+                    {item.label}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>
