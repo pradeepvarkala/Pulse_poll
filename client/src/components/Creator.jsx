@@ -736,27 +736,51 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
       {/* Editor Header */}
       <div style={{ 
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        padding: '12px 24px', borderBottom: '1px solid var(--border-glass)',
-        backgroundColor: 'var(--bg-dark)', zIndex: 10
+        padding: '6px 16px', borderBottom: '1px solid var(--border-glass)',
+        backgroundColor: 'var(--bg-dark)', zIndex: 10, minHeight: '42px', maxHeight: '42px'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <button 
-            className="btn btn-secondary" 
+            type="button"
+            className="btn btn-secondary btn-sm" 
             onClick={onBack} 
-            title={returnNavContext?.returnView === 'sessions' ? "Back to Workshop Schedule" : "Back to Dashboard"}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', fontSize: '0.82rem', fontWeight: 600 }}
+            title={returnNavContext?.returnView === 'sessions' ? "Back to Schedule" : "Dashboard"}
+            style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '4px 10px', fontSize: '0.78rem', fontWeight: 600 }}
           >
-            <ArrowLeft size={16} />
-            <span>{returnNavContext?.returnView === 'sessions' ? "Back to Workshop Schedule" : "Back to Dashboard"}</span>
+            <ArrowLeft size={14} />
+            <span>{returnNavContext?.returnView === 'sessions' ? "Back to Schedule" : "Dashboard"}</span>
           </button>
-          <div>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>{presentation.title}</h2>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Saved locally</span>
-          </div>
+          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>/</span>
+          <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            🎨 Presentation Creator
+          </span>
         </div>
 
-        <button className="btn btn-primary" onClick={() => onPresent(presentation.id)}>
-          <Play size={16} /> Present Live
+        {/* Top Right Mini Circular Play Button */}
+        <button 
+          type="button"
+          className="btn btn-primary btn-icon" 
+          onClick={() => onPresent(presentation.id)}
+          title="Present Live ▶"
+          style={{ 
+            width: '32px', 
+            height: '32px', 
+            borderRadius: '50%', 
+            padding: 0, 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            background: 'var(--accent)', 
+            color: '#08211E', 
+            border: 'none', 
+            boxShadow: '0 2px 8px rgba(6, 182, 212, 0.4)', 
+            cursor: 'pointer',
+            transition: 'transform 0.2s ease'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+        >
+          <Play size={16} fill="#08211E" color="#08211E" style={{ marginLeft: '2px' }} />
         </button>
       </div>
 
@@ -1445,10 +1469,10 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
             overflowY: 'auto',
             minHeight: 0,
             minWidth: 0,
-            padding: isRightSidebarCollapsed ? '12px 4px' : '1.25rem',
+            padding: isRightSidebarCollapsed ? '10px 4px' : '0.75rem 0.85rem',
             display: 'flex',
             flexDirection: 'column',
-            gap: '16px',
+            gap: '8px',
             position: 'relative',
             background: 'var(--surface)',
             borderLeft: '1px solid var(--border-glass)',
@@ -1463,7 +1487,7 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
               justifyContent: 'center', 
               height: '100%', 
               position: 'relative',
-              gap: '16px'
+              gap: '12px'
             }}>
               {/* Circular Arrow Toggle Button Vertically Centered along presentation height */}
               <button 
@@ -1472,8 +1496,8 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                 onClick={() => setIsRightSidebarCollapsed(false)}
                 title="Expand Slide Settings"
                 style={{ 
-                  width: '38px', 
-                  height: '38px', 
+                  width: '34px', 
+                  height: '34px', 
                   borderRadius: '50%', 
                   background: 'var(--accent)', 
                   color: '#08211E', 
@@ -1488,7 +1512,7 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                 onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.12)'}
                 onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
               >
-                <ChevronLeft size={20} color="#08211E" />
+                <ChevronLeft size={18} color="#08211E" />
               </button>
 
               {/* Hover Popout Tab Items (Sharp Popout without blur, no text on load) */}
@@ -1512,8 +1536,8 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                       }}
                       title={item.label}
                       style={{
-                        width: '34px',
-                        height: '34px',
+                        width: '32px',
+                        height: '32px',
                         borderRadius: '50%',
                         background: activeSidebarTab === item.id ? 'var(--accent-soft)' : 'var(--surface-2)',
                         color: activeSidebarTab === item.id ? 'var(--accent)' : 'var(--text-secondary)',
@@ -1525,7 +1549,7 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                         transition: 'all 0.2s ease'
                       }}
                     >
-                      <IconComp size={16} />
+                      <IconComp size={15} />
                     </button>
                   </div>
                 );
@@ -1534,9 +1558,9 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
           ) : (
             <>
               {/* Header with SETTINGS Label */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-glass)', paddingBottom: '10px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-glass)', paddingBottom: '4px' }}>
                 <span style={{ 
-                  fontSize: '0.88rem', 
+                  fontSize: '0.8rem', 
                   fontWeight: 900, 
                   color: 'var(--primary)', 
                   textTransform: 'uppercase', 
@@ -1551,8 +1575,8 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                   onClick={() => setIsRightSidebarCollapsed(true)}
                   title="Minimize Sidebar"
                   style={{ 
-                    width: '32px', 
-                    height: '32px', 
+                    width: '26px', 
+                    height: '26px', 
                     borderRadius: '50%', 
                     background: 'var(--surface-2)', 
                     color: 'var(--primary)', 
@@ -1564,16 +1588,16 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                     padding: 0
                   }}
                 >
-                  <ChevronRight size={18} />
+                  <ChevronRight size={15} />
                 </button>
               </div>
 
               {/* Sidebar Tab Header (Type, Customize, AI - No Content Tab) */}
-              <div className="sidebar-tabs" style={{ display: 'flex', borderBottom: '1px solid var(--border-glass)', marginBottom: '15px' }}>
+              <div className="sidebar-tabs" style={{ display: 'flex', borderBottom: '1px solid var(--border-glass)', marginBottom: '6px' }}>
             <button 
               type="button"
               className={`sidebar-tab-btn ${activeSidebarTab === 'type' ? 'active' : ''}`}
-              style={{ flex: 1, background: 'transparent', border: 'none', borderBottom: activeSidebarTab === 'type' ? '2px solid var(--primary)' : '2px solid transparent', padding: '10px 4px', color: activeSidebarTab === 'type' ? 'var(--primary)' : 'var(--text-secondary)', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', transition: 'all 0.15s ease' }}
+              style={{ flex: 1, background: 'transparent', border: 'none', borderBottom: activeSidebarTab === 'type' ? '2px solid var(--primary)' : '2px solid transparent', padding: '6px 2px', color: activeSidebarTab === 'type' ? 'var(--primary)' : 'var(--text-secondary)', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer', transition: 'all 0.15s ease' }}
               onClick={() => setActiveSidebarTab('type')}
             >
               Type
@@ -1581,7 +1605,7 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
             <button 
               type="button"
               className={`sidebar-tab-btn ${activeSidebarTab === 'design' ? 'active' : ''}`}
-              style={{ flex: 1, background: 'transparent', border: 'none', borderBottom: activeSidebarTab === 'design' ? '2px solid var(--primary)' : '2px solid transparent', padding: '10px 4px', color: activeSidebarTab === 'design' ? 'var(--primary)' : 'var(--text-secondary)', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', transition: 'all 0.15s ease' }}
+              style={{ flex: 1, background: 'transparent', border: 'none', borderBottom: activeSidebarTab === 'design' ? '2px solid var(--primary)' : '2px solid transparent', padding: '6px 2px', color: activeSidebarTab === 'design' ? 'var(--primary)' : 'var(--text-secondary)', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer', transition: 'all 0.15s ease' }}
               onClick={() => setActiveSidebarTab('design')}
             >
               Customize
@@ -1589,7 +1613,7 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
             <button 
               type="button"
               className={`sidebar-tab-btn ${activeSidebarTab === 'ai' ? 'active' : ''}`}
-              style={{ flex: 1, background: 'transparent', border: 'none', borderBottom: activeSidebarTab === 'ai' ? '2px solid var(--primary)' : '2px solid transparent', padding: '10px 4px', color: activeSidebarTab === 'ai' ? 'var(--primary)' : 'var(--text-secondary)', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', transition: 'all 0.15s ease', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
+              style={{ flex: 1, background: 'transparent', border: 'none', borderBottom: activeSidebarTab === 'ai' ? '2px solid var(--primary)' : '2px solid transparent', padding: '6px 2px', color: activeSidebarTab === 'ai' ? 'var(--primary)' : 'var(--text-secondary)', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer', transition: 'all 0.15s ease', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
               onClick={() => setActiveSidebarTab('ai')}
             >
               🤖 AI
