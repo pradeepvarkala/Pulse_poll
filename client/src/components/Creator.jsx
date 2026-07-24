@@ -765,14 +765,16 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
         className="creator-container"
         style={{
           display: 'grid',
-          gridTemplateColumns: isRightSidebarCollapsed ? '82px 1fr 44px' : '82px 1fr 320px',
+          gridTemplateColumns: isRightSidebarCollapsed ? '82px minmax(0, 1fr) 44px' : '82px minmax(0, 1fr) 320px',
           flex: 1,
+          height: 'calc(100vh - 65px)',
+          maxHeight: 'calc(100vh - 65px)',
           overflow: 'hidden',
           transition: 'grid-template-columns 0.35s cubic-bezier(0.16, 1, 0.3, 1)'
         }}
       >
         {/* Left Side: Icon-Only Slide List (Thumbnails) with Tooltips */}
-        <div className="sidebar-left" style={{ padding: '0.8rem 0.4rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+        <div className="sidebar-left" style={{ height: '100%', maxHeight: '100%', overflowY: 'auto', minHeight: 0, padding: '0.8rem 0.4rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', width: '100%', marginBottom: '6px' }}>
             <span style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               Slides
@@ -914,17 +916,32 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
         </div>
 
         {/* Center: Slide Preview Mockup */}
-        <div className="editor-center" style={{ position: 'relative', padding: '0.5rem 0.8rem', overflowY: 'auto' }}>
+        <div 
+          className="editor-center" 
+          style={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            justifyContent: 'space-between', 
+            height: '100%', 
+            maxHeight: '100%', 
+            minHeight: 0, 
+            minWidth: 0, 
+            overflowY: 'auto', 
+            padding: '0.8rem 1rem', 
+            position: 'relative' 
+          }}
+        >
           <div 
             className={`glass-card slide-preview-container theme-${presentation?.theme || 'corporate'}`} 
             style={{ 
               position: 'relative',
               width: '100%',
-              maxWidth: '880px',
-              minHeight: '410px',
-              maxHeight: 'calc(100vh - 190px)',
+              maxWidth: '820px',
+              maxHeight: 'calc(100vh - 210px)',
               aspectRatio: '16/9',
               padding: '1.2rem 1.6rem',
+              margin: 'auto 0',
               backgroundImage: activeSlide?.bgImage ? `linear-gradient(rgba(11, 15, 25, 0.65), rgba(11, 15, 25, 0.85)), url(${activeSlide.bgImage})` : undefined,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
@@ -932,7 +949,8 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
               flexDirection: 'column',
               justifyContent: 'space-between',
               boxShadow: '0 16px 40px rgba(0, 0, 0, 0.4)',
-              borderRadius: '20px'
+              borderRadius: '20px',
+              flexShrink: 0
             }}
           >
             {/* Top Bar: Slide Counter Badge & Help Badge */}
@@ -1422,8 +1440,12 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
         <div 
           className="sidebar-right"
           style={{
-            padding: isRightSidebarCollapsed ? '12px 4px' : '1.25rem',
+            height: '100%',
+            maxHeight: '100%',
             overflowY: 'auto',
+            minHeight: 0,
+            minWidth: 0,
+            padding: isRightSidebarCollapsed ? '12px 4px' : '1.25rem',
             display: 'flex',
             flexDirection: 'column',
             gap: '16px',
