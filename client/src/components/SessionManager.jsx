@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Calendar, Plus, Trash2, Play, Users, Lock, Unlock, Shuffle, 
   ChevronRight, Award, Sparkles, CheckCircle2, Copy, Eye, ArrowLeft, Layers, 
-  Clock, Edit3, Link as LinkIcon, FileText, Check, X, ExternalLink, HelpCircle, FileUp
+  Clock, Edit3, Link as LinkIcon, FileText, Check, X, ExternalLink, HelpCircle, FileUp, Settings
 } from 'lucide-react';
 import { solveGroupAllocation, getGroupNames, GROUP_NAMING_THEMES } from '../utils/groupingAlgorithm';
 
@@ -44,12 +44,7 @@ const SAMPLE_SESSIONS = [
         ]
       }
     ],
-    roster: [
-      { id: 'p-1', name: 'Alex Rivers', gender: 'M', avatar: '🚀', indCode: 'IND-101' },
-      { id: 'p-2', name: 'Rahul Sharma', gender: 'M', avatar: '⚡', indCode: 'IND-102' },
-      { id: 'p-3', name: 'Ananya Verma', gender: 'F', avatar: '👑', indCode: 'IND-103' },
-      { id: 'p-4', name: 'Priya Patel', gender: 'F', avatar: '🦁', indCode: 'IND-104' }
-    ],
+    roster: [],
     groups: []
   }
 ];
@@ -124,6 +119,66 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
   const [secRemarks, setSecRemarks] = useState('');
   const [secPresentationId, setSecPresentationId] = useState('sample-pres-1');
   const [secCustomUrl, setSecCustomUrl] = useState('');
+
+  // Edit Workshop Metadata Modal States
+  const [showEditWorkshopModal, setShowEditWorkshopModal] = useState(false);
+  const [editingSessionId, setEditingSessionId] = useState(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editSubject, setEditSubject] = useState('');
+  const [editDate, setEditDate] = useState('');
+  const [editTime, setEditTime] = useState('');
+  const [editNumDays, setEditNumDays] = useState(1);
+  const [editDesc, setEditDesc] = useState('');
+
+  const handleOpenEditWorkshopModal = (sess) => {
+    setEditingSessionId(sess.id);
+    setEditTitle(sess.title || '');
+    setEditSubject(sess.subject || '');
+    setEditDate(sess.scheduledDate || '');
+    setEditTime(sess.scheduledTime || '');
+    setEditNumDays(sess.numDays || sess.days?.length || 1);
+    setEditDesc(sess.description || '');
+    setShowEditWorkshopModal(true);
+  };
+
+  const handleSaveWorkshopEdits = (e) => {
+    e.preventDefault();
+    if (!editingSessionId || !editTitle.trim()) return;
+
+    setSessions(prev => prev.map(s => {
+      if (s.id === editingSessionId) {
+        const numDaysInt = parseInt(editNumDays, 10) || 1;
+        let daysArray = [...(s.days || [])];
+        
+        if (numDaysInt > daysArray.length) {
+          for (let i = daysArray.length + 1; i <= numDaysInt; i++) {
+            daysArray.push({
+              dayNumber: i,
+              title: `Day ${i}: Training Module & Orientation`,
+              sections: []
+            });
+          }
+        } else if (numDaysInt < daysArray.length) {
+          daysArray = daysArray.slice(0, numDaysInt);
+        }
+
+        return {
+          ...s,
+          title: editTitle.trim(),
+          subject: editSubject.trim(),
+          scheduledDate: editDate,
+          scheduledTime: editTime,
+          numDays: numDaysInt,
+          description: editDesc.trim(),
+          days: daysArray
+        };
+      }
+      return s;
+    }));
+
+    setShowEditWorkshopModal(false);
+    setEditingSessionId(null);
+  };
 
   const activeSession = sessions.find(s => s.id === activeSessionId) || sessions[0];
 
@@ -399,6 +454,15 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                   <button 
                     className="btn btn-secondary"
+                    onClick={() => handleOpenEditWorkshopModal(sess)}
+                    style={{ fontSize: '0.82rem', fontWeight: 500, display: 'flex', gap: '4px', alignItems: 'center' }}
+                    title="Edit Title, Subject, Date, Time & Days"
+                  >
+                    <Settings size={14} /> Edit Details
+                  </button>
+
+                  <button 
+                    className="btn btn-secondary"
                     onClick={() => handleOpenWorkshopSchedule(sess.id)}
                     style={{ fontSize: '0.82rem', fontWeight: 500 }}
                   >
@@ -447,16 +511,27 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
               <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Subject: {activeSession.subject} • Scheduled: {activeSession.scheduledDate} ({activeSession.numDays || activeSession.days?.length} Days)</div>
             </div>
 
-            <button 
-              className="btn btn-primary"
-              onClick={() => {
-                const firstDeckId = activeSession.days?.[0]?.sections?.[0]?.presentationId || 'sample-pres-1';
-                onLaunchPresenter(firstDeckId);
-              }}
-              style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 600, fontSize: '0.85rem', border: 'none' }}
-            >
-              <Play size={16} /> Launch Presentation Live
-            </button>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+              <button 
+                className="btn btn-secondary"
+                onClick={() => handleOpenEditWorkshopModal(activeSession)}
+                style={{ fontSize: '0.82rem', fontWeight: 500, display: 'flex', gap: '6px', alignItems: 'center' }}
+                title="Edit Title, Subject, Date, Time & Days"
+              >
+                <Settings size={14} /> Edit Workshop Details
+              </button>
+
+              <button 
+                className="btn btn-primary"
+                onClick={() => {
+                  const firstDeckId = activeSession.days?.[0]?.sections?.[0]?.presentationId || 'sample-pres-1';
+                  onLaunchPresenter(firstDeckId);
+                }}
+                style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 600, fontSize: '0.85rem', border: 'none' }}
+              >
+                <Play size={16} /> Launch Presentation Live
+              </button>
+            </div>
           </div>
 
           <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>
@@ -478,107 +553,70 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-soft)', paddingBottom: '10px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ fontSize: '1.1rem' }}>📅</span>
-                    <span style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--accent)' }}>Day {day.dayNumber || dIdx + 1}</span>
+                    <span style={{ fontWeight: 600, fontSize: '0.98rem', color: 'var(--text-primary)' }}>{day.title}</span>
                   </div>
-                  <span style={{ fontSize: '0.75rem', background: 'var(--surface-2)', padding: '2px 8px', borderRadius: '6px', color: 'var(--text-muted)' }}>
-                    {(day.sections || []).length} Sections
-                  </span>
+                  <button 
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => handleOpenAddSectionModal(dIdx)}
+                    style={{ fontSize: '0.78rem', padding: '4px 10px', gap: '4px' }}
+                  >
+                    <Plus size={13} /> Add Section
+                  </button>
                 </div>
 
-                {/* Day Card Sections List */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {/* Day Sections List */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {(day.sections || []).map((sec, sIdx) => (
                     <div 
                       key={sec.id || sIdx}
                       style={{
-                        padding: '14px', background: 'var(--surface-2)', border: '1px solid var(--border-soft)',
-                        borderRadius: '10px', display: 'flex', flexDirection: 'column', gap: '8px'
+                        padding: '12px 14px', borderRadius: '8px', background: 'var(--surface-2)',
+                        border: '1px solid var(--border-soft)', display: 'flex', flexDirection: 'column', gap: '8px'
                       }}
                     >
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>{sec.title}</div>
-                        <button className="btn btn-secondary btn-icon" onClick={() => handleDeleteSection(dIdx, sIdx)} title="Delete Section" style={{ padding: '3px' }}>
+                        <div>
+                          <div style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>{sec.title}</div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', gap: '8px', marginTop: '2px' }}>
+                            <span>🕒 {sec.startTime} - {sec.endTime} ({sec.duration})</span>
+                          </div>
+                        </div>
+                        <button 
+                          className="btn btn-secondary btn-icon"
+                          onClick={() => handleDeleteSection(dIdx, sIdx)}
+                          title="Remove Section"
+                          style={{ width: '26px', height: '26px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        >
                           <Trash2 size={13} color="var(--danger)" />
                         </button>
                       </div>
 
-                      <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'flex', gap: '12px' }}>
-                        <span>🕒 {sec.startTime} - {sec.endTime}</span>
-                        <span>⏱️ {sec.duration}</span>
-                      </div>
-
-                      {sec.remarks && (
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-faint)', fontStyle: 'italic' }}>
-                          Note: "{sec.remarks}"
-                        </div>
-                      )}
-
-                      {/* Interactive Presentation Deck Selector & Creation Controls */}
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '6px', paddingTop: '8px', borderTop: '1px solid var(--border-soft)' }}>
-                        <label style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-muted)' }}>
-                          🔗 Linked Presentation Deck:
-                        </label>
-
-                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
-                          <select 
-                            value={sec.presentationId || 'sample-pres-1'}
-                            onChange={(e) => handleUpdateSectionDeck(dIdx, sIdx, e.target.value)}
-                            style={{
-                              flex: 1, minWidth: '150px', padding: '6px 8px', borderRadius: '6px',
-                              background: '#0f172a', border: '1px solid var(--border-glass)',
-                              color: 'var(--text-primary)', fontSize: '0.78rem', fontWeight: 600, outline: 'none'
-                            }}
-                          >
-                            <option value="sample-pres-1">Deck 1: Executive STEM & Diagnostic Quiz</option>
-                            <option value="sample-pres-2">Deck 2: Escape Vault Cyber Challenge</option>
-                            <option value="sample-pres-3">Deck 3: Innovation 2x2 Grid & Word Cloud</option>
-                            {userPresentations.map(p => (
-                              <option key={p.id} value={p.id}>📁 {p.title || 'Untitled Presentation'}</option>
-                            ))}
-                            <option value="__CREATE_NEW__" style={{ fontWeight: 700, color: 'var(--accent)' }}>✨ + Create New Presentation Deck...</option>
-                          </select>
-
-                          <button 
-                            className="btn btn-secondary"
-                            onClick={() => {
-                              if (onViewCreator) onViewCreator(sec.presentationId || 'sample-pres-1');
-                            }}
-                            style={{ padding: '5px 8px', fontSize: '0.72rem', fontWeight: 600, gap: '4px' }}
-                            title="Edit or Add Slides to this Deck"
-                          >
-                            <Edit3 size={11} /> Edit Deck
-                          </button>
-
-                          <button 
-                            className="btn btn-primary"
-                            onClick={() => onLaunchPresenter(sec.presentationId || 'sample-pres-1')}
-                            style={{ padding: '5px 10px', fontSize: '0.72rem', fontWeight: 600, background: 'var(--accent)', color: '#08211E', border: 'none', gap: '4px' }}
-                          >
-                            <Play size={11} /> Play Deck
-                          </button>
-                        </div>
+                      {/* Presentation Link Dropdown */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--surface)', padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--border)' }}>
+                        <Layers size={14} color="var(--accent)" />
+                        <select 
+                          value={sec.presentationId || 'sample-pres-1'}
+                          onChange={(e) => handleUpdateSectionDeck(dIdx, sIdx, e.target.value)}
+                          style={{
+                            background: 'transparent', border: 'none', color: 'var(--text-primary)',
+                            fontSize: '0.78rem', fontWeight: 500, outline: 'none', flex: 1, cursor: 'pointer'
+                          }}
+                        >
+                          <option value="sample-pres-1">Diagnostic Polls & Alignment Quiz</option>
+                          <option value="sample-pres-2">Escape Room Vault Challenge</option>
+                          <option value="sample-pres-3">Strategic Impact 2x2 Grid</option>
+                          <option value="__CREATE_NEW__">✨ + Create New Presentation Deck...</option>
+                        </select>
                       </div>
                     </div>
                   ))}
 
                   {(day.sections || []).length === 0 && (
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', padding: '12px', textAlign: 'center' }}>
-                      No sections added for Day {day.dayNumber}. Click below to configure schedule!
+                    <div style={{ padding: '16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem', background: 'var(--surface-2)', borderRadius: '8px', border: '1px dashed var(--border-soft)' }}>
+                      No sections added to this day yet. Click "+ Add Section" above.
                     </div>
                   )}
                 </div>
-
-                {/* Add Section to Day Button */}
-                <button 
-                  className="btn btn-secondary"
-                  onClick={() => {
-                    setSelectedDayIdx(dIdx);
-                    setShowSectionModal(true);
-                  }}
-                  style={{ padding: '8px', fontSize: '0.8rem', fontWeight: 500, borderStyle: 'dashed', justifyContent: 'center', gap: '6px' }}
-                >
-                  <Plus size={14} /> Add Program Section & Time to Day {day.dayNumber || dIdx + 1}
-                </button>
               </div>
             ))}
           </div>
@@ -586,11 +624,11 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
       )}
 
       {/* TAB 3: QR REGISTRATION & TEAMS LOBBY */}
-      {activeTab === 'lobby' && activeSession && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+      {activeTab === 'teams' && activeSession && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', alignItems: 'start' }}>
           <div className="glass-card" style={{ padding: '24px', borderRadius: '12px', background: 'var(--surface)', border: '1px solid var(--border)', textAlign: 'center' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--accent)', marginBottom: '12px' }}>
-              📱 Session Join QR Code
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+              📲 Session Join QR Code
             </h3>
             <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '16px' }}>
               Participants scan once to join workshop programs:
@@ -612,12 +650,19 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
               📋 Roster ({(activeSession.roster || []).length} Joined)
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '350px', overflowY: 'auto' }}>
-              {(activeSession.roster || []).map((p) => (
-                <div key={p.id} style={{ padding: '8px 12px', background: 'var(--surface-2)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>{p.avatar || '🚀'} {p.name}</span>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{p.indCode}</span>
+              {(activeSession.roster || []).length > 0 ? (
+                (activeSession.roster || []).map((p) => (
+                  <div key={p.id} style={{ padding: '8px 12px', background: 'var(--surface-2)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>{p.avatar || '🚀'} {p.name}</span>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{p.indCode}</span>
+                  </div>
+                ))
+              ) : (
+                <div style={{ padding: '24px 16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem', background: 'var(--surface-2)', borderRadius: '8px', border: '1px dashed var(--border-soft)' }}>
+                  ✨ No participants registered yet.<br />
+                  Scan the QR Code on the left to join live!
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>
@@ -864,6 +909,127 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
                 </button>
                 <button type="submit" className="btn btn-primary" style={{ flex: 1, background: 'var(--accent)', color: '#08211E', fontWeight: 600, border: 'none' }}>
                   Save Section
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 3: EDIT WORKSHOP METADATA (Title, Subject, Date, Time, NumDays, Description) */}
+      {showEditWorkshopModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0, 0, 0, 0.65)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000,
+          padding: '20px'
+        }}>
+          <div className="glass-card animate-fade" style={{ width: '100%', maxWidth: '540px', padding: '26px', borderRadius: '16px', background: 'var(--surface)', border: '1px solid var(--border)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                ⚙️ Edit Workshop Details
+              </h2>
+              <button className="btn btn-secondary btn-icon" onClick={() => setShowEditWorkshopModal(false)}>
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveWorkshopEdits} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
+                  Workshop / Program Title
+                </label>
+                <input 
+                  type="text"
+                  className="input-text"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  required
+                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text-primary)' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
+                    Subject Name / Category
+                  </label>
+                  <input 
+                    type="text"
+                    className="input-text"
+                    value={editSubject}
+                    onChange={(e) => setEditSubject(e.target.value)}
+                    required
+                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text-primary)' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
+                    Number of Days
+                  </label>
+                  <input 
+                    type="number"
+                    min="1"
+                    max="14"
+                    className="input-text"
+                    value={editNumDays}
+                    onChange={(e) => setEditNumDays(e.target.value)}
+                    required
+                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text-primary)' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
+                    Scheduled Start Date
+                  </label>
+                  <input 
+                    type="date"
+                    className="input-text"
+                    value={editDate}
+                    onChange={(e) => setEditDate(e.target.value)}
+                    required
+                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text-primary)' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
+                    Scheduled Time Slots
+                  </label>
+                  <input 
+                    type="text"
+                    className="input-text"
+                    value={editTime}
+                    onChange={(e) => setEditTime(e.target.value)}
+                    required
+                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text-primary)' }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
+                  Workshop Description / Objectives
+                </label>
+                <textarea 
+                  rows={3}
+                  className="input-text"
+                  value={editDesc}
+                  onChange={(e) => setEditDesc(e.target.value)}
+                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text-primary)', resize: 'vertical' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setShowEditWorkshopModal(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary" style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 600 }}>
+                  Save Workshop Changes
                 </button>
               </div>
             </form>

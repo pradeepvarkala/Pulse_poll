@@ -1487,23 +1487,6 @@ export default function App() {
             boxShadow: isSidebarCollapsed ? 'none' : '6px 0 25px rgba(0,0,0,0.3)'
           }}
         >
-          {/* Header Card: Active Service / Environment (Render Style) */}
-          <div style={{ padding: '10px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: '10px', border: '1px solid var(--border-soft)', marginBottom: '16px' }}>
-            <div style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', fontWeight: 800 }}>
-              WEB SERVICE
-            </div>
-            <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-primary)', margin: '2px 0 4px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span>PulsePoll</span>
-              <span style={{ fontSize: '0.65rem', background: 'var(--accent-soft)', color: 'var(--accent)', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>Node</span>
-            </div>
-            <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 6px #10b981' }} />
-              <a href="https://harithahavana.in" target="_blank" rel="noreferrer" style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}>
-                harithahavana.in ↗
-              </a>
-            </div>
-          </div>
-
           {/* Navigation Group 1: ENVIRONMENT */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '16px' }}>
             <div style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', fontWeight: 800, padding: '4px 12px' }}>
