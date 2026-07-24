@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   ArrowLeft, Plus, Minus, Trash2, Play, BarChart3, Cloud, HelpCircle, 
   Trophy, Sliders, ArrowDownUp, Hash, Grid3X3, FileSpreadsheet, MapPin, AlignLeft, Timer, FileUp,
-  ChevronLeft, ChevronRight, ChevronDown, Sparkles
+  ChevronLeft, ChevronRight, ChevronDown, Sparkles, Settings, Music, Image as ImageIcon, FileText, Video
 } from 'lucide-react';
 
 const AVAILABLE_THEMES = [
@@ -116,6 +116,9 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
   const [openAccordions, setOpenAccordions] = useState({
     type: true,
     content: true,
+    audio: true,
+    image: true,
+    media: true,
     design: true,
     ai: false
   });
@@ -1557,7 +1560,7 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
             </div>
           ) : (
             <>
-              {/* Header with SETTINGS Label */}
+              {/* Header with SETTINGS Label & Gear Button */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-glass)', paddingBottom: '4px' }}>
                 <span style={{ 
                   fontSize: '0.8rem', 
@@ -1569,27 +1572,50 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                 }}>
                   SETTINGS
                 </span>
-                <button 
-                  type="button"
-                  className="btn btn-secondary btn-icon"
-                  onClick={() => setIsRightSidebarCollapsed(true)}
-                  title="Minimize Sidebar"
-                  style={{ 
-                    width: '26px', 
-                    height: '26px', 
-                    borderRadius: '50%', 
-                    background: 'var(--surface-2)', 
-                    color: 'var(--primary)', 
-                    border: '1px solid var(--border-glass)', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center', 
-                    cursor: 'pointer',
-                    padding: 0
-                  }}
-                >
-                  <ChevronRight size={15} />
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <button 
+                    type="button"
+                    className="btn btn-secondary btn-icon"
+                    onClick={() => setActiveSidebarTab('type')}
+                    title="Slide Settings"
+                    style={{ 
+                      width: '26px', 
+                      height: '26px', 
+                      borderRadius: '50%', 
+                      background: 'var(--surface-2)', 
+                      color: 'var(--primary)', 
+                      border: '1px solid var(--border-glass)', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      cursor: 'pointer',
+                      padding: 0
+                    }}
+                  >
+                    <Settings size={14} color="var(--primary)" />
+                  </button>
+                  <button 
+                    type="button"
+                    className="btn btn-secondary btn-icon"
+                    onClick={() => setIsRightSidebarCollapsed(true)}
+                    title="Minimize Sidebar"
+                    style={{ 
+                      width: '26px', 
+                      height: '26px', 
+                      borderRadius: '50%', 
+                      background: 'var(--surface-2)', 
+                      color: 'var(--primary)', 
+                      border: '1px solid var(--border-glass)', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      cursor: 'pointer',
+                      padding: 0
+                    }}
+                  >
+                    <ChevronRight size={15} />
+                  </button>
+                </div>
               </div>
 
               {/* Sidebar Tab Header (Type, Customize, AI - No Content Tab) */}
@@ -1632,9 +1658,12 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <Sliders size={16} />
-                    <span>Question Type Selector</span>
+                    <span>Type & Layout</span>
                   </div>
-                  {openAccordions.type ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Settings size={14} color="var(--primary)" />
+                    {openAccordions.type ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                  </div>
                 </button>
 
                 {openAccordions.type && (
@@ -2024,20 +2053,24 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
           {/* 3. DESIGN / CUSTOMIZE TAB */}
           {activeSidebarTab === 'design' && (
             <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%' }}>
+              {/* Accordion 1: Audio Settings */}
               <div className="accordion-card" style={{ width: '100%', borderRadius: '10px', background: 'var(--surface-2)', border: '1px solid var(--border-glass)', overflow: 'hidden' }}>
                 <button
                   type="button"
-                  onClick={() => toggleAccordionSection('design')}
-                  style={{ width: '100%', padding: '10px 14px', background: 'rgba(6,182,212,0.08)', border: 'none', borderBottom: openAccordions.design ? '1px solid var(--border-glass)' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', color: 'var(--primary)', fontWeight: 800, fontSize: '0.82rem' }}
+                  onClick={() => toggleAccordionSection('audio')}
+                  style={{ width: '100%', padding: '10px 14px', background: 'rgba(6,182,212,0.08)', border: 'none', borderBottom: openAccordions.audio ? '1px solid var(--border-glass)' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', color: 'var(--primary)', fontWeight: 800, fontSize: '0.82rem' }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Grid3X3 size={16} />
-                    <span>Theme & Visual Customization</span>
+                    <Music size={16} />
+                    <span>Audio Settings</span>
                   </div>
-                  {openAccordions.design ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Settings size={14} color="var(--primary)" />
+                    {openAccordions.audio ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                  </div>
                 </button>
 
-                {openAccordions.design && (
+                {openAccordions.audio && (
                   <div style={{ padding: '14px 12px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     {/* 5 Countdown Audio Themes (Paid Feature) */}
                     <div className="settings-group">
@@ -2123,21 +2156,137 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                         🔒 Focus Mode (Anti-Cheat)
                       </label>
                     </div>
+                  </div>
+                )}
+              </div>
 
-                    {/* Pin Image Background selection */}
-                    {activeSlide.type === 'pin' && (
-                      <div className="settings-group">
-                        <label>Pin Background Layout</label>
-                        <select 
-                          value={activeSlide.pinImageType || 'target'}
-                          onChange={(e) => handleUpdateActiveSlide({ pinImageType: e.target.value })}
-                        >
-                          <option value="target">Target / Bullseye Circles</option>
-                          <option value="quadrants">4-Quadrant Strategy Matrix</option>
-                        </select>
+              {/* Accordion 2: Image & Background Wallpapers */}
+              <div className="accordion-card" style={{ width: '100%', borderRadius: '10px', background: 'var(--surface-2)', border: '1px solid var(--border-glass)', overflow: 'hidden' }}>
+                <button
+                  type="button"
+                  onClick={() => toggleAccordionSection('image')}
+                  style={{ width: '100%', padding: '10px 14px', background: 'rgba(6,182,212,0.08)', border: 'none', borderBottom: openAccordions.image ? '1px solid var(--border-glass)' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', color: 'var(--primary)', fontWeight: 800, fontSize: '0.82rem' }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <ImageIcon size={16} />
+                    <span>Image & Background Wallpaper</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Settings size={14} color="var(--primary)" />
+                    {openAccordions.image ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                  </div>
+                </button>
+
+                {openAccordions.image && (
+                  <div style={{ padding: '14px 12px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    {/* Slide Background Artwork Image Picker */}
+                    <div className="settings-group">
+                      <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span>Slide Background Artwork</span>
+                        <span style={{ fontSize: '0.7rem', color: '#06b6d4', fontWeight: 800 }}>🎨 AI Generated</span>
+                      </label>
+                      <select 
+                        value={activeSlide.bgImage || ''}
+                        onChange={(e) => handleUpdateActiveSlide({ bgImage: e.target.value })}
+                        style={{
+                          width: '100%', padding: '10px 12px', background: '#0f172a',
+                          border: '1px solid var(--border-glass)', borderRadius: '8px',
+                          color: '#ffffff', fontSize: '0.85rem', fontWeight: 600, outline: 'none'
+                        }}
+                      >
+                        <option value="">Default Theme Wallpaper</option>
+                        <option value="/assets/theme_cyber_neon.jpg">🌌 Cyber Neon Artwork</option>
+                        <option value="/assets/theme_midnight_gold.jpg">👑 Midnight Gold Executive</option>
+                        <option value="/assets/theme_cosmic_nebula.jpg">✨ Cosmic Nebula Stardust</option>
+                        <option value="/assets/theme_playroom_magic.jpg">🎨 Playroom Magic Pastel</option>
+                      </select>
+                    </div>
+
+                    {/* Theme Settings (Global for presentation) */}
+                    <div className="settings-group">
+                      <label>Presentation Theme</label>
+                      <div className="theme-picker-section">
+                        <div className="theme-picker-category-title" style={{ color: '#06b6d4', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          🎨 Generated Artwork Themes
+                        </div>
+                        <div className="theme-picker-grid" style={{ gridTemplateColumns: '1fr 1fr', marginBottom: '16px' }}>
+                          {AVAILABLE_THEMES.filter(t => t.type === 'art').map(t => (
+                            <div 
+                              key={t.id} 
+                              className={`theme-picker-item ${(presentation.theme || 'corporate') === t.id ? 'active' : ''}`}
+                              onClick={() => handleUpdateTheme(t.id)}
+                              style={{ overflow: 'hidden' }}
+                            >
+                              <div className="theme-palette-preview" style={{ backgroundImage: `url(${t.bg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+                                {t.colors.map((c, i) => (
+                                  <div key={i} className="theme-color-dot" style={{ backgroundColor: c }} />
+                                ))}
+                              </div>
+                              <div className="theme-picker-name">{t.name}</div>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="theme-picker-category-title">Light Themes</div>
+                        <div className="theme-picker-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                          {AVAILABLE_THEMES.filter(t => t.type === 'light').map(t => (
+                            <div 
+                              key={t.id} 
+                              className={`theme-picker-item ${(presentation.theme || 'corporate') === t.id ? 'active' : ''}`}
+                              onClick={() => handleUpdateTheme(t.id)}
+                            >
+                              <div className="theme-palette-preview" style={{ backgroundColor: t.bg }}>
+                                {t.colors.map((c, i) => (
+                                  <div key={i} className="theme-color-dot" style={{ backgroundColor: c }} />
+                                ))}
+                              </div>
+                              <div className="theme-picker-name">{t.name}</div>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="theme-picker-category-title" style={{ marginTop: '12px' }}>Dark Themes</div>
+                        <div className="theme-picker-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                          {AVAILABLE_THEMES.filter(t => t.type === 'dark').map(t => (
+                            <div 
+                              key={t.id} 
+                              className={`theme-picker-item ${(presentation.theme || 'corporate') === t.id ? 'active' : ''}`}
+                              onClick={() => handleUpdateTheme(t.id)}
+                            >
+                              <div className="theme-palette-preview" style={{ backgroundColor: t.bg }}>
+                                {t.colors.map((c, i) => (
+                                  <div key={i} className="theme-color-dot" style={{ backgroundColor: c }} />
+                                ))}
+                              </div>
+                              <div className="theme-picker-name">{t.name}</div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    )}
+                    </div>
+                  </div>
+                )}
+              </div>
 
+              {/* Accordion 3: Media & Document Provision */}
+              <div className="accordion-card" style={{ width: '100%', borderRadius: '10px', background: 'var(--surface-2)', border: '1px solid var(--border-glass)', overflow: 'hidden' }}>
+                <button
+                  type="button"
+                  onClick={() => toggleAccordionSection('media')}
+                  style={{ width: '100%', padding: '10px 14px', background: 'rgba(6,182,212,0.08)', border: 'none', borderBottom: openAccordions.media ? '1px solid var(--border-glass)' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', color: 'var(--primary)', fontWeight: 800, fontSize: '0.82rem' }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <FileText size={16} />
+                    <span>Media & Document Provision</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Settings size={14} color="var(--primary)" />
+                    {openAccordions.media ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                  </div>
+                </button>
+
+                {openAccordions.media && (
+                  <div style={{ padding: '14px 12px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     {/* Slide Media (Images & Videos) Upload Provision - Paid Feature */}
                     <div className="settings-group" style={{ padding: '12px', background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '10px' }}>
                       <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
@@ -2243,90 +2392,24 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                       )}
                     </div>
 
-                    {/* Slide Background Artwork Image Picker */}
-                    <div className="settings-group">
-                      <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span>Slide Background Artwork</span>
-                        <span style={{ fontSize: '0.7rem', color: '#06b6d4', fontWeight: 800 }}>🎨 AI Generated</span>
+                    {/* PowerPoint PPTX / PDF Presentation Import */}
+                    <div className="settings-group" style={{ padding: '12px', background: 'rgba(59,130,246,0.05)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: '10px' }}>
+                      <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                        <span style={{ fontWeight: 800, color: 'var(--primary)' }}>📄 PPTX / PDF Presentation Import</span>
+                        <span style={{ fontSize: '0.7rem', color: '#3b82f6', fontWeight: 800 }}>Document Slide</span>
                       </label>
-                      <select 
-                        value={activeSlide.bgImage || ''}
-                        onChange={(e) => handleUpdateActiveSlide({ bgImage: e.target.value })}
-                        style={{
-                          width: '100%', padding: '10px 12px', background: '#0f172a',
-                          border: '1px solid var(--border-glass)', borderRadius: '8px',
-                          color: '#ffffff', fontSize: '0.85rem', fontWeight: 600, outline: 'none'
-                        }}
+                      <label 
+                        className="btn btn-secondary" 
+                        style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '0.8rem', background: 'var(--accent-soft)', color: 'var(--accent)', border: '1px solid var(--accent)', fontWeight: 700, padding: '8px' }}
                       >
-                        <option value="">Default Theme Wallpaper</option>
-                        <option value="/assets/theme_cyber_neon.jpg">🌌 Cyber Neon Artwork</option>
-                        <option value="/assets/theme_midnight_gold.jpg">👑 Midnight Gold Executive</option>
-                        <option value="/assets/theme_cosmic_nebula.jpg">✨ Cosmic Nebula Stardust</option>
-                        <option value="/assets/theme_playroom_magic.jpg">🎨 Playroom Magic Pastel</option>
-                      </select>
-                    </div>
-
-                    {/* Theme Settings (Global for presentation) */}
-                    <div className="settings-group">
-                      <label>Presentation Theme</label>
-                      <div className="theme-picker-section">
-                        <div className="theme-picker-category-title" style={{ color: '#06b6d4', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          🎨 Generated Artwork Themes
-                        </div>
-                        <div className="theme-picker-grid" style={{ gridTemplateColumns: '1fr 1fr', marginBottom: '16px' }}>
-                          {AVAILABLE_THEMES.filter(t => t.type === 'art').map(t => (
-                            <div 
-                              key={t.id} 
-                              className={`theme-picker-item ${(presentation.theme || 'corporate') === t.id ? 'active' : ''}`}
-                              onClick={() => handleUpdateTheme(t.id)}
-                              style={{ overflow: 'hidden' }}
-                            >
-                              <div className="theme-palette-preview" style={{ backgroundImage: `url(${t.bg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
-                                {t.colors.map((c, i) => (
-                                  <div key={i} className="theme-color-dot" style={{ backgroundColor: c }} />
-                                ))}
-                              </div>
-                              <div className="theme-picker-name">{t.name}</div>
-                            </div>
-                          ))}
-                        </div>
-
-                        <div className="theme-picker-category-title">Light Themes</div>
-                        <div className="theme-picker-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
-                          {AVAILABLE_THEMES.filter(t => t.type === 'light').map(t => (
-                            <div 
-                              key={t.id} 
-                              className={`theme-picker-item ${(presentation.theme || 'corporate') === t.id ? 'active' : ''}`}
-                              onClick={() => handleUpdateTheme(t.id)}
-                            >
-                              <div className="theme-palette-preview" style={{ backgroundColor: t.bg }}>
-                                {t.colors.map((c, i) => (
-                                  <div key={i} className="theme-color-dot" style={{ backgroundColor: c }} />
-                                ))}
-                              </div>
-                              <div className="theme-picker-name">{t.name}</div>
-                            </div>
-                          ))}
-                        </div>
-
-                        <div className="theme-picker-category-title" style={{ marginTop: '12px' }}>Dark Themes</div>
-                        <div className="theme-picker-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
-                          {AVAILABLE_THEMES.filter(t => t.type === 'dark').map(t => (
-                            <div 
-                              key={t.id} 
-                              className={`theme-picker-item ${(presentation.theme || 'corporate') === t.id ? 'active' : ''}`}
-                              onClick={() => handleUpdateTheme(t.id)}
-                            >
-                              <div className="theme-palette-preview" style={{ backgroundColor: t.bg }}>
-                                {t.colors.map((c, i) => (
-                                  <div key={i} className="theme-color-dot" style={{ backgroundColor: c }} />
-                                ))}
-                              </div>
-                              <div className="theme-picker-name">{t.name}</div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+                        <FileUp size={16} /> Import PowerPoint / PDF Slide
+                        <input 
+                          type="file" 
+                          accept=".pptx,.ppt,.pdf,.png,.jpg,.jpeg" 
+                          style={{ display: 'none' }}
+                          onChange={handleImportPptFile}
+                        />
+                      </label>
                     </div>
                   </div>
                 )}
