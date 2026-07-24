@@ -111,15 +111,12 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
   const [aiProgressText, setAiProgressText] = useState('');
   const [draggedSlideIndex, setDraggedSlideIndex] = useState(null);
   const [isRightSidebarCollapsed, setIsRightSidebarCollapsed] = useState(true);
-  const [isRadialPickerOpen, setIsRadialPickerOpen] = useState(false);
-  const [typePickerViewMode, setTypePickerViewMode] = useState('radial'); // 'radial' or 'grid'
+  const [showSlideTypeModal, setShowSlideTypeModal] = useState(false);
   const [openAccordions, setOpenAccordions] = useState({
-    type: true,
-    content: true,
-    audio: true,
-    image: true,
-    media: true,
-    design: true,
+    audio: false,
+    image: false,
+    theme: false,
+    media: false,
     ai: false
   });
 
@@ -127,11 +124,12 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
     setOpenAccordions(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // Close Module Guide on Escape key press
+  // Close Module Guide & Slide Type Picker Modal on Escape key press
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         setShowInstructionPopup(false);
+        setShowSlideTypeModal(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -388,17 +386,17 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
     });
   };
 
-  const handleAddSlide = () => {
+  const handleAddSlideWithType = (type = 'poll') => {
     const newSlide = {
       id: Math.random().toString(36).substr(2, 9),
-      type: 'poll',
+      type,
       question: '',
       timeLimit: 15,
-      timerAutoStart: false, // Default to manual start!
-      options: [
+      timerAutoStart: false,
+      options: ['poll', 'quiz', 'scales', 'ranking', 'points', 'grid', 'form'].includes(type) ? [
         { id: Math.random().toString(36).substr(2, 9), text: '' },
         { id: Math.random().toString(36).substr(2, 9), text: '' }
-      ]
+      ] : undefined
     };
     const updatedPres = {
       ...presentation,
@@ -407,6 +405,11 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
     };
     savePresentation(updatedPres);
     setActiveSlideId(newSlide.id);
+    setShowSlideTypeModal(false);
+  };
+
+  const handleAddSlide = () => {
+    setShowSlideTypeModal(true);
   };
 
   const handleDeleteSlide = (slideId, e) => {
@@ -812,7 +815,7 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
             <button 
               type="button"
               className="btn btn-secondary btn-icon" 
-              onClick={handleAddSlide} 
+              onClick={() => setShowSlideTypeModal(true)} 
               title="Add New Slide (+)"
               style={{ 
                 width: '42px', 
@@ -1072,6 +1075,82 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                   >
                     Got it, Let's build! 🚀
                   </button>
+                </div>
+              </div>
+            )}
+
+            {/* Slide Type Selection 5x3 Grid Popup Modal */}
+            {showSlideTypeModal && (
+              <div style={{
+                position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+                backgroundColor: 'rgba(9, 13, 22, 0.88)', backdropFilter: 'blur(10px)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1200,
+                padding: '20px'
+              }}>
+                <div className="glass-card animate-fade" style={{
+                  width: '100%', maxWidth: '680px', padding: '26px', textAlign: 'left',
+                  border: '1.5px solid rgba(6, 182, 212, 0.5)', background: '#090d16',
+                  boxShadow: '0 20px 50px rgba(6, 182, 212, 0.35)',
+                  maxHeight: '88vh', overflowY: 'auto', borderRadius: '20px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
+                    <div>
+                      <h3 style={{ fontSize: '1.25rem', fontWeight: 900, margin: 0, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        ✨ Select Slide Type
+                      </h3>
+                      <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>Choose an interactive module to add a new slide to your deck</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowSlideTypeModal(false)}
+                      title="Close (Esc)"
+                      style={{
+                        background: 'rgba(255,255,255,0.1)', border: 'none', color: 'var(--text-primary)',
+                        width: '32px', height: '32px', borderRadius: '50%', display: 'flex',
+                        alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontWeight: 800, fontSize: '1rem'
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  {/* 5x3 Responsive Grid Layout of all 14 Slide Types */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', width: '100%' }}>
+                    {SLIDE_TYPE_ITEMS.map((item) => {
+                      const IconComp = item.icon;
+                      return (
+                        <button
+                          key={item.type}
+                          type="button"
+                          onClick={() => handleAddSlideWithType(item.type)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            background: 'var(--surface-2)',
+                            border: '1.5px solid var(--border-glass)',
+                            borderRadius: '12px',
+                            padding: '10px 12px',
+                            color: 'var(--text-primary)',
+                            fontWeight: 800,
+                            fontSize: '0.82rem',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                            transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                          }}
+                          className="hover-scale"
+                        >
+                          <div style={{ padding: '8px', borderRadius: '8px', background: `${item.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <IconComp size={18} color={item.color} />
+                          </div>
+                          <div>
+                            <div style={{ fontWeight: 800, color: 'var(--text-primary)', fontSize: '0.84rem' }}>{item.label}</div>
+                            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 500 }}>Click to Add</div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             )}
@@ -1622,491 +1701,253 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                 </div>
               </div>
 
-              {/* Sidebar Tab Header (Type, Customize, AI - No Content Tab) */}
-              <div className="sidebar-tabs" style={{ display: 'flex', borderBottom: '1px solid var(--border-glass)', marginBottom: '6px' }}>
-            <button 
-              type="button"
-              className={`sidebar-tab-btn ${activeSidebarTab === 'type' ? 'active' : ''}`}
-              style={{ flex: 1, background: 'transparent', border: 'none', borderBottom: activeSidebarTab === 'type' ? '2px solid var(--primary)' : '2px solid transparent', padding: '6px 2px', color: activeSidebarTab === 'type' ? 'var(--primary)' : 'var(--text-secondary)', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer', transition: 'all 0.15s ease' }}
-              onClick={() => setActiveSidebarTab('type')}
-            >
-              Type
-            </button>
-            <button 
-              type="button"
-              className={`sidebar-tab-btn ${activeSidebarTab === 'design' ? 'active' : ''}`}
-              style={{ flex: 1, background: 'transparent', border: 'none', borderBottom: activeSidebarTab === 'design' ? '2px solid var(--primary)' : '2px solid transparent', padding: '6px 2px', color: activeSidebarTab === 'design' ? 'var(--primary)' : 'var(--text-secondary)', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer', transition: 'all 0.15s ease' }}
-              onClick={() => setActiveSidebarTab('design')}
-            >
-              Customize
-            </button>
-            <button 
-              type="button"
-              className={`sidebar-tab-btn ${activeSidebarTab === 'ai' ? 'active' : ''}`}
-              style={{ flex: 1, background: 'transparent', border: 'none', borderBottom: activeSidebarTab === 'ai' ? '2px solid var(--primary)' : '2px solid transparent', padding: '6px 2px', color: activeSidebarTab === 'ai' ? 'var(--primary)' : 'var(--text-secondary)', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer', transition: 'all 0.15s ease', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
-              onClick={() => setActiveSidebarTab('ai')}
-            >
-              🤖 AI
-            </button>
-          </div>
+          {/* RIGHT SIDEBAR EXPANDED VIEW: 5 CLEAN EXPANDABLE ACCORDION CARDS */}
+          <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', padding: '4px 0' }}>
+            {/* Card 1: Audio Settings */}
+            <div className="accordion-card" style={{ width: '100%', borderRadius: '10px', background: 'var(--surface-2)', border: '1px solid var(--border-glass)', overflow: 'hidden' }}>
+              <button
+                type="button"
+                onClick={() => toggleAccordionSection('audio')}
+                style={{ width: '100%', padding: '8px 12px', background: 'rgba(6,182,212,0.08)', border: 'none', borderBottom: openAccordions.audio ? '1px solid var(--border-glass)' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', color: 'var(--primary)', fontWeight: 800, fontSize: '0.82rem' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Music size={16} />
+                  <span>Audio Settings</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Settings size={14} color="var(--primary)" />
+                  {openAccordions.audio ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                </div>
+              </button>
 
-          {/* 1. TYPE TAB (With Vertical Collapsible PowerPoint-style Tables) */}
-          {activeSidebarTab === 'type' && (
-            <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%' }}>
-              {/* Accordion 1: Question Type Selector */}
-              <div className="accordion-card" style={{ width: '100%', borderRadius: '10px', background: 'var(--surface-2)', border: '1px solid var(--border-glass)', overflow: 'hidden' }}>
-                <button
-                  type="button"
-                  onClick={() => toggleAccordionSection('type')}
-                  style={{ width: '100%', padding: '10px 14px', background: 'rgba(6,182,212,0.08)', border: 'none', borderBottom: openAccordions.type ? '1px solid var(--border-glass)' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', color: 'var(--primary)', fontWeight: 800, fontSize: '0.82rem' }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Sliders size={16} />
-                    <span>Type & Layout</span>
+              {openAccordions.audio && (
+                <div style={{ padding: '10px 10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {/* 5 Countdown Audio Themes (Paid Feature) */}
+                  <div className="settings-group" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                    <label style={{ fontSize: '0.78rem', fontWeight: 700, margin: 0, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      Audio Theme <span style={{ fontSize: '0.65rem', color: '#f59e0b' }}>🔒</span>
+                    </label>
+                    <select 
+                      value={activeSlide.audioTheme || presentation.audioTheme || 'classic'}
+                      onChange={(e) => {
+                        if (user?.tier === 'free') {
+                          onRequestUpgrade('audio_theme');
+                          return;
+                        }
+                        handleUpdateActiveSlide({ audioTheme: e.target.value });
+                      }}
+                      style={{
+                        flex: 1, maxWidth: '170px', padding: '6px 8px', background: '#0f172a',
+                        border: '1px solid var(--border-glass)', borderRadius: '6px',
+                        color: '#ffffff', fontSize: '0.78rem', fontWeight: 600, outline: 'none'
+                      }}
+                    >
+                      <option value="classic">⏱️ Classic Ticking</option>
+                      <option value="synth">⚡ Synth Beat</option>
+                      <option value="gameshow">🎺 Game Show</option>
+                      <option value="chill">🌊 Deep Chill</option>
+                      <option value="arcade">🚀 Arcade Rush</option>
+                    </select>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Settings size={14} color="var(--primary)" />
-                    {openAccordions.type ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-                  </div>
-                </button>
-
-                {openAccordions.type && (
-                  <div style={{ padding: '12px 10px', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '10px' }}>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 700 }}>Layout View:</span>
-                      <button 
-                        type="button" 
-                        onClick={() => setTypePickerViewMode(typePickerViewMode === 'radial' ? 'grid' : 'radial')}
-                        style={{ background: 'none', border: 'none', color: 'var(--accent)', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
-                      >
-                        {typePickerViewMode === 'radial' ? '🔳 Grid View' : '⭕ Radial Hub'}
-                      </button>
-                    </div>
-
-                    {typePickerViewMode === 'radial' ? (
-                      /* 2-Row Layout (7 Items Each) with Visible Gap for Center Button - Collapsed By Default */
-                      <div 
-                        onMouseEnter={() => setIsRadialPickerOpen(true)}
-                        onMouseLeave={() => setIsRadialPickerOpen(false)}
-                        style={{ 
-                          display: 'flex', 
-                          flexDirection: 'column', 
-                          alignItems: 'center', 
-                          width: '100%', 
-                          margin: '0', 
-                          gap: isRadialPickerOpen ? '6px' : '0',
-                          position: 'relative',
-                          transform: isRadialPickerOpen ? 'translateY(-20px)' : 'translateY(0)',
-                          transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
-                        }}
-                      >
-                        {/* ROW 1: TOP 7 ITEMS */}
-                        <div 
-                          style={{
-                            display: isRadialPickerOpen ? 'flex' : 'none',
-                            flexWrap: 'wrap',
-                            gap: '5px',
-                            justifyContent: 'center',
-                            width: '100%',
-                            opacity: isRadialPickerOpen ? 1 : 0,
-                            transform: isRadialPickerOpen ? 'translateY(0) scale(1)' : 'translateY(12px) scale(0.9)',
-                            transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
-                          }}
-                        >
-                          {SLIDE_TYPE_ITEMS.slice(0, 7).map((item) => {
-                            const IconComp = item.icon;
-                            const isActive = activeSlide.type === item.type;
-
-                            return (
-                              <button
-                                key={item.type}
-                                type="button"
-                                onClick={() => {
-                                  handleChangeSlideType(item.type);
-                                  setIsRadialPickerOpen(false);
-                                }}
-                                style={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '5px',
-                                  background: isActive ? 'var(--accent-soft)' : 'var(--surface-2)',
-                                  border: isActive ? '2px solid var(--accent)' : '1.5px solid var(--border)',
-                                  color: isActive ? 'var(--accent)' : 'var(--text-primary)',
-                                  padding: '4px 9px',
-                                  borderRadius: '20px',
-                                  fontSize: '0.74rem',
-                                  fontWeight: 800,
-                                  cursor: 'pointer',
-                                  boxShadow: isActive ? '0 0 14px var(--accent-soft)' : '0 4px 10px rgba(0,0,0,0.2)',
-                                  transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
-                                }}
-                                className="hover-scale"
-                              >
-                                <IconComp size={13} color={item.color} />
-                                <span>{item.label}</span>
-                              </button>
-                            );
-                          })}
-                        </div>
-
-                        {/* VISIBLE GAP & CLEAN CENTER HUB BUTTON */}
-                        <div 
-                          onClick={() => setIsRadialPickerOpen(!isRadialPickerOpen)}
-                          style={{
-                            width: isRadialPickerOpen ? '86px' : '98px',
-                            height: isRadialPickerOpen ? '86px' : '98px',
-                            borderRadius: '50%',
-                            background: 'radial-gradient(circle, rgba(6, 182, 212, 0.25) 0%, var(--surface-2) 85%)',
-                            border: '3px solid var(--accent)',
-                            boxShadow: '0 0 25px rgba(6, 182, 212, 0.45)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            cursor: 'pointer',
-                            zIndex: 20,
-                            margin: isRadialPickerOpen ? '2px 0' : '0',
-                            transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
-                          }}
-                          className="kinetic-hub-pulse hover-scale"
-                          title="Active Selected Question Type (Click or Hover to View All 14 Options)"
-                        >
-                          {(() => {
-                            const IconComp = SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.icon || BarChart3;
-                            const iconColor = SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.color || '#38bdf8';
-                            return <IconComp size={isRadialPickerOpen ? 24 : 28} color={iconColor} />;
-                          })()}
-                          <span style={{ fontSize: isRadialPickerOpen ? '0.72rem' : '0.78rem', fontWeight: 900, color: 'var(--text-primary)', marginTop: '2px', textAlign: 'center', padding: '0 4px' }}>
-                            {SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.label}
-                          </span>
-                          <span style={{ fontSize: '0.58rem', fontWeight: 800, color: 'var(--accent)', marginTop: '1px' }}>
-                            {isRadialPickerOpen ? '✕ Close' : '⚡ Click to Change'}
-                          </span>
-                        </div>
-
-                        {/* ROW 2: BOTTOM 7 ITEMS */}
-                        <div 
-                          style={{
-                            display: isRadialPickerOpen ? 'flex' : 'none',
-                            flexWrap: 'wrap',
-                            gap: '6px',
-                            justifyContent: 'center',
-                            width: '100%',
-                            opacity: isRadialPickerOpen ? 1 : 0,
-                            transform: isRadialPickerOpen ? 'translateY(0) scale(1)' : 'translateY(-12px) scale(0.9)',
-                            transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
-                          }}
-                        >
-                          {SLIDE_TYPE_ITEMS.slice(7, 14).map((item) => {
-                            const IconComp = item.icon;
-                            const isActive = activeSlide.type === item.type;
-
-                            return (
-                              <button
-                                key={item.type}
-                                type="button"
-                                onClick={() => {
-                                  handleChangeSlideType(item.type);
-                                  setIsRadialPickerOpen(false);
-                                }}
-                                style={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '6px',
-                                  background: isActive ? 'var(--accent-soft)' : 'var(--surface-2)',
-                                  border: isActive ? '2px solid var(--accent)' : '1.5px solid var(--border)',
-                                  color: isActive ? 'var(--accent)' : 'var(--text-primary)',
-                                  padding: '5px 11px',
-                                  borderRadius: '20px',
-                                  fontSize: '0.76rem',
-                                  fontWeight: 800,
-                                  cursor: 'pointer',
-                                  boxShadow: isActive ? '0 0 14px var(--accent-soft)' : '0 4px 10px rgba(0,0,0,0.2)',
-                                  transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
-                                }}
-                                className="hover-scale"
-                              >
-                                <IconComp size={14} color={item.color} />
-                                <span>{item.label}</span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ) : (
-                      /* Standard Grid View */
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', width: '100%' }}>
-                        {SLIDE_TYPE_ITEMS.map((item) => {
-                          const IconComp = item.icon;
-                          return (
-                            <button 
-                              key={item.type}
-                              className={`btn-type-option ${activeSlide.type === item.type ? 'active' : ''}`}
-                              onClick={() => handleChangeSlideType(item.type)}
-                            >
-                              <IconComp size={14} color={item.color} /> {item.label}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
-          )}
 
-          {/* 3. DESIGN / CUSTOMIZE TAB */}
-          {activeSidebarTab === 'design' && (
-            <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%' }}>
-              {/* Accordion 1: Audio Settings */}
-              <div className="accordion-card" style={{ width: '100%', borderRadius: '10px', background: 'var(--surface-2)', border: '1px solid var(--border-glass)', overflow: 'hidden' }}>
-                <button
-                  type="button"
-                  onClick={() => toggleAccordionSection('audio')}
-                  style={{ width: '100%', padding: '10px 14px', background: 'rgba(6,182,212,0.08)', border: 'none', borderBottom: openAccordions.audio ? '1px solid var(--border-glass)' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', color: 'var(--primary)', fontWeight: 800, fontSize: '0.82rem' }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Music size={16} />
-                    <span>Audio Settings</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Settings size={14} color="var(--primary)" />
-                    {openAccordions.audio ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-                  </div>
-                </button>
+            {/* Card 2: Image Settings */}
+            <div className="accordion-card" style={{ width: '100%', borderRadius: '10px', background: 'var(--surface-2)', border: '1px solid var(--border-glass)', overflow: 'hidden' }}>
+              <button
+                type="button"
+                onClick={() => toggleAccordionSection('image')}
+                style={{ width: '100%', padding: '8px 12px', background: 'rgba(6,182,212,0.08)', border: 'none', borderBottom: openAccordions.image ? '1px solid var(--border-glass)' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', color: 'var(--primary)', fontWeight: 800, fontSize: '0.82rem' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <ImageIcon size={16} />
+                  <span>Image Settings</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Settings size={14} color="var(--primary)" />
+                  {openAccordions.image ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                </div>
+              </button>
 
-                {openAccordions.audio && (
-                  <div style={{ padding: '14px 12px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                    {/* 5 Countdown Audio Themes (Paid Feature) - Single Horizontal Line */}
-                    <div className="settings-group" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-                      <label style={{ fontSize: '0.78rem', fontWeight: 700, margin: 0, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        Audio Theme <span style={{ fontSize: '0.65rem', color: '#f59e0b' }}>🔒</span>
-                      </label>
-                      <select 
-                        value={activeSlide.audioTheme || presentation.audioTheme || 'classic'}
-                        onChange={(e) => {
-                          if (user?.tier === 'free') {
-                            onRequestUpgrade('audio_theme');
-                            return;
+              {openAccordions.image && (
+                <div style={{ padding: '10px 10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {/* Slide Background Artwork Image Picker */}
+                  <div className="settings-group" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                    <label style={{ fontSize: '0.78rem', fontWeight: 700, margin: 0, whiteSpace: 'nowrap' }}>
+                      Slide Wallpaper
+                    </label>
+                    <select 
+                      value={activeSlide.bgImage || ''}
+                      onChange={(e) => handleUpdateActiveSlide({ bgImage: e.target.value })}
+                      style={{
+                        flex: 1, maxWidth: '170px', padding: '6px 8px', background: '#0f172a',
+                        border: '1px solid var(--border-glass)', borderRadius: '6px',
+                        color: '#ffffff', fontSize: '0.78rem', fontWeight: 600, outline: 'none'
+                      }}
+                    >
+                      <option value="">Default Theme</option>
+                      <option value="/assets/theme_cyber_neon.jpg">🌌 Cyber Neon</option>
+                      <option value="/assets/theme_midnight_gold.jpg">👑 Midnight Gold</option>
+                      <option value="/assets/theme_cosmic_nebula.jpg">✨ Cosmic Nebula</option>
+                      <option value="/assets/theme_playroom_magic.jpg">🎨 Playroom Magic</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Card 3: Presentation Theme */}
+            <div className="accordion-card" style={{ width: '100%', borderRadius: '10px', background: 'var(--surface-2)', border: '1px solid var(--border-glass)', overflow: 'hidden' }}>
+              <button
+                type="button"
+                onClick={() => toggleAccordionSection('theme')}
+                style={{ width: '100%', padding: '8px 12px', background: 'rgba(6,182,212,0.08)', border: 'none', borderBottom: openAccordions.theme ? '1px solid var(--border-glass)' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', color: 'var(--primary)', fontWeight: 800, fontSize: '0.82rem' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Grid3X3 size={16} />
+                  <span>Presentation Theme</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Settings size={14} color="var(--primary)" />
+                  {openAccordions.theme ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                </div>
+              </button>
+
+              {openAccordions.theme && (
+                <div style={{ padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div className="theme-picker-section">
+                    <div className="theme-picker-category-title" style={{ color: '#06b6d4', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      🎨 Generated Artwork Themes
+                    </div>
+                    <div className="theme-picker-grid" style={{ gridTemplateColumns: '1fr 1fr', marginBottom: '12px' }}>
+                      {AVAILABLE_THEMES.filter(t => t.type === 'art').map(t => (
+                        <div 
+                          key={t.id} 
+                          className={`theme-picker-item ${(presentation.theme || 'corporate') === t.id ? 'active' : ''}`}
+                          onClick={() => handleUpdateTheme(t.id)}
+                          style={{ overflow: 'hidden' }}
+                        >
+                          <div className="theme-palette-preview" style={{ backgroundImage: `url(${t.bg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+                            {t.colors.map((c, i) => (
+                              <div key={i} className="theme-color-dot" style={{ backgroundColor: c }} />
+                            ))}
+                          </div>
+                          <div className="theme-picker-name">{t.name}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="theme-picker-category-title">Light Themes</div>
+                    <div className="theme-picker-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                      {AVAILABLE_THEMES.filter(t => t.type === 'light').map(t => (
+                        <div 
+                          key={t.id} 
+                          className={`theme-picker-item ${(presentation.theme || 'corporate') === t.id ? 'active' : ''}`}
+                          onClick={() => handleUpdateTheme(t.id)}
+                        >
+                          <div className="theme-palette-preview" style={{ backgroundColor: t.bg }}>
+                            {t.colors.map((c, i) => (
+                              <div key={i} className="theme-color-dot" style={{ backgroundColor: c }} />
+                            ))}
+                          </div>
+                          <div className="theme-picker-name">{t.name}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="theme-picker-category-title" style={{ marginTop: '10px' }}>Dark Themes</div>
+                    <div className="theme-picker-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                      {AVAILABLE_THEMES.filter(t => t.type === 'dark').map(t => (
+                        <div 
+                          key={t.id} 
+                          className={`theme-picker-item ${(presentation.theme || 'corporate') === t.id ? 'active' : ''}`}
+                          onClick={() => handleUpdateTheme(t.id)}
+                        >
+                          <div className="theme-palette-preview" style={{ backgroundColor: t.bg }}>
+                            {t.colors.map((c, i) => (
+                              <div key={i} className="theme-color-dot" style={{ backgroundColor: c }} />
+                            ))}
+                          </div>
+                          <div className="theme-picker-name">{t.name}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Card 4: Media & Presentation Import */}
+            <div className="accordion-card" style={{ width: '100%', borderRadius: '10px', background: 'var(--surface-2)', border: '1px solid var(--border-glass)', overflow: 'hidden' }}>
+              <button
+                type="button"
+                onClick={() => toggleAccordionSection('media')}
+                style={{ width: '100%', padding: '8px 12px', background: 'rgba(6,182,212,0.08)', border: 'none', borderBottom: openAccordions.media ? '1px solid var(--border-glass)' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', color: 'var(--primary)', fontWeight: 800, fontSize: '0.82rem' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <FileText size={16} />
+                  <span>Media & Document Import</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Settings size={14} color="var(--primary)" />
+                  {openAccordions.media ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                </div>
+              </button>
+
+              {openAccordions.media && (
+                <div style={{ padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {/* Slide Media (Images & Videos) Upload Provision - Paid Feature */}
+                  <div className="settings-group" style={{ padding: '10px', background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '8px' }}>
+                    <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                      <span style={{ fontWeight: 800, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem' }}>
+                        🖼️ 🎥 Add Image or Video
+                      </span>
+                      <span style={{ fontSize: '0.65rem', color: '#f59e0b', fontWeight: 800 }}>🔒 Paid</span>
+                    </label>
+
+                    {/* File Upload Button */}
+                    <label 
+                      className="btn btn-secondary" 
+                      onClick={() => {
+                        if (user?.tier === 'free') {
+                          let unlocks = [];
+                          try {
+                            unlocks = typeof user.unlocked_modules === 'string' 
+                              ? JSON.parse(user.unlocked_modules || '[]') 
+                              : (user.unlocked_modules || []);
+                          } catch(err) { unlocks = []; }
+                          const isMediaUnlocked = unlocks.some(i => i.module === 'media_upload' && new Date(i.expiresAt) > new Date());
+                          if (!isMediaUnlocked) {
+                            onRequestUpgrade('media_upload');
                           }
-                          handleUpdateActiveSlide({ audioTheme: e.target.value });
-                        }}
-                        style={{
-                          flex: 1, maxWidth: '170px', padding: '6px 8px', background: '#0f172a',
-                          border: '1px solid var(--border-glass)', borderRadius: '6px',
-                          color: '#ffffff', fontSize: '0.78rem', fontWeight: 600, outline: 'none'
-                        }}
-                      >
-                        <option value="classic">⏱️ Classic Ticking</option>
-                        <option value="synth">⚡ Synth Beat</option>
-                        <option value="gameshow">🎺 Game Show</option>
-                        <option value="chill">🌊 Deep Chill</option>
-                        <option value="arcade">🚀 Arcade Rush</option>
-                      </select>
-                    </div>
-
-                    {/* Customizable Time Limit - Single Horizontal Line */}
-                    <div className="settings-group" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-                      <label style={{ fontSize: '0.78rem', fontWeight: 700, margin: 0 }}>
-                        Time Limit (sec)
-                      </label>
+                        }
+                      }}
+                      style={{ 
+                        width: '100%', padding: '6px', display: 'flex', alignItems: 'center', 
+                        justifyContent: 'center', gap: '6px', cursor: 'pointer',
+                        background: 'var(--surface-2)', border: '1.5px dashed #f59e0b',
+                        color: '#f59e0b', fontWeight: 700, fontSize: '0.76rem', marginBottom: '6px'
+                      }}
+                    >
+                      <FileUp size={14} />
+                      <span>Upload Image / Video File</span>
                       <input 
-                        type="number" 
-                        className="input-text" 
-                        min="0" 
-                        max="120"
-                        value={activeSlide.timeLimit !== undefined ? activeSlide.timeLimit : 15}
-                        onChange={(e) => handleUpdateActiveSlide({ timeLimit: parseInt(e.target.value) || 0 })}
-                        style={{ width: '65px', padding: '5px 8px', fontSize: '0.78rem', fontWeight: 700, textAlign: 'center' }}
+                        type="file" 
+                        accept="image/*,video/*,.png,.jpg,.jpeg,.gif,.webp,.mp4,.webm,.mov,.ogg"
+                        onChange={handleUploadSlideMedia}
+                        style={{ display: 'none' }}
                       />
-                    </div>
+                    </label>
 
-                    {/* Auto Start Timer Toggle */}
-                    <div className="settings-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
+                    {/* Or Paste Media URL */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                       <input 
-                        type="checkbox"
-                        id="sidebar-timer-autostart"
-                        checked={activeSlide.timerAutoStart === true}
-                        onChange={(e) => handleUpdateActiveSlide({ timerAutoStart: e.target.checked })}
-                        style={{ accentColor: 'var(--primary)', cursor: 'pointer', width: '15px', height: '15px' }}
-                      />
-                      <label htmlFor="sidebar-timer-autostart" style={{ cursor: 'pointer', userSelect: 'none', margin: 0, fontSize: '0.78rem' }}>
-                        Auto-start timer on slide load
-                      </label>
-                    </div>
-
-                    {/* Focus Mode / Anti-Cheat Toggle */}
-                    <div className="settings-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
-                      <input 
-                        type="checkbox"
-                        id="sidebar-focus-mode"
-                        checked={activeSlide.focusMode === true}
+                        type="url" 
+                        className="input-text"
+                        placeholder="Or paste image / video URL..."
+                        value={activeSlide.videoUrl || activeSlide.imageUrl || ''}
                         onChange={(e) => {
-                          if (e.target.checked && user?.tier === 'free') {
-                            let unlocks = [];
-                            try {
-                              unlocks = typeof user.unlocked_modules === 'string' 
-                                ? JSON.parse(user.unlocked_modules || '[]') 
-                                : (user.unlocked_modules || []);
-                            } catch(err) { unlocks = []; }
-                            const isFocusUnlocked = unlocks.some(i => i.module === 'focus_mode' && new Date(i.expiresAt) > new Date());
-                            if (!isFocusUnlocked) {
-                              onRequestUpgrade('focus_mode');
-                              return;
-                            }
-                          }
-                          handleUpdateActiveSlide({ focusMode: e.target.checked });
-                        }}
-                        style={{ accentColor: 'var(--primary)', cursor: 'pointer', width: '15px', height: '15px' }}
-                      />
-                      <label htmlFor="sidebar-focus-mode" style={{ cursor: 'pointer', userSelect: 'none', margin: 0, fontWeight: 600, fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        🔒 Focus Mode (Anti-Cheat)
-                      </label>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Accordion 2: Image & Background Wallpapers */}
-              <div className="accordion-card" style={{ width: '100%', borderRadius: '10px', background: 'var(--surface-2)', border: '1px solid var(--border-glass)', overflow: 'hidden' }}>
-                <button
-                  type="button"
-                  onClick={() => toggleAccordionSection('image')}
-                  style={{ width: '100%', padding: '10px 14px', background: 'rgba(6,182,212,0.08)', border: 'none', borderBottom: openAccordions.image ? '1px solid var(--border-glass)' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', color: 'var(--primary)', fontWeight: 800, fontSize: '0.82rem' }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <ImageIcon size={16} />
-                    <span>Image & Background Wallpaper</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Settings size={14} color="var(--primary)" />
-                    {openAccordions.image ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-                  </div>
-                </button>
-
-                {openAccordions.image && (
-                  <div style={{ padding: '14px 12px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                    {/* Slide Background Artwork Image Picker - Single Horizontal Line */}
-                    <div className="settings-group" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-                      <label style={{ fontSize: '0.78rem', fontWeight: 700, margin: 0, whiteSpace: 'nowrap' }}>
-                        Slide Wallpaper
-                      </label>
-                      <select 
-                        value={activeSlide.bgImage || ''}
-                        onChange={(e) => handleUpdateActiveSlide({ bgImage: e.target.value })}
-                        style={{
-                          flex: 1, maxWidth: '170px', padding: '6px 8px', background: '#0f172a',
-                          border: '1px solid var(--border-glass)', borderRadius: '6px',
-                          color: '#ffffff', fontSize: '0.78rem', fontWeight: 600, outline: 'none'
-                        }}
-                      >
-                        <option value="">Default Theme</option>
-                        <option value="/assets/theme_cyber_neon.jpg">🌌 Cyber Neon</option>
-                        <option value="/assets/theme_midnight_gold.jpg">👑 Midnight Gold</option>
-                        <option value="/assets/theme_cosmic_nebula.jpg">✨ Cosmic Nebula</option>
-                        <option value="/assets/theme_playroom_magic.jpg">🎨 Playroom Magic</option>
-                      </select>
-                    </div>
-
-                    {/* Theme Settings (Global for presentation) */}
-                    <div className="settings-group">
-                      <label>Presentation Theme</label>
-                      <div className="theme-picker-section">
-                        <div className="theme-picker-category-title" style={{ color: '#06b6d4', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          🎨 Generated Artwork Themes
-                        </div>
-                        <div className="theme-picker-grid" style={{ gridTemplateColumns: '1fr 1fr', marginBottom: '16px' }}>
-                          {AVAILABLE_THEMES.filter(t => t.type === 'art').map(t => (
-                            <div 
-                              key={t.id} 
-                              className={`theme-picker-item ${(presentation.theme || 'corporate') === t.id ? 'active' : ''}`}
-                              onClick={() => handleUpdateTheme(t.id)}
-                              style={{ overflow: 'hidden' }}
-                            >
-                              <div className="theme-palette-preview" style={{ backgroundImage: `url(${t.bg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
-                                {t.colors.map((c, i) => (
-                                  <div key={i} className="theme-color-dot" style={{ backgroundColor: c }} />
-                                ))}
-                              </div>
-                              <div className="theme-picker-name">{t.name}</div>
-                            </div>
-                          ))}
-                        </div>
-
-                        <div className="theme-picker-category-title">Light Themes</div>
-                        <div className="theme-picker-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
-                          {AVAILABLE_THEMES.filter(t => t.type === 'light').map(t => (
-                            <div 
-                              key={t.id} 
-                              className={`theme-picker-item ${(presentation.theme || 'corporate') === t.id ? 'active' : ''}`}
-                              onClick={() => handleUpdateTheme(t.id)}
-                            >
-                              <div className="theme-palette-preview" style={{ backgroundColor: t.bg }}>
-                                {t.colors.map((c, i) => (
-                                  <div key={i} className="theme-color-dot" style={{ backgroundColor: c }} />
-                                ))}
-                              </div>
-                              <div className="theme-picker-name">{t.name}</div>
-                            </div>
-                          ))}
-                        </div>
-
-                        <div className="theme-picker-category-title" style={{ marginTop: '12px' }}>Dark Themes</div>
-                        <div className="theme-picker-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
-                          {AVAILABLE_THEMES.filter(t => t.type === 'dark').map(t => (
-                            <div 
-                              key={t.id} 
-                              className={`theme-picker-item ${(presentation.theme || 'corporate') === t.id ? 'active' : ''}`}
-                              onClick={() => handleUpdateTheme(t.id)}
-                            >
-                              <div className="theme-palette-preview" style={{ backgroundColor: t.bg }}>
-                                {t.colors.map((c, i) => (
-                                  <div key={i} className="theme-color-dot" style={{ backgroundColor: c }} />
-                                ))}
-                              </div>
-                              <div className="theme-picker-name">{t.name}</div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Accordion 3: Media & Document Provision */}
-              <div className="accordion-card" style={{ width: '100%', borderRadius: '10px', background: 'var(--surface-2)', border: '1px solid var(--border-glass)', overflow: 'hidden' }}>
-                <button
-                  type="button"
-                  onClick={() => toggleAccordionSection('media')}
-                  style={{ width: '100%', padding: '10px 14px', background: 'rgba(6,182,212,0.08)', border: 'none', borderBottom: openAccordions.media ? '1px solid var(--border-glass)' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', color: 'var(--primary)', fontWeight: 800, fontSize: '0.82rem' }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <FileText size={16} />
-                    <span>Media & Document Provision</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Settings size={14} color="var(--primary)" />
-                    {openAccordions.media ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-                  </div>
-                </button>
-
-                {openAccordions.media && (
-                  <div style={{ padding: '14px 12px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    {/* Slide Media (Images & Videos) Upload Provision - Paid Feature */}
-                    <div className="settings-group" style={{ padding: '12px', background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '10px' }}>
-                      <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                        <span style={{ fontWeight: 800, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          🖼️ 🎥 Add Image or Video
-                        </span>
-                        <span style={{ fontSize: '0.7rem', color: '#f59e0b', fontWeight: 800 }}>🔒 Paid Feature</span>
-                      </label>
-
-                      {/* File Upload Button for Image or Video */}
-                      <label 
-                        className="btn btn-secondary" 
-                        onClick={() => {
                           if (user?.tier === 'free') {
                             let unlocks = [];
                             try {
@@ -2117,112 +1958,95 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                             const isMediaUnlocked = unlocks.some(i => i.module === 'media_upload' && new Date(i.expiresAt) > new Date());
                             if (!isMediaUnlocked) {
                               onRequestUpgrade('media_upload');
+                              return;
                             }
                           }
+                          const val = e.target.value;
+                          const isVid = val.endsWith('.mp4') || val.endsWith('.webm') || val.includes('youtube.com') || val.includes('vimeo.com');
+                          if (isVid) {
+                            handleUpdateActiveSlide({ videoUrl: val, imageUrl: null });
+                          } else {
+                            handleUpdateActiveSlide({ imageUrl: val, bgImage: val, videoUrl: null });
+                          }
                         }}
-                        style={{ 
-                          width: '100%', 
-                          padding: '8px', 
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          justifyContent: 'center', 
-                          gap: '8px', 
-                          cursor: 'pointer',
-                          background: 'var(--surface-2)',
-                          border: '1.5px dashed #f59e0b',
-                          color: '#f59e0b',
-                          fontWeight: 700,
-                          fontSize: '0.8rem',
-                          marginBottom: '8px'
-                        }}
-                      >
-                        <FileUp size={16} />
-                        <span>Upload Image / Video File (Premium)</span>
-                        <input 
-                          type="file" 
-                          accept="image/*,video/*,.png,.jpg,.jpeg,.gif,.webp,.mp4,.webm,.mov,.ogg"
-                          onChange={handleUploadSlideMedia}
-                          style={{ display: 'none' }}
-                        />
-                      </label>
-
-                      {/* Or Paste Media URL Input */}
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '8px' }}>
-                        <label style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>Or Paste Direct Image / Video URL:</label>
-                        <input 
-                          type="url" 
-                          className="input-text"
-                          placeholder="https://example.com/media.mp4 or .jpg"
-                          value={activeSlide.videoUrl || activeSlide.imageUrl || ''}
-                          onChange={(e) => {
-                            if (user?.tier === 'free') {
-                              let unlocks = [];
-                              try {
-                                unlocks = typeof user.unlocked_modules === 'string' 
-                                  ? JSON.parse(user.unlocked_modules || '[]') 
-                                  : (user.unlocked_modules || []);
-                              } catch(err) { unlocks = []; }
-                              const isMediaUnlocked = unlocks.some(i => i.module === 'media_upload' && new Date(i.expiresAt) > new Date());
-                              if (!isMediaUnlocked) {
-                                onRequestUpgrade('media_upload');
-                                return;
-                              }
-                            }
-                            const val = e.target.value;
-                            const isVid = val.endsWith('.mp4') || val.endsWith('.webm') || val.includes('youtube.com') || val.includes('vimeo.com');
-                            if (isVid) {
-                              handleUpdateActiveSlide({ videoUrl: val, imageUrl: null });
-                            } else {
-                              handleUpdateActiveSlide({ imageUrl: val, bgImage: val, videoUrl: null });
-                            }
-                          }}
-                          style={{ fontSize: '0.78rem', padding: '6px 10px' }}
-                        />
-                      </div>
-
-                      {/* Active Media Status & Clear Button */}
-                      {(activeSlide.videoUrl || activeSlide.imageUrl) && (
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px', padding: '6px 10px', background: 'rgba(255,255,255,0.03)', borderRadius: '6px' }}>
-                          <span style={{ fontSize: '0.72rem', color: 'var(--accent-green)', fontWeight: 700 }}>
-                            {activeSlide.videoUrl ? '🎥 Video Attached' : '🖼️ Image Attached'}
-                          </span>
-                          <button 
-                            type="button" 
-                            className="btn btn-secondary btn-icon"
-                            onClick={() => handleUpdateActiveSlide({ videoUrl: null, imageUrl: null })}
-                            title="Remove Media"
-                            style={{ background: 'none', border: 'none', color: 'var(--accent-red)', cursor: 'pointer', padding: 0 }}
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* PowerPoint PPTX / PDF Presentation Import */}
-                    <div className="settings-group" style={{ padding: '12px', background: 'rgba(59,130,246,0.05)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: '10px' }}>
-                      <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                        <span style={{ fontWeight: 800, color: 'var(--primary)' }}>📄 PPTX / PDF Presentation Import</span>
-                        <span style={{ fontSize: '0.7rem', color: '#3b82f6', fontWeight: 800 }}>Document Slide</span>
-                      </label>
-                      <label 
-                        className="btn btn-secondary" 
-                        style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '0.8rem', background: 'var(--accent-soft)', color: 'var(--accent)', border: '1px solid var(--accent)', fontWeight: 700, padding: '8px' }}
-                      >
-                        <FileUp size={16} /> Import PowerPoint / PDF Slide
-                        <input 
-                          type="file" 
-                          accept=".pptx,.ppt,.pdf,.png,.jpg,.jpeg" 
-                          style={{ display: 'none' }}
-                          onChange={handleImportPptFile}
-                        />
-                      </label>
+                        style={{ fontSize: '0.76rem', padding: '5px 8px' }}
+                      />
                     </div>
                   </div>
-                )}
-              </div>
+
+                  {/* PowerPoint PPTX / PDF Presentation Import */}
+                  <div className="settings-group" style={{ padding: '10px', background: 'rgba(59,130,246,0.05)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: '8px' }}>
+                    <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                      <span style={{ fontWeight: 800, color: 'var(--primary)', fontSize: '0.78rem' }}>📄 PPTX / PDF Import</span>
+                    </label>
+                    <label 
+                      className="btn btn-secondary" 
+                      style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '0.76rem', background: 'var(--accent-soft)', color: 'var(--accent)', border: '1px solid var(--accent)', fontWeight: 700, padding: '6px' }}
+                    >
+                      <FileUp size={14} /> Import PowerPoint / PDF
+                      <input 
+                        type="file" 
+                        accept=".pptx,.ppt,.pdf,.png,.jpg,.jpeg" 
+                        style={{ display: 'none' }}
+                        onChange={handleImportPptFile}
+                      />
+                    </label>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+
+            {/* Card 5: AI Assistant */}
+            <div className="accordion-card" style={{ width: '100%', borderRadius: '10px', background: 'var(--surface-2)', border: '1px solid var(--border-glass)', overflow: 'hidden' }}>
+              <button
+                type="button"
+                onClick={() => toggleAccordionSection('ai')}
+                style={{ width: '100%', padding: '8px 12px', background: 'rgba(6,182,212,0.08)', border: 'none', borderBottom: openAccordions.ai ? '1px solid var(--border-glass)' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', color: 'var(--primary)', fontWeight: 800, fontSize: '0.82rem' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Sparkles size={16} />
+                  <span>AI Assistant</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Settings size={14} color="var(--primary)" />
+                  {openAccordions.ai ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                </div>
+              </button>
+
+              {openAccordions.ai && (
+                <div style={{ padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div className="settings-group">
+                    <label style={{ fontSize: '0.78rem', fontWeight: 700 }}>AI Presentation Topic</label>
+                    <textarea 
+                      className="input-text" 
+                      rows={2}
+                      value={aiPromptText}
+                      onChange={(e) => setAiPromptText(e.target.value)}
+                      placeholder="e.g. Campus Safety & Wellness"
+                      style={{ fontSize: '0.78rem', padding: '6px 8px', resize: 'none' }}
+                    />
+                  </div>
+
+                  <button 
+                    type="button"
+                    className="btn btn-primary" 
+                    onClick={handleAiGenerate}
+                    disabled={isAiGenerating || !aiPromptText.trim()}
+                    style={{ width: '100%', padding: '8px', fontWeight: 800, fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                  >
+                    <Sparkles size={14} />
+                    {isAiGenerating ? 'Generating Deck...' : 'Generate AI Presentation'}
+                  </button>
+
+                  {isAiGenerating && (
+                    <div style={{ fontSize: '0.72rem', color: 'var(--accent)', fontWeight: 700, textAlign: 'center' }}>
+                      {aiProgressText}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* 4. AI TAB PANEL */}
           {activeSidebarTab === 'ai' && (
