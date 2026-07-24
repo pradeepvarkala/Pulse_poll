@@ -108,6 +108,7 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
   const [showInstructionPopup, setShowInstructionPopup] = useState(false);
   const [aiPromptText, setAiPromptText] = useState('');
   const [isAiGenerating, setIsAiGenerating] = useState(false);
+  const [aiProgressText, setAiProgressText] = useState('');
   const [draggedSlideIndex, setDraggedSlideIndex] = useState(null);
   const [isRightSidebarCollapsed, setIsRightSidebarCollapsed] = useState(true);
   const [isRadialPickerOpen, setIsRadialPickerOpen] = useState(false);
@@ -122,6 +123,17 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
   const toggleAccordionSection = (key) => {
     setOpenAccordions(prev => ({ ...prev, [key]: !prev[key] }));
   };
+
+  // Close Module Guide on Escape key press
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setShowInstructionPopup(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
 
   const handleImportPptFile = (e) => {
@@ -863,16 +875,17 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
         </div>
 
         {/* Center: Slide Preview Mockup */}
-        <div className="editor-center" style={{ position: 'relative', padding: '1rem', overflowY: 'auto' }}>
+        <div className="editor-center" style={{ position: 'relative', padding: '0.5rem 0.8rem', overflowY: 'auto' }}>
           <div 
             className={`glass-card slide-preview-container theme-${presentation?.theme || 'corporate'}`} 
             style={{ 
               position: 'relative',
               width: '100%',
-              maxWidth: '920px',
-              minHeight: '490px',
+              maxWidth: '880px',
+              minHeight: '410px',
+              maxHeight: 'calc(100vh - 190px)',
               aspectRatio: '16/9',
-              padding: '1.8rem 2.2rem',
+              padding: '1.2rem 1.6rem',
               backgroundImage: activeSlide?.bgImage ? `linear-gradient(rgba(11, 15, 25, 0.65), rgba(11, 15, 25, 0.85)), url(${activeSlide.bgImage})` : undefined,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
@@ -914,14 +927,38 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                   boxShadow: '0 20px 40px rgba(6, 182, 212, 0.25)',
                   maxHeight: '90vh', overflowY: 'auto'
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '15px' }}>
-                    <span style={{ fontSize: '2.5rem' }}>{INSTRUCTIONS[activeSlide.type].icon}</span>
-                    <div>
-                      <h3 style={{ fontSize: '1.4rem', fontWeight: 800, margin: 0, color: 'var(--primary)' }}>
-                        {INSTRUCTIONS[activeSlide.type].title}
-                      </h3>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Module Guide</span>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ fontSize: '2.5rem' }}>{INSTRUCTIONS[activeSlide.type].icon}</span>
+                      <div>
+                        <h3 style={{ fontSize: '1.4rem', fontWeight: 800, margin: 0, color: 'var(--primary)' }}>
+                          {INSTRUCTIONS[activeSlide.type].title}
+                        </h3>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Module Guide</span>
+                      </div>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowInstructionPopup(false)}
+                      title="Close Guide (Esc)"
+                      style={{
+                        background: 'rgba(255,255,255,0.1)',
+                        border: 'none',
+                        color: 'var(--text-primary)',
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        fontWeight: 800,
+                        fontSize: '1rem',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      ✕
+                    </button>
                   </div>
 
                   <p style={{ fontSize: '0.9rem', color: '#cbd5e1', lineHeight: 1.5, marginBottom: '20px' }}>
@@ -1600,7 +1637,7 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                             {SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.label}
                           </span>
                           <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--accent)', marginTop: '1px' }}>
-                            {isRadialPickerOpen ? '✕ Close' : '⚡ Hover Options'}
+                            {isRadialPickerOpen ? '✕ Close' : '⚡ Click to Change'}
                           </span>
                         </div>
 
