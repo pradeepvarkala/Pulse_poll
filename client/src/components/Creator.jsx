@@ -81,6 +81,23 @@ const INSTRUCTIONS = {
   }
 };
 
+const SLIDE_TYPE_ITEMS = [
+  { type: 'poll', label: 'Multiple Choice', icon: BarChart3, color: '#38bdf8' },
+  { type: 'wordcloud', label: 'Word Cloud', icon: Cloud, color: '#f43f5e' },
+  { type: 'openended', label: 'Open Ended', icon: AlignLeft, color: '#10b981' },
+  { type: 'scales', label: 'Scales', icon: Sliders, color: '#fbbf24' },
+  { type: 'ranking', label: 'Ranking', icon: ArrowDownUp, color: '#a855f7' },
+  { type: 'qa', label: 'Q&A', icon: HelpCircle, color: '#ec4899' },
+  { type: 'guess', label: 'Guess Number', icon: Hash, color: '#06b6d4' },
+  { type: 'points', label: '100 Points', icon: Sliders, color: '#f97316' },
+  { type: 'grid', label: '2x2 Grid', icon: Grid3X3, color: '#8b5cf6' },
+  { type: 'form', label: 'Quick Form', icon: FileSpreadsheet, color: '#14b8a6' },
+  { type: 'pin', label: 'Pin on Image', icon: MapPin, color: '#ef4444' },
+  { type: 'quiz', label: 'Quiz Game', icon: Trophy, color: '#eab308' },
+  { type: 'stopwatch', label: 'Stopwatch', icon: Timer, color: '#6366f1' },
+  { type: 'brainstorm', label: 'Brainstorm', icon: Grid3X3, color: '#06b6d4' }
+];
+
 export default function Creator({ presentationId, onBack, onPresent, user, onRequestUpgrade, returnNavContext }) {
   const [presentation, setPresentation] = useState(null);
   const [activeSlideId, setActiveSlideId] = useState(null);
