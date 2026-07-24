@@ -1380,50 +1380,52 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                 </div>
 
                 {typePickerViewMode === 'radial' ? (
-                  /* Circular Radial Trigger Hub (Image 3 Style) */
+                  /* Circular Radial Trigger Hub (Image 3 Style with Hover Kinetic Effect) */
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', width: '100%', margin: '10px 0' }}>
                     <div 
+                      onMouseEnter={() => setIsRadialPickerOpen(true)}
                       onClick={() => setIsRadialPickerOpen(true)}
                       style={{
-                        width: '130px',
-                        height: '130px',
+                        width: '135px',
+                        height: '135px',
                         borderRadius: '50%',
-                        background: 'radial-gradient(circle, rgba(6, 182, 212, 0.25) 0%, rgba(15, 23, 42, 0.95) 75%)',
+                        background: 'radial-gradient(circle, rgba(6, 182, 212, 0.35) 0%, rgba(15, 23, 42, 0.95) 75%)',
                         border: '3px solid var(--accent)',
-                        boxShadow: '0 0 30px rgba(6, 182, 212, 0.45)',
+                        boxShadow: '0 0 35px rgba(6, 182, 212, 0.55)',
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
                         cursor: 'pointer',
-                        transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                        transition: 'all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
                         position: 'relative'
                       }}
-                      className="radial-hub-trigger hover-scale"
-                      title="Click to open full Circular Radial Arc Selector Wheel"
+                      className="radial-hub-trigger kinetic-hub-pulse hover-scale"
+                      title="Hover or Click to open kinetic animated bubble menu"
                     >
                       {/* Active Type Icon */}
                       {(() => {
                         const IconComp = SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.icon || BarChart3;
                         const iconColor = SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.color || '#38bdf8';
-                        return <IconComp size={34} color={iconColor} />;
+                        return <IconComp size={36} color={iconColor} />;
                       })()}
                       
-                      <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#ffffff', marginTop: '6px', textAlign: 'center', padding: '0 8px' }}>
+                      <span style={{ fontSize: '0.88rem', fontWeight: 900, color: '#ffffff', marginTop: '6px', textAlign: 'center', padding: '0 8px' }}>
                         {SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.label || 'Multiple Choice'}
                       </span>
-                      <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--accent)', marginTop: '2px' }}>
-                        ⚡ Click to Expand
+                      <span style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--accent)', marginTop: '3px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        ✨ Hover to Expand
                       </span>
                     </div>
 
                     <button 
                       type="button" 
                       className="btn btn-secondary btn-sm"
+                      onMouseEnter={() => setIsRadialPickerOpen(true)}
                       onClick={() => setIsRadialPickerOpen(true)}
                       style={{ borderRadius: '20px', fontSize: '0.78rem', padding: '6px 16px', gap: '6px', border: '1px solid var(--accent)', color: 'var(--accent)', background: 'rgba(6, 182, 212, 0.08)' }}
                     >
-                      ⭕ Expand Radial Selector Wheel (Image 3)
+                      ⭕ Open Kinetic Radial Menu (Hover / Click)
                     </button>
                   </div>
                 ) : (
@@ -1975,22 +1977,22 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                     position: 'absolute',
                     left: `${x}px`,
                     top: `${y}px`,
-                    width: '56px',
-                    height: '56px',
+                    width: '60px',
+                    height: '60px',
                     borderRadius: '50%',
                     background: isActive ? item.color : 'rgba(15, 23, 42, 0.95)',
-                    border: `2px solid ${isActive ? '#ffffff' : item.color}`,
+                    border: `2.5px solid ${isActive ? '#ffffff' : item.color}`,
                     color: isActive ? '#08211E' : '#ffffff',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
                     cursor: 'pointer',
-                    boxShadow: isActive ? `0 0 24px ${item.color}` : '0 4px 14px rgba(0,0,0,0.5)',
-                    transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                    boxShadow: isActive ? `0 0 28px ${item.color}` : '0 6px 18px rgba(0,0,0,0.6)',
+                    animationDelay: `${idx * 0.035}s`,
                     zIndex: 20
                   }}
-                  className="hover-scale"
+                  className="kinetic-bubble-sector hover-scale"
                 >
                   <IconComp size={20} color={isActive ? '#08211E' : item.color} />
                   <span style={{ fontSize: '0.58rem', fontWeight: 800, marginTop: '2px', textAlign: 'center', lineHeight: 1, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '50px' }}>
