@@ -1011,19 +1011,21 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
               </button>
             </div>
 
-            {/* Floating Instruction Overlay Popup */}
+            {/* Floating Instruction Overlay Popup - Fits 100% of Slide Canvas */}
             {showInstructionPopup && INSTRUCTIONS[activeSlide.type] && (
               <div style={{
-                position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-                backgroundColor: 'rgba(9, 13, 22, 0.85)', backdropFilter: 'blur(8px)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100,
-                padding: '24px'
+                position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                width: '100%', height: '100%',
+                backgroundColor: 'rgba(9, 13, 22, 0.92)', backdropFilter: 'blur(10px)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100,
+                padding: '16px', borderRadius: '20px'
               }}>
                 <div className="glass-card animate-fade" style={{
-                  width: '100%', maxWidth: '520px', padding: '32px', textAlign: 'left',
-                  border: '1px solid rgba(6, 182, 212, 0.4)', background: '#0b0f19',
-                  boxShadow: '0 20px 40px rgba(6, 182, 212, 0.25)',
-                  maxHeight: '90vh', overflowY: 'auto'
+                  width: '100%', height: '100%', padding: '20px 24px', textAlign: 'left',
+                  border: '1.5px solid rgba(6, 182, 212, 0.5)', background: '#0b0f19',
+                  boxShadow: '0 20px 40px rgba(6, 182, 212, 0.3)',
+                  overflowY: 'auto', borderRadius: '16px',
+                  display: 'flex', flexDirection: 'column', justifyContent: 'space-between'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
