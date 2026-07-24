@@ -1486,6 +1486,7 @@ export default function App() {
       {view !== 'presenter' && view !== 'audience' && (
         <aside 
           className="render-sidebar-dock"
+          onMouseLeave={() => setIsSidebarCollapsed(true)}
           style={{
             position: 'fixed',
             top: '60px',
