@@ -1714,12 +1714,16 @@ export default function App() {
           className="main-content animate-fade-in" 
           style={{ 
             background: 'var(--surface)', 
-            border: '1px solid var(--border)', 
-            borderRadius: '16px', 
-            padding: '24px', 
-            margin: isSidebarCollapsed ? '20px auto' : '20px 20px 20px 250px', 
-            maxWidth: isSidebarCollapsed ? '1280px' : 'calc(100% - 270px)', 
-            boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+            border: view === 'creator' ? 'none' : '1px solid var(--border)', 
+            borderRadius: view === 'creator' ? '0' : '16px', 
+            padding: view === 'creator' ? '0' : '24px', 
+            margin: view === 'creator' 
+              ? (isSidebarCollapsed ? '0 auto' : '0 0 0 230px') 
+              : (isSidebarCollapsed ? '20px auto' : '20px 20px 20px 250px'), 
+            maxWidth: view === 'creator' 
+              ? (isSidebarCollapsed ? '100%' : 'calc(100% - 230px)') 
+              : (isSidebarCollapsed ? '1280px' : 'calc(100% - 270px)'), 
+            boxShadow: view === 'creator' ? 'none' : '0 10px 30px rgba(0,0,0,0.2)',
             transition: 'margin 0.35s cubic-bezier(0.16, 1, 0.3, 1), max-width 0.35s cubic-bezier(0.16, 1, 0.3, 1)'
           }}
         >
