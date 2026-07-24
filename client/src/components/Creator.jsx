@@ -739,8 +739,9 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
       {/* Editor Header */}
       <div style={{ 
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        padding: '6px 16px', borderBottom: '1px solid var(--border-glass)',
-        backgroundColor: 'var(--bg-dark)', zIndex: 10, minHeight: '42px', maxHeight: '42px'
+        padding: '2px 10px', borderBottom: '1px solid var(--border-glass)',
+        backgroundColor: 'var(--bg-dark)', zIndex: 10, minHeight: '34px', maxHeight: '34px',
+        margin: 0
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <button 
@@ -748,13 +749,13 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
             className="btn btn-secondary btn-sm" 
             onClick={onBack} 
             title={returnNavContext?.returnView === 'sessions' ? "Back to Schedule" : "Dashboard"}
-            style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '4px 10px', fontSize: '0.78rem', fontWeight: 600 }}
+            style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '3px 8px', fontSize: '0.76rem', fontWeight: 600 }}
           >
-            <ArrowLeft size={14} />
+            <ArrowLeft size={13} />
             <span>{returnNavContext?.returnView === 'sessions' ? "Back to Schedule" : "Dashboard"}</span>
           </button>
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>/</span>
-          <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600 }}>/</span>
+          <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
             🎨 Presentation Creator
           </span>
         </div>
@@ -766,8 +767,8 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
           onClick={() => onPresent(presentation.id)}
           title="Present Live ▶"
           style={{ 
-            width: '32px', 
-            height: '32px', 
+            width: '28px', 
+            height: '28px', 
             borderRadius: '50%', 
             padding: 0, 
             display: 'flex', 
@@ -783,7 +784,7 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
           onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
           onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
         >
-          <Play size={16} fill="#08211E" color="#08211E" style={{ marginLeft: '2px' }} />
+          <Play size={14} fill="#08211E" color="#08211E" style={{ marginLeft: '1px' }} />
         </button>
       </div>
 
@@ -1689,9 +1690,11 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                           flexDirection: 'column', 
                           alignItems: 'center', 
                           width: '100%', 
-                          margin: '4px 0', 
-                          gap: '10px',
-                          position: 'relative'
+                          margin: '0', 
+                          gap: isRadialPickerOpen ? '6px' : '0',
+                          position: 'relative',
+                          transform: isRadialPickerOpen ? 'translateY(-20px)' : 'translateY(0)',
+                          transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
                         }}
                       >
                         {/* ROW 1: TOP 7 ITEMS */}
@@ -1699,7 +1702,7 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                           style={{
                             display: isRadialPickerOpen ? 'flex' : 'none',
                             flexWrap: 'wrap',
-                            gap: '6px',
+                            gap: '5px',
                             justifyContent: 'center',
                             width: '100%',
                             opacity: isRadialPickerOpen ? 1 : 0,
@@ -1722,13 +1725,13 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                                 style={{
                                   display: 'flex',
                                   alignItems: 'center',
-                                  gap: '6px',
+                                  gap: '5px',
                                   background: isActive ? 'var(--accent-soft)' : 'var(--surface-2)',
                                   border: isActive ? '2px solid var(--accent)' : '1.5px solid var(--border)',
                                   color: isActive ? 'var(--accent)' : 'var(--text-primary)',
-                                  padding: '5px 11px',
+                                  padding: '4px 9px',
                                   borderRadius: '20px',
-                                  fontSize: '0.76rem',
+                                  fontSize: '0.74rem',
                                   fontWeight: 800,
                                   cursor: 'pointer',
                                   boxShadow: isActive ? '0 0 14px var(--accent-soft)' : '0 4px 10px rgba(0,0,0,0.2)',
@@ -1736,7 +1739,7 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                                 }}
                                 className="hover-scale"
                               >
-                                <IconComp size={14} color={item.color} />
+                                <IconComp size={13} color={item.color} />
                                 <span>{item.label}</span>
                               </button>
                             );
@@ -1747,8 +1750,8 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                         <div 
                           onClick={() => setIsRadialPickerOpen(!isRadialPickerOpen)}
                           style={{
-                            width: '105px',
-                            height: '105px',
+                            width: isRadialPickerOpen ? '86px' : '98px',
+                            height: isRadialPickerOpen ? '86px' : '98px',
                             borderRadius: '50%',
                             background: 'radial-gradient(circle, rgba(6, 182, 212, 0.25) 0%, var(--surface-2) 85%)',
                             border: '3px solid var(--accent)',
@@ -1759,7 +1762,7 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                             justifyContent: 'center',
                             cursor: 'pointer',
                             zIndex: 20,
-                            margin: '2px 0',
+                            margin: isRadialPickerOpen ? '2px 0' : '0',
                             transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
                           }}
                           className="kinetic-hub-pulse hover-scale"
@@ -1768,12 +1771,12 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                           {(() => {
                             const IconComp = SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.icon || BarChart3;
                             const iconColor = SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.color || '#38bdf8';
-                            return <IconComp size={30} color={iconColor} />;
+                            return <IconComp size={isRadialPickerOpen ? 24 : 28} color={iconColor} />;
                           })()}
-                          <span style={{ fontSize: '0.78rem', fontWeight: 900, color: 'var(--text-primary)', marginTop: '2px', textAlign: 'center', padding: '0 4px' }}>
+                          <span style={{ fontSize: isRadialPickerOpen ? '0.72rem' : '0.78rem', fontWeight: 900, color: 'var(--text-primary)', marginTop: '2px', textAlign: 'center', padding: '0 4px' }}>
                             {SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.label}
                           </span>
-                          <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--accent)', marginTop: '1px' }}>
+                          <span style={{ fontSize: '0.58rem', fontWeight: 800, color: 'var(--accent)', marginTop: '1px' }}>
                             {isRadialPickerOpen ? '✕ Close' : '⚡ Click to Change'}
                           </span>
                         </div>
