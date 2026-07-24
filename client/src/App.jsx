@@ -756,6 +756,7 @@ export default function App() {
   }, []);
 
   const [selectedPresentationId, setSelectedPresentationId] = useState(null);
+  const [returnNavContext, setReturnNavContext] = useState(null);
   const [urlRoomCode, setUrlRoomCode] = useState('');
   const [authMode, setAuthMode] = useState(null); // null (shows landing page), 'login', 'signup'
   const [selectedFeature, setSelectedFeature] = useState('');
@@ -1096,8 +1097,9 @@ export default function App() {
     setUrlRoomCode('');
   };
 
-  const handleNavigateToCreator = (id) => {
+  const handleNavigateToCreator = (id, navContext = null) => {
     setSelectedPresentationId(id);
+    setReturnNavContext(navContext);
     setView('creator');
   };
 
@@ -1657,7 +1659,7 @@ export default function App() {
 
       {/* Primary Routing Panel */}
       {view !== 'presenter' && view !== 'audience' ? (
-        <main className="main-content">
+        <main className="main-content" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '24px', margin: '20px auto', maxWidth: '1280px', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}>
           {view === 'dashboard' && (
             <Dashboard 
               user={user}
@@ -1687,7 +1689,14 @@ export default function App() {
           {view === 'creator' && (
             <Creator 
               presentationId={selectedPresentationId}
-              onBack={handleNavigateToDashboard}
+              onBack={() => {
+                if (returnNavContext && returnNavContext.returnView === 'sessions') {
+                  setView('sessions');
+                } else {
+                  handleNavigateToDashboard();
+                }
+              }}
+              returnNavContext={returnNavContext}
               onPresent={handleNavigateToPresenter}
               user={user}
               onRequestUpgrade={() => setShowUpgradeModal(true)}
@@ -1725,9 +1734,8 @@ export default function App() {
                 setSelectedPresentationId(presId);
                 handleNavigateToPresenter();
               }}
-              onViewCreator={(presId) => {
-                if (presId) setSelectedPresentationId(presId);
-                setView('creator');
+              onViewCreator={(presId, navContext) => {
+                handleNavigateToCreator(presId, navContext);
               }}
               onBackToDashboard={handleNavigateToDashboard}
             />

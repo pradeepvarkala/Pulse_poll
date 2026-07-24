@@ -81,7 +81,7 @@ const INSTRUCTIONS = {
   }
 };
 
-export default function Creator({ presentationId, onBack, onPresent, user, onRequestUpgrade }) {
+export default function Creator({ presentationId, onBack, onPresent, user, onRequestUpgrade, returnNavContext }) {
   const [presentation, setPresentation] = useState(null);
   const [activeSlideId, setActiveSlideId] = useState(null);
   const [activeEmojiPickerId, setActiveEmojiPickerId] = useState(null);
@@ -629,8 +629,14 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
         backgroundColor: 'var(--bg-dark)', zIndex: 10
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <button className="btn btn-secondary btn-icon" onClick={onBack} title="Back to Dashboard">
-            <ArrowLeft size={18} />
+          <button 
+            className="btn btn-secondary" 
+            onClick={onBack} 
+            title={returnNavContext?.returnView === 'sessions' ? "Back to Workshop Schedule" : "Back to Dashboard"}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', fontSize: '0.82rem', fontWeight: 600 }}
+          >
+            <ArrowLeft size={16} />
+            <span>{returnNavContext?.returnView === 'sessions' ? "Back to Workshop Schedule" : "Back to Dashboard"}</span>
           </button>
           <div>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>{presentation.title}</h2>

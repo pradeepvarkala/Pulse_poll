@@ -1222,6 +1222,18 @@ h1, h2, h3, h4, h5, h6, .font-display {
   text-overflow: ellipsis;
 }
 
+/* Runner Sprint Keyframe Animation */
+@keyframes runnerSprint {
+  0% { transform: translateY(-50%) translateY(0px) rotate(0deg); }
+  25% { transform: translateY(-50%) translateY(-3px) rotate(5deg); }
+  50% { transform: translateY(-50%) translateY(0px) rotate(0deg); }
+  75% { transform: translateY(-50%) translateY(-3px) rotate(-5deg); }
+  100% { transform: translateY(-50%) translateY(0px) rotate(0deg); }
+}
+.runner-sprint-animation {
+  animation: runnerSprint 0.35s infinite linear;
+}
+
 /* Word Cloud SVG Layout styling */
 .word-cloud-svg {
   width: 100%;

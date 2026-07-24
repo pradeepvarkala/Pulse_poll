@@ -140,12 +140,54 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
     }));
   };
 
-  const handleUpdateSectionDeck = (dayIdx, secIdx, newDeckId) => {
-    const updatedDays = [...activeSession.days];
-    const updatedSections = [...(updatedDays[dayIdx].sections || [])];
-    updatedSections[secIdx] = { ...updatedSections[secIdx], presentationId: newDeckId };
-    updatedDays[dayIdx] = { ...updatedDays[dayIdx], sections: updatedSections };
-    updateActiveSession({ days: updatedDays });
+  const [showHelp, setShowHelp] = useState(false);
+
+  const handleUpdateSectionDeck = (dayIdx, secIdx, selectedVal) => {
+    if (selectedVal === '__CREATE_NEW__') {
+      const sec = activeSession.days?.[dayIdx]?.sections?.[secIdx];
+      const newPres = {
+        id: `pres-${Math.random().toString(36).substr(2, 7)}`,
+        title: `${sec?.title || 'Workshop Section'} Deck`,
+        updatedAt: new Date().toLocaleDateString(),
+        theme: 'corporate',
+        slides: [
+          {
+            id: Math.random().toString(36).substr(2, 9),
+            type: 'poll',
+            question: `Key Concept Check for ${sec?.title || 'this section'}:`,
+            options: [
+              { id: 'opt-1', text: 'Option A' },
+              { id: 'opt-2', text: 'Option B' }
+            ]
+          }
+        ]
+      };
+
+      let presentations = [];
+      try {
+        const saved = localStorage.getItem('pulse-poll-presentations');
+        if (saved) presentations = JSON.parse(saved);
+      } catch(e) {}
+      presentations.unshift(newPres);
+      localStorage.setItem('pulse-poll-presentations', JSON.stringify(presentations));
+      setUserPresentations(presentations);
+
+      const updatedDays = [...activeSession.days];
+      const updatedSections = [...(updatedDays[dayIdx].sections || [])];
+      updatedSections[secIdx] = { ...updatedSections[secIdx], presentationId: newPres.id };
+      updatedDays[dayIdx] = { ...updatedDays[dayIdx], sections: updatedSections };
+      updateActiveSession({ days: updatedDays });
+
+      if (onViewCreator) {
+        onViewCreator(newPres.id, { returnView: 'sessions', returnTab: 'schedule', returnSessionId: activeSession.id });
+      }
+    } else {
+      const updatedDays = [...activeSession.days];
+      const updatedSections = [...(updatedDays[dayIdx].sections || [])];
+      updatedSections[secIdx] = { ...updatedSections[secIdx], presentationId: selectedVal };
+      updatedDays[dayIdx] = { ...updatedDays[dayIdx], sections: updatedSections };
+      updateActiveSession({ days: updatedDays });
+    }
   };
 
   // Create Workshop Wizard Handler
@@ -256,29 +298,41 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px', fontFamily: "'Inter', sans-serif", color: 'var(--text-primary)' }}>
       
       {/* Top Header Bar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px', marginBottom: '24px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px', marginBottom: '16px' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <button className="btn btn-secondary btn-icon" onClick={handleHeaderBack} title="Back">
               <ArrowLeft size={18} />
             </button>
-            <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <h1 style={{ fontSize: '1.4rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Calendar color="var(--accent)" /> Multi-Day Workshops & Teacher Programs
             </h1>
+            <button 
+              className="btn btn-secondary btn-icon" 
+              onClick={() => setShowHelp(!showHelp)} 
+              title="Toggle Help Guide"
+              style={{ width: '32px', height: '32px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >
+              <HelpCircle size={16} color="var(--accent)" />
+            </button>
           </div>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '4px 0 0 38px', fontWeight: 400 }}>
-            Schedule multi-day event cards, link presentation decks per time slot, and launch live training sessions.
-          </p>
         </div>
 
         <button 
           className="btn btn-primary"
           onClick={() => setShowCreateModal(true)}
-          style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 600, gap: '8px', padding: '10px 18px', border: 'none' }}
+          style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 600, gap: '6px', padding: '8px 14px', border: 'none', fontSize: '0.85rem' }}
         >
-          <Plus size={18} /> Schedule New Workshop / Program
+          <Plus size={16} /> Schedule Workshop
         </button>
       </div>
+
+      {/* Optional Help Banner - Shown ONLY when clicked on Help Symbol */}
+      {showHelp && (
+        <div className="animate-fade" style={{ padding: '12px 16px', background: 'var(--surface-2)', border: '1px solid var(--border-soft)', borderRadius: '12px', marginBottom: '20px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+          💡 <strong>Help & Navigation Guide:</strong> Schedule multi-day event cards, link existing presentation decks or create new decks per section slot, and manage participant rosters. Click Back (`←`) to step through previous pages without jumping to default dashboard.
+        </div>
+      )}
 
       {/* Main Navigation Tabs */}
       <div style={{ display: 'flex', gap: '12px', borderBottom: '1px solid var(--border-soft)', paddingBottom: '12px', marginBottom: '24px' }}>
@@ -481,6 +535,7 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
                             {userPresentations.map(p => (
                               <option key={p.id} value={p.id}>📁 {p.title || 'Untitled Presentation'}</option>
                             ))}
+                            <option value="__CREATE_NEW__" style={{ fontWeight: 700, color: 'var(--accent)' }}>✨ + Create New Presentation Deck...</option>
                           </select>
 
                           <button 

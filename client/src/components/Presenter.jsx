@@ -3,7 +3,7 @@ import io from 'socket.io-client';
 import { 
   ChevronLeft, ChevronRight, Lock, Unlock, Eye, EyeOff, RotateCcw, 
   Users, Trophy, Presentation as PresIcon, HelpCircle, ArrowLeft, CheckCircle2, QrCode, Edit3, MessageSquare, Shuffle, RefreshCw, Award, Sparkles,
-  BarChart3, PieChart, CircleDot, Activity
+  BarChart3, PieChart, CircleDot, Activity, Flame
 } from 'lucide-react';
 import { solveGroupAllocation, GROUP_NAMING_THEMES, calculateInteractionCoverage } from '../utils/groupingAlgorithm';
 import { playClickSound, playHoverSound, playCorrectSound, playMultiplierSound, playSciFiBeep } from '../utils/soundEffects';
@@ -1715,6 +1715,14 @@ export default function Presenter({ presentationId, onBack, user: userProp }) {
                     >
                       <Activity size={18} />
                     </button>
+                    <button 
+                      className={`btn ${pollVizMode === 'runner' ? 'active' : ''}`} 
+                      onClick={() => setPollVizMode('runner')}
+                      title="Horizontal Runner Race Mode"
+                      style={{ padding: '6px', borderRadius: '10px', minWidth: 'unset', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: pollVizMode === 'runner' ? 'var(--accent)' : 'transparent', color: pollVizMode === 'runner' ? '#08211E' : 'var(--text-primary)', border: 'none' }}
+                    >
+                      <Flame size={18} />
+                    </button>
                   </div>
 
                   {/* Render based on mode */}
@@ -1830,6 +1838,85 @@ export default function Presenter({ presentationId, onBack, user: userProp }) {
                             <div className="density-label">
                               <span style={{ marginRight: '4px' }}>{opt.emoji || '🚀'}</span>
                               {opt.text}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {pollVizMode === 'runner' && (
+                    <div className="animate-fade" style={{ width: '100%', maxWidth: '880px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '14px', padding: '10px 0' }}>
+                      {activeSlide.options?.map((opt, idx) => {
+                        const responses = activeSlide.responses || {};
+                        const votes = responses[opt.id] || 0;
+                        const totalVotes = Object.values(responses).reduce((a, b) => a + b, 0);
+                        const percent = totalVotes > 0 ? (votes / totalVotes) * 100 : 0;
+                        const color = OPTION_COLORS[idx % OPTION_COLORS.length];
+
+                        const isCorrect = (activeSlide.correctAnswerIndices || []).includes(idx) || idx === activeSlide.correctAnswerIndex;
+                        const hasCorrect = activeSlide.correctAnswerIndex !== undefined || (activeSlide.correctAnswerIndices || []).length > 0;
+                        const isIncorrect = correctRevealed && hasCorrect && !isCorrect;
+
+                        const textStr = opt.text || '';
+                        const hasLeadingEmoji = /^\p{Emoji}/u.test(textStr);
+
+                        return (
+                          <div key={opt.id} style={{ display: 'flex', flexDirection: 'column', gap: '6px', width: '100%', background: 'rgba(15, 23, 42, 0.6)', padding: '12px 16px', borderRadius: '14px', border: '1px solid var(--border-soft)' }}>
+                            {/* Track Header (Option Name + Vote Stats) */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <span style={{ fontWeight: 700, fontSize: '0.92rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                {!hasLeadingEmoji && opt.emoji && <span>{opt.emoji}</span>}
+                                <span>{textStr}</span>
+                                {isCorrect && correctRevealed && <span style={{ color: '#10b981', marginLeft: '6px' }}>✓ Correct</span>}
+                              </span>
+                              <span style={{ fontWeight: 800, fontSize: '0.9rem', color: color }}>
+                                {votes} votes ({percent.toFixed(0)}%)
+                              </span>
+                            </div>
+
+                            {/* Race Track Container */}
+                            <div style={{ position: 'relative', height: '26px', background: 'rgba(255, 255, 255, 0.06)', borderRadius: '14px', overflow: 'visible', border: '1px solid rgba(255, 255, 255, 0.1)', display: 'flex', alignItems: 'center', padding: '0 4px' }}>
+                              {/* Animated Progress Bar Fill */}
+                              <div style={{
+                                position: 'absolute', left: 0, top: 0, bottom: 0,
+                                width: `${Math.max(percent, 0)}%`,
+                                background: `linear-gradient(90deg, ${color}cc, ${color})`,
+                                borderRadius: '14px',
+                                transition: 'width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                                boxShadow: `0 0 12px ${color}88`
+                              }} />
+
+                              {/* Finish Line Flag Marker on Far Right */}
+                              <div style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '1rem', zIndex: 2, opacity: 0.8 }} title="Finish Line">
+                                🏁
+                              </div>
+
+                              {/* Animated Runner Avatar Clip */}
+                              <div 
+                                style={{
+                                  position: 'absolute',
+                                  left: `calc(${Math.max(percent, 0)}% - 16px)`,
+                                  top: '50%',
+                                  transform: 'translateY(-50%)',
+                                  zIndex: 5,
+                                  transition: 'left 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}
+                              >
+                                <div 
+                                  className={percent > 0 ? "runner-sprint-animation" : ""}
+                                  style={{
+                                    fontSize: '1.4rem',
+                                    filter: `drop-shadow(0 2px 8px ${color})`,
+                                    transform: 'scaleX(1)'
+                                  }}
+                                >
+                                  🏃‍♂️
+                                </div>
+                              </div>
                             </div>
                           </div>
                         );
