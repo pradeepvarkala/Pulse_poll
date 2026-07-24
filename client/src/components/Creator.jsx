@@ -1076,9 +1076,9 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
               </div>
             )}
 
-            <input 
-              type="text"
+            <textarea 
               className="preview-question-input"
+              rows={Math.min(3, Math.max(1, Math.ceil((activeSlide.question || '').length / 45)))}
               value={activeSlide.question}
               onChange={(e) => handleUpdateActiveSlide({ question: e.target.value })}
               onFocus={(e) => {
@@ -1096,18 +1096,21 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                 borderBottom: '1px dashed transparent',
                 color: 'var(--text-primary)',
                 fontFamily: 'Outfit, sans-serif',
-                fontSize: (activeSlide.question || '').length > 60 ? '1.25rem' : (activeSlide.question || '').length > 35 ? '1.5rem' : '1.85rem',
+                fontSize: (activeSlide.question || '').length > 80 ? '1.15rem' : (activeSlide.question || '').length > 45 ? '1.35rem' : '1.75rem',
                 fontWeight: 800,
                 textAlign: 'center',
                 width: '100%',
                 maxWidth: '100%',
-                wordWrap: 'break-word',
+                boxSizing: 'border-box',
+                wordBreak: 'break-word',
                 overflowWrap: 'break-word',
                 whiteSpace: 'pre-wrap',
+                resize: 'none',
                 outline: 'none',
-                padding: '6px',
-                marginTop: '1.5rem',
-                marginBottom: '1rem',
+                padding: '4px 12px',
+                marginTop: '1.2rem',
+                marginBottom: '0.8rem',
+                lineHeight: 1.3,
                 transition: 'var(--transition-smooth)'
               }}
               onBlur={(e) => e.target.style.borderBottomColor = 'transparent'}
@@ -1850,206 +1853,6 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                   </div>
                 )}
               </div>
-
-              {/* Accordion 2: Slide Question & Content Options Table */}
-              <div className="accordion-card" style={{ width: '100%', borderRadius: '10px', background: 'var(--surface-2)', border: '1px solid var(--border-glass)', overflow: 'hidden' }}>
-                <button
-                  type="button"
-                  onClick={() => toggleAccordionSection('content')}
-                  style={{ width: '100%', padding: '10px 14px', background: 'rgba(6,182,212,0.08)', border: 'none', borderBottom: openAccordions.content ? '1px solid var(--border-glass)' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', color: 'var(--primary)', fontWeight: 800, fontSize: '0.82rem' }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <AlignLeft size={16} />
-                    <span>Slide Question & Options</span>
-                  </div>
-                  {openAccordions.content ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-                </button>
-
-                {openAccordions.content && (
-                  <div style={{ padding: '14px 12px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    {/* Question Text */}
-                    <div className="settings-group">
-                      <label>Question Text</label>
-                      <textarea 
-                        className="input-text" 
-                        style={{ minHeight: '60px', resize: 'vertical' }}
-                        value={activeSlide.question}
-                        onChange={(e) => handleUpdateActiveSlide({ question: e.target.value })}
-                        placeholder="e.g. Rate your understanding:"
-                      />
-                    </div>
-
-                    {/* Dynamic Options Editors */}
-                    {['poll', 'quiz', 'scales', 'ranking', 'points', 'grid', 'form'].includes(activeSlide.type) && (
-                      <div className="settings-group">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                          <label>{getOptionsLabel()}</label>
-                          {activeSlide.type === 'quiz' && <span style={{ fontSize: '0.7rem', color: 'var(--accent-green)' }}>Select Correct</span>}
-                        </div>
-                        
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '350px', overflowY: 'auto', paddingRight: '4px' }}>
-                          {activeSlide.options?.map((opt, index) => (
-                            <div key={opt.id} className="option-edit-item" style={{ position: 'relative', display: 'flex', gap: '8px', alignItems: 'center' }}>
-                              {['quiz', 'poll'].includes(activeSlide.type) && (
-                                <input 
-                                  type="checkbox" 
-                                  checked={(activeSlide.correctAnswerIndices || []).includes(index) || activeSlide.correctAnswerIndex === index}
-                                  onChange={() => handleToggleCorrectAnswer(index)}
-                                  style={{ cursor: 'pointer', accentColor: 'var(--accent-green)', width: '16px', height: '16px', flexShrink: 0 }}
-                                  title="Mark option as correct"
-                                />
-                              )}
-                              
-                              {/* Option Emoji Box */}
-                              <div style={{ position: 'relative', flexShrink: 0 }}>
-                                <button 
-                                  type="button"
-                                  className="emoji-picker-btn"
-                                  onClick={(e) => handleToggleEmojiPicker(e, opt.id)}
-                                >
-                                  {opt.emoji || '🚀'}
-                                </button>
-                              </div>
-
-                              <input 
-                                type="text" 
-                                className="input-text" 
-                                value={opt.text}
-                                onChange={(e) => handleOptionChange(opt.id, e.target.value)}
-                                placeholder={`Item ${index + 1}`}
-                              />
-                              <button 
-                                type="button"
-                                className="btn btn-secondary btn-icon" 
-                                style={{ width: '38px', height: '38px', border: 'none', background: 'transparent', flexShrink: 0 }}
-                                onClick={() => handleInsertOptionAfter(index)}
-                                title="Add Option Below"
-                              >
-                                <Plus size={12} color="var(--primary)" />
-                              </button>
-                              <button 
-                                className="btn btn-secondary btn-icon" 
-                                style={{ width: '38px', height: '38px', border: 'none', background: 'transparent', flexShrink: 0 }}
-                                onClick={() => handleDeleteOption(opt.id)}
-                                title="Delete Option"
-                              >
-                                <Trash2 size={12} color="var(--accent-red)" />
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-
-                        <button className="btn btn-secondary" onClick={handleAddOption} style={{ width: '100%', marginTop: '10px' }}>
-                          <Plus size={12} /> Add Item
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Axis labels for 2x2 Grid */}
-                    {activeSlide.type === 'grid' && (
-                      <>
-                        <div className="settings-group">
-                          <label>X-Axis Label (Horizontal)</label>
-                          <input 
-                            type="text" 
-                            className="input-text"
-                            value={activeSlide.xAxisLabel || ''}
-                            onChange={(e) => handleUpdateActiveSlide({ xAxisLabel: e.target.value })}
-                          />
-                        </div>
-                        <div className="settings-group">
-                          <label>Y-Axis Label (Vertical)</label>
-                          <input 
-                            type="text" 
-                            className="input-text"
-                            value={activeSlide.yAxisLabel || ''}
-                            onChange={(e) => handleUpdateActiveSlide({ yAxisLabel: e.target.value })}
-                          />
-                        </div>
-                      </>
-                    )}
-
-                    {/* Guess Correct Number setting */}
-                    {activeSlide.type === 'guess' && (
-                      <div className="settings-group">
-                        <label>Correct Number Value</label>
-                        <input 
-                          type="number" 
-                          className="input-text"
-                          value={activeSlide.correctNumber}
-                          onChange={(e) => handleUpdateActiveSlide({ correctNumber: Number(e.target.value) || 0 })}
-                        />
-                      </div>
-                    )}
-
-                    {/* Stopwatch presets */}
-                    {activeSlide.type === 'stopwatch' && (
-                      <div className="settings-group">
-                        <label>Timer Duration Presets</label>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px', marginTop: '6px' }}>
-                          {[10, 15, 20, 30, 60].map((sec) => (
-                            <button
-                              key={sec}
-                              type="button"
-                              className={`btn ${activeSlide.timeLimit === sec ? 'btn-primary' : 'btn-secondary'}`}
-                              style={{ padding: '6px 2px', fontSize: '0.75rem', fontWeight: 800 }}
-                              onClick={() => handleUpdateActiveSlide({ timeLimit: sec })}
-                            >
-                              {sec}s
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Brainstorm Categories */}
-                    {activeSlide.type === 'brainstorm' && (
-                      <>
-                        <div className="settings-group">
-                          <label>Grid Category 1</label>
-                          <input 
-                            type="text" 
-                            className="input-text"
-                            value={activeSlide.category1 || ''}
-                            onChange={(e) => handleUpdateActiveSlide({ category1: e.target.value })}
-                            placeholder="e.g. Category A"
-                          />
-                        </div>
-                        <div className="settings-group">
-                          <label>Grid Category 2</label>
-                          <input 
-                            type="text" 
-                            className="input-text"
-                            value={activeSlide.category2 || ''}
-                            onChange={(e) => handleUpdateActiveSlide({ category2: e.target.value })}
-                            placeholder="e.g. Category B"
-                          />
-                        </div>
-                        <div className="settings-group">
-                          <label>Grid Category 3</label>
-                          <input 
-                            type="text" 
-                            className="input-text"
-                            value={activeSlide.category3 || ''}
-                            onChange={(e) => handleUpdateActiveSlide({ category3: e.target.value })}
-                            placeholder="e.g. Category C"
-                          />
-                        </div>
-                        <div className="settings-group">
-                          <label>Grid Category 4</label>
-                          <input 
-                            type="text" 
-                            className="input-text"
-                            value={activeSlide.category4 || ''}
-                            onChange={(e) => handleUpdateActiveSlide({ category4: e.target.value })}
-                            placeholder="e.g. Category D"
-                          />
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
             </div>
           )}
 
@@ -2074,12 +1877,11 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                 </button>
 
                 {openAccordions.audio && (
-                  <div style={{ padding: '14px 12px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    {/* 5 Countdown Audio Themes (Paid Feature) */}
-                    <div className="settings-group">
-                      <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span>Countdown Audio Theme</span>
-                        <span style={{ fontSize: '0.7rem', color: '#f59e0b', fontWeight: 800 }}>🔒 Paid Feature</span>
+                  <div style={{ padding: '14px 12px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    {/* 5 Countdown Audio Themes (Paid Feature) - Single Horizontal Line */}
+                    <div className="settings-group" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                      <label style={{ fontSize: '0.78rem', fontWeight: 700, margin: 0, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        Audio Theme <span style={{ fontSize: '0.65rem', color: '#f59e0b' }}>🔒</span>
                       </label>
                       <select 
                         value={activeSlide.audioTheme || presentation.audioTheme || 'classic'}
@@ -2091,22 +1893,24 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                           handleUpdateActiveSlide({ audioTheme: e.target.value });
                         }}
                         style={{
-                          width: '100%', padding: '10px 12px', background: '#0f172a',
-                          border: '1px solid var(--border-glass)', borderRadius: '8px',
-                          color: '#ffffff', fontSize: '0.85rem', fontWeight: 600, outline: 'none'
+                          flex: 1, maxWidth: '170px', padding: '6px 8px', background: '#0f172a',
+                          border: '1px solid var(--border-glass)', borderRadius: '6px',
+                          color: '#ffffff', fontSize: '0.78rem', fontWeight: 600, outline: 'none'
                         }}
                       >
-                        <option value="classic">⏱️ Classic Ticking Clock</option>
-                        <option value="synth">⚡ Synthesizer Energy Beat</option>
-                        <option value="gameshow">🎺 Game Show Fanfare</option>
-                        <option value="chill">🌊 Ambient Deep Chill</option>
-                        <option value="arcade">🚀 Space Arcade Rush</option>
+                        <option value="classic">⏱️ Classic Ticking</option>
+                        <option value="synth">⚡ Synth Beat</option>
+                        <option value="gameshow">🎺 Game Show</option>
+                        <option value="chill">🌊 Deep Chill</option>
+                        <option value="arcade">🚀 Arcade Rush</option>
                       </select>
                     </div>
 
-                    {/* Customizable Time Limit */}
-                    <div className="settings-group">
-                      <label>Question Time Limit (0 to disable)</label>
+                    {/* Customizable Time Limit - Single Horizontal Line */}
+                    <div className="settings-group" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                      <label style={{ fontSize: '0.78rem', fontWeight: 700, margin: 0 }}>
+                        Time Limit (sec)
+                      </label>
                       <input 
                         type="number" 
                         className="input-text" 
@@ -2114,25 +1918,26 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                         max="120"
                         value={activeSlide.timeLimit !== undefined ? activeSlide.timeLimit : 15}
                         onChange={(e) => handleUpdateActiveSlide({ timeLimit: parseInt(e.target.value) || 0 })}
+                        style={{ width: '65px', padding: '5px 8px', fontSize: '0.78rem', fontWeight: 700, textAlign: 'center' }}
                       />
                     </div>
 
                     {/* Auto Start Timer Toggle */}
-                    <div className="settings-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '8px', marginTop: '-6px' }}>
+                    <div className="settings-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
                       <input 
                         type="checkbox"
                         id="sidebar-timer-autostart"
                         checked={activeSlide.timerAutoStart === true}
                         onChange={(e) => handleUpdateActiveSlide({ timerAutoStart: e.target.checked })}
-                        style={{ accentColor: 'var(--primary)', cursor: 'pointer', width: '16px', height: '16px' }}
+                        style={{ accentColor: 'var(--primary)', cursor: 'pointer', width: '15px', height: '15px' }}
                       />
-                      <label htmlFor="sidebar-timer-autostart" style={{ cursor: 'pointer', userSelect: 'none', margin: 0 }}>
+                      <label htmlFor="sidebar-timer-autostart" style={{ cursor: 'pointer', userSelect: 'none', margin: 0, fontSize: '0.78rem' }}>
                         Auto-start timer on slide load
                       </label>
                     </div>
 
                     {/* Focus Mode / Anti-Cheat Toggle */}
-                    <div className="settings-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '8px', marginTop: '-6px' }}>
+                    <div className="settings-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
                       <input 
                         type="checkbox"
                         id="sidebar-focus-mode"
@@ -2153,9 +1958,9 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                           }
                           handleUpdateActiveSlide({ focusMode: e.target.checked });
                         }}
-                        style={{ accentColor: 'var(--primary)', cursor: 'pointer', width: '16px', height: '16px' }}
+                        style={{ accentColor: 'var(--primary)', cursor: 'pointer', width: '15px', height: '15px' }}
                       />
-                      <label htmlFor="sidebar-focus-mode" style={{ cursor: 'pointer', userSelect: 'none', margin: 0, fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <label htmlFor="sidebar-focus-mode" style={{ cursor: 'pointer', userSelect: 'none', margin: 0, fontWeight: 600, fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
                         🔒 Focus Mode (Anti-Cheat)
                       </label>
                     </div>
@@ -2181,27 +1986,26 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                 </button>
 
                 {openAccordions.image && (
-                  <div style={{ padding: '14px 12px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    {/* Slide Background Artwork Image Picker */}
-                    <div className="settings-group">
-                      <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span>Slide Background Artwork</span>
-                        <span style={{ fontSize: '0.7rem', color: '#06b6d4', fontWeight: 800 }}>🎨 AI Generated</span>
+                  <div style={{ padding: '14px 12px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    {/* Slide Background Artwork Image Picker - Single Horizontal Line */}
+                    <div className="settings-group" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                      <label style={{ fontSize: '0.78rem', fontWeight: 700, margin: 0, whiteSpace: 'nowrap' }}>
+                        Slide Wallpaper
                       </label>
                       <select 
                         value={activeSlide.bgImage || ''}
                         onChange={(e) => handleUpdateActiveSlide({ bgImage: e.target.value })}
                         style={{
-                          width: '100%', padding: '10px 12px', background: '#0f172a',
-                          border: '1px solid var(--border-glass)', borderRadius: '8px',
-                          color: '#ffffff', fontSize: '0.85rem', fontWeight: 600, outline: 'none'
+                          flex: 1, maxWidth: '170px', padding: '6px 8px', background: '#0f172a',
+                          border: '1px solid var(--border-glass)', borderRadius: '6px',
+                          color: '#ffffff', fontSize: '0.78rem', fontWeight: 600, outline: 'none'
                         }}
                       >
-                        <option value="">Default Theme Wallpaper</option>
-                        <option value="/assets/theme_cyber_neon.jpg">🌌 Cyber Neon Artwork</option>
-                        <option value="/assets/theme_midnight_gold.jpg">👑 Midnight Gold Executive</option>
-                        <option value="/assets/theme_cosmic_nebula.jpg">✨ Cosmic Nebula Stardust</option>
-                        <option value="/assets/theme_playroom_magic.jpg">🎨 Playroom Magic Pastel</option>
+                        <option value="">Default Theme</option>
+                        <option value="/assets/theme_cyber_neon.jpg">🌌 Cyber Neon</option>
+                        <option value="/assets/theme_midnight_gold.jpg">👑 Midnight Gold</option>
+                        <option value="/assets/theme_cosmic_nebula.jpg">✨ Cosmic Nebula</option>
+                        <option value="/assets/theme_playroom_magic.jpg">🎨 Playroom Magic</option>
                       </select>
                     </div>
 
