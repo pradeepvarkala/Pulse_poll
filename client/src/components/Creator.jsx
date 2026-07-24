@@ -167,6 +167,20 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
   };
 
   const handleUploadSlideMedia = (e) => {
+    if (user?.tier === 'free') {
+      let unlocks = [];
+      try {
+        unlocks = typeof user.unlocked_modules === 'string' 
+          ? JSON.parse(user.unlocked_modules || '[]') 
+          : (user.unlocked_modules || []);
+      } catch(err) { unlocks = []; }
+      const isMediaUnlocked = unlocks.some(i => i.module === 'media_upload' && new Date(i.expiresAt) > new Date());
+      if (!isMediaUnlocked) {
+        onRequestUpgrade('media_upload');
+        return;
+      }
+    }
+
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -2078,18 +2092,32 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                       </div>
                     )}
 
-                    {/* Slide Media (Images & Videos) Upload Provision */}
-                    <div className="settings-group" style={{ padding: '12px', background: 'rgba(6,182,212,0.04)', border: '1px solid var(--border-glass)', borderRadius: '10px' }}>
+                    {/* Slide Media (Images & Videos) Upload Provision - Paid Feature */}
+                    <div className="settings-group" style={{ padding: '12px', background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '10px' }}>
                       <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                         <span style={{ fontWeight: 800, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                           🖼️ 🎥 Add Image or Video
                         </span>
-                        <span style={{ fontSize: '0.7rem', color: 'var(--accent)', fontWeight: 800 }}>Media Provision</span>
+                        <span style={{ fontSize: '0.7rem', color: '#f59e0b', fontWeight: 800 }}>🔒 Paid Feature</span>
                       </label>
 
                       {/* File Upload Button for Image or Video */}
                       <label 
                         className="btn btn-secondary" 
+                        onClick={() => {
+                          if (user?.tier === 'free') {
+                            let unlocks = [];
+                            try {
+                              unlocks = typeof user.unlocked_modules === 'string' 
+                                ? JSON.parse(user.unlocked_modules || '[]') 
+                                : (user.unlocked_modules || []);
+                            } catch(err) { unlocks = []; }
+                            const isMediaUnlocked = unlocks.some(i => i.module === 'media_upload' && new Date(i.expiresAt) > new Date());
+                            if (!isMediaUnlocked) {
+                              onRequestUpgrade('media_upload');
+                            }
+                          }
+                        }}
                         style={{ 
                           width: '100%', 
                           padding: '8px', 
@@ -2099,15 +2127,15 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                           gap: '8px', 
                           cursor: 'pointer',
                           background: 'var(--surface-2)',
-                          border: '1.5px dashed var(--accent)',
-                          color: 'var(--accent)',
+                          border: '1.5px dashed #f59e0b',
+                          color: '#f59e0b',
                           fontWeight: 700,
                           fontSize: '0.8rem',
                           marginBottom: '8px'
                         }}
                       >
                         <FileUp size={16} />
-                        <span>Upload Image / Video File</span>
+                        <span>Upload Image / Video File (Premium)</span>
                         <input 
                           type="file" 
                           accept="image/*,video/*,.png,.jpg,.jpeg,.gif,.webp,.mp4,.webm,.mov,.ogg"
@@ -2125,6 +2153,19 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                           placeholder="https://example.com/media.mp4 or .jpg"
                           value={activeSlide.videoUrl || activeSlide.imageUrl || ''}
                           onChange={(e) => {
+                            if (user?.tier === 'free') {
+                              let unlocks = [];
+                              try {
+                                unlocks = typeof user.unlocked_modules === 'string' 
+                                  ? JSON.parse(user.unlocked_modules || '[]') 
+                                  : (user.unlocked_modules || []);
+                              } catch(err) { unlocks = []; }
+                              const isMediaUnlocked = unlocks.some(i => i.module === 'media_upload' && new Date(i.expiresAt) > new Date());
+                              if (!isMediaUnlocked) {
+                                onRequestUpgrade('media_upload');
+                                return;
+                              }
+                            }
                             const val = e.target.value;
                             const isVid = val.endsWith('.mp4') || val.endsWith('.webm') || val.includes('youtube.com') || val.includes('vimeo.com');
                             if (isVid) {
