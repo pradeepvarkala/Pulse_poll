@@ -588,111 +588,155 @@ export default function Presenter({ presentationId, onBack, user: userProp }) {
   const user = currentUser;
   const userEmail = currentUser.email || 'guest@pulsepoll.com';
 
+const SAMPLE_DECKS = {
+  'sample-pres-1': {
+    id: 'sample-pres-1',
+    title: 'Diagnostic Polls & Alignment Quiz',
+    theme: 'cyber-neon',
+    slides: [
+      { 
+        type: 'poll', 
+        question: 'Which concept best explains the primary core fundamentals of interactive polling?', 
+        options: [
+          { id: 'opt-1', text: 'Real-Time Audience Engagement', emoji: '🚀' },
+          { id: 'opt-2', text: 'Visual Analytics & Charts', emoji: '📊' },
+          { id: 'opt-3', text: 'Gamified Competitive Quizzes', emoji: '🏆' },
+          { id: 'opt-4', text: 'Instant Feedback Loops', emoji: '⚡' }
+        ] 
+      },
+      {
+        type: 'wordcloud',
+        question: 'In one word, what makes live presentations memorable?'
+      },
+      {
+        type: 'quiz',
+        question: 'Which biological process converts sunlight and carbon dioxide into oxygen? 🌿',
+        timeLimit: 15,
+        correctAnswerIndex: 0,
+        options: [
+          { id: 'opt-1', text: 'Photosynthesis (Correct)', emoji: '🌿' },
+          { id: 'opt-2', text: 'Cellular Respiration', emoji: '💨' },
+          { id: 'opt-3', text: 'Evaporation', emoji: '💧' }
+        ]
+      }
+    ]
+  },
+  'sample-pres-2': {
+    id: 'sample-pres-2',
+    title: 'Escape Room Vault Challenge',
+    theme: 'cyber-neon',
+    slides: [
+      {
+        type: 'brainstorm',
+        question: '🗝️ Team Escape Vault: Brainstorm the top 3 security protocols to unlock the digital vault!'
+      },
+      {
+        type: 'quiz',
+        question: 'What is the master passcode required to bypass the security mainframe firewall?',
+        timeLimit: 20,
+        correctAnswerIndex: 1,
+        options: [
+          { id: 'opt-1', text: '2026-ALPHA', emoji: '🔑' },
+          { id: 'opt-2', text: 'CYBER-404-UNLOCK (Correct)', emoji: '🛡️' },
+          { id: 'opt-3', text: '0000-PASS', emoji: '⚡' }
+        ]
+      }
+    ]
+  },
+  'sample-pres-3': {
+    id: 'sample-pres-3',
+    title: 'Strategic Impact 2x2 Grid',
+    theme: 'midnight-gold',
+    slides: [
+      {
+        type: 'grid',
+        question: 'Map key enterprise initiatives on the 2x2 matrix (Impact vs Effort):'
+      },
+      {
+        type: 'wordcloud',
+        question: 'What is the biggest strategic growth opportunity for our team this year?'
+      }
+    ]
+  }
+};
+
   useEffect(() => {
+    let isMounted = true;
+
+    // 1. Instant check for built-in sample decks (0ms load time)
+    if (presentationId && SAMPLE_DECKS[presentationId]) {
+      const deck = SAMPLE_DECKS[presentationId];
+      setPresentation(deck);
+      setSlides(deck.slides);
+      setTheme(deck.theme || 'cyber-neon');
+      return;
+    }
+
+    // 2. Instant check for local storage presentations (0ms load time)
+    const saved = localStorage.getItem('pulse-poll-presentations');
+    if (saved) {
+      try {
+        const presentations = JSON.parse(saved);
+        const localFound = presentations.find(p => p.id === presentationId);
+        if (localFound) {
+          const parsedLocal = {
+            ...localFound,
+            slides: typeof localFound.slides === 'string' ? JSON.parse(localFound.slides) : (localFound.slides || [])
+          };
+          setPresentation(parsedLocal);
+          setSlides(parsedLocal.slides);
+          setTheme(parsedLocal.theme || 'corporate');
+          return;
+        }
+      } catch (e) {
+        console.error('Error parsing localStorage presentations:', e);
+      }
+    }
+
+    // 3. Async network fetch with 1.2s timeout fallback
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 1200);
+
     const fetchPresentation = async () => {
       try {
         const res = await fetch('/api/presentations', {
-          headers: { 'x-user-email': userEmail }
+          headers: { 'x-user-email': userEmail },
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
         const data = await res.json();
         const found = data.find(p => p.id === presentationId);
-        if (found) {
+        if (found && isMounted) {
           const parsedFound = {
             ...found,
-            slides: typeof found.slides === 'string' ? JSON.parse(found.slides) : found.slides
+            slides: typeof found.slides === 'string' ? JSON.parse(found.slides) : (found.slides || [])
           };
           setPresentation(parsedFound);
           setSlides(parsedFound.slides);
           setTheme(parsedFound.theme || 'corporate');
           return;
         }
-
-        const saved = localStorage.getItem('pulse-poll-presentations');
-        if (saved) {
-          const presentations = JSON.parse(saved);
-          const localFound = presentations.find(p => p.id === presentationId);
-          if (localFound) {
-            setPresentation(localFound);
-            setSlides(localFound.slides);
-            setTheme(localFound.theme || 'corporate');
-            return;
-          }
-        }
-
-        // Fallback sample presentation
-        const sampleDeck = {
-          id: presentationId || 'pres-sample-default',
-          title: 'Interactive Presentation Deck',
-          theme: 'cyber-neon',
-          slides: [
-            { 
-              type: 'poll', 
-              question: 'Which concept best explains the primary core fundamentals of interactive polling?', 
-              options: [
-                { id: 'opt-1', text: 'Real-Time Audience Engagement', emoji: '🚀' },
-                { id: 'opt-2', text: 'Visual Analytics & Charts', emoji: '📊' },
-                { id: 'opt-3', text: 'Gamified Competitive Quizzes', emoji: '🏆' },
-                { id: 'opt-4', text: 'Instant Feedback Loops', emoji: '⚡' }
-              ] 
-            },
-            {
-              type: 'wordcloud',
-              question: 'In one word, what makes live presentations memorable?'
-            },
-            {
-              type: 'quiz',
-              question: 'Which biological process converts sunlight and carbon dioxide into oxygen? 🌿',
-              timeLimit: 15,
-              correctAnswerIndex: 0,
-              options: [
-                { id: 'opt-1', text: 'Photosynthesis (Correct)', emoji: '🌿' },
-                { id: 'opt-2', text: 'Cellular Respiration', emoji: '💨' },
-                { id: 'opt-3', text: 'Evaporation', emoji: '💧' }
-              ]
-            }
-          ]
-        };
-        setPresentation(sampleDeck);
-        setSlides(sampleDeck.slides);
-        setTheme(sampleDeck.theme);
       } catch (err) {
-        console.error('Error fetching presentation in presenter:', err);
-        const saved = localStorage.getItem('pulse-poll-presentations');
-        if (saved) {
-          const presentations = JSON.parse(saved);
-          const localFound = presentations.find(p => p.id === presentationId);
-          if (localFound) {
-            setPresentation(localFound);
-            setSlides(localFound.slides);
-            setTheme(localFound.theme || 'corporate');
-            return;
-          }
-        }
-        const sampleDeck = {
-          id: presentationId || 'pres-sample-default',
-          title: 'Interactive Presentation Deck',
-          theme: 'cyber-neon',
-          slides: [
-            { 
-              type: 'poll', 
-              question: 'Which concept best explains the primary core fundamentals of interactive polling?', 
-              options: [
-                { id: 'opt-1', text: 'Real-Time Audience Engagement', emoji: '🚀' },
-                { id: 'opt-2', text: 'Visual Analytics & Charts', emoji: '📊' },
-                { id: 'opt-3', text: 'Gamified Competitive Quizzes', emoji: '🏆' },
-                { id: 'opt-4', text: 'Instant Feedback Loops', emoji: '⚡' }
-              ] 
-            }
-          ]
-        };
-        setPresentation(sampleDeck);
-        setSlides(sampleDeck.slides);
-        setTheme(sampleDeck.theme);
+        console.warn('Network fetch presentation timed out or failed, using fallback deck:', err);
+      }
+
+      // 4. Default instant fallback deck so screen NEVER hangs on loading
+      if (isMounted) {
+        const defaultDeck = SAMPLE_DECKS['sample-pres-1'];
+        setPresentation(defaultDeck);
+        setSlides(defaultDeck.slides);
+        setTheme(defaultDeck.theme);
       }
     };
 
     fetchPresentation();
-  }, [presentationId]);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+      controller.abort();
+    };
+  }, [presentationId, userEmail]);
 
   useEffect(() => {
     if (!quizRunning && !stopwatchActive) {
