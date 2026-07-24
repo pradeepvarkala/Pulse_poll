@@ -1366,12 +1366,12 @@ export default function App() {
           {/* Left: Menu Toggle + Brand Logo + Render Breadcrumb Path */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <button 
-              className="btn btn-secondary btn-icon" 
+              className="btn btn-primary btn-icon" 
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
               title={isSidebarCollapsed ? "Expand Render Dock Menu" : "Collapse Render Dock Menu"}
-              style={{ width: '36px', height: '36px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              style={{ width: '38px', height: '38px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--accent)', color: '#08211E', border: 'none', boxShadow: '0 0 12px rgba(6, 182, 212, 0.4)', borderRadius: '10px' }}
             >
-              <Menu size={18} />
+              <Menu size={20} color="#08211E" />
             </button>
 
             <div 
@@ -1462,6 +1462,24 @@ export default function App() {
             </button>
           </div>
         </header>
+      )}
+
+      {/* EXTREME LEFT EDGE HOVER ZONE TO AUTO-REVEAL SIDEBAR */}
+      {view !== 'presenter' && view !== 'audience' && isSidebarCollapsed && (
+        <div 
+          onMouseEnter={() => setIsSidebarCollapsed(false)}
+          style={{
+            position: 'fixed',
+            top: '60px',
+            left: 0,
+            bottom: 0,
+            width: '16px',
+            zIndex: 960,
+            cursor: 'pointer',
+            background: 'linear-gradient(90deg, rgba(6, 182, 212, 0.3), transparent)'
+          }}
+          title="Hover extreme left edge to reveal side menu"
+        />
       )}
 
       {/* RENDER-STYLE LOCKED LEFT SIDEBAR NAVIGATION DOCK */}

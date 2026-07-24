@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Calendar, Plus, Trash2, Play, Users, Lock, Unlock, Shuffle, 
   ChevronRight, Award, Sparkles, CheckCircle2, Copy, Eye, ArrowLeft, Layers, 
-  Clock, Edit3, Link as LinkIcon, FileText, Check, X, ExternalLink, HelpCircle, FileUp, Settings
+  Clock, Edit3, Link as LinkIcon, FileText, Check, X, ExternalLink, HelpCircle, FileUp, Settings, Printer, Download, Gamepad2, MessageSquare
 } from 'lucide-react';
 import { solveGroupAllocation, getGroupNames, GROUP_NAMING_THEMES } from '../utils/groupingAlgorithm';
 
@@ -48,6 +48,58 @@ const SAMPLE_SESSIONS = [
     groups: []
   }
 ];
+
+// Time parsing helper: converts "09:30 AM" to minutes from midnight
+const timeToMinutes = (timeStr) => {
+  if (!timeStr) return 540; // Default 09:00 AM (540 mins)
+  const match = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+  if (!match) return 540;
+  let hours = parseInt(match[1], 10);
+  const minutes = parseInt(match[2], 10);
+  const period = match[3] ? match[3].toUpperCase() : null;
+
+  if (period) {
+    if (period === 'PM' && hours < 12) hours += 12;
+    if (period === 'AM' && hours === 12) hours = 0;
+  }
+  return hours * 60 + minutes;
+};
+
+// Minutes to time string helper: converts 570 to "09:30 AM"
+const minutesToTime = (totalMins) => {
+  let normalizedMins = Math.max(0, totalMins) % (24 * 60);
+  let hours = Math.floor(normalizedMins / 60);
+  const mins = normalizedMins % 60;
+  const period = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  if (hours === 0) hours = 12;
+  const padH = String(hours).padStart(2, '0');
+  const padM = String(mins).padStart(2, '0');
+  return `${padH}:${padM} ${period}`;
+};
+
+// Auto-cascading schedule time recalculator
+const recalculateCascadingScheduleTimes = (sectionsList) => {
+  if (!sectionsList || sectionsList.length === 0) return [];
+  
+  let currentStartMins = timeToMinutes(sectionsList[0]?.startTime || '09:00 AM');
+
+  return sectionsList.map((sec, idx) => {
+    const durationMins = parseInt(sec.durationMinutes || sec.duration || 60, 10) || 60;
+    
+    const rowStartMins = idx === 0 ? currentStartMins : currentStartMins + 1;
+    const rowEndMins = rowStartMins + durationMins;
+    currentStartMins = rowEndMins;
+
+    return {
+      ...sec,
+      startTime: minutesToTime(rowStartMins),
+      endTime: minutesToTime(rowEndMins),
+      durationMinutes: durationMins,
+      duration: `${durationMins} mins`
+    };
+  });
+};
 
 export default function SessionManager({ onLaunchPresenter, onBackToDashboard, onViewCreator }) {
   const [sessions, setSessions] = useState(() => {
@@ -178,6 +230,146 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
 
     setShowEditWorkshopModal(false);
     setEditingSessionId(null);
+  };
+
+  const handleUpdateSectionRowField = (dayIdx, secIdx, field, val) => {
+    updateActiveSession(prev => {
+      const daysCopy = [...(prev.days || [])];
+      if (!daysCopy[dayIdx]) return prev;
+      
+      const sectionsCopy = [...(daysCopy[dayIdx].sections || [])];
+      if (!sectionsCopy[secIdx]) return prev;
+
+      sectionsCopy[secIdx] = {
+        ...sectionsCopy[secIdx],
+        [field]: val
+      };
+
+      daysCopy[dayIdx] = {
+        ...daysCopy[dayIdx],
+        sections: recalculateCascadingScheduleTimes(sectionsCopy)
+      };
+
+      return {
+        ...prev,
+        days: daysCopy
+      };
+    });
+  };
+
+  const handleAddQuickScheduleRow = (dayIdx) => {
+    updateActiveSession(prev => {
+      const daysCopy = [...(prev.days || [])];
+      if (!daysCopy[dayIdx]) return prev;
+
+      const existingSections = daysCopy[dayIdx].sections || [];
+      const lastSec = existingSections[existingSections.length - 1];
+      
+      let defaultStartMins = 540; // 09:00 AM default
+      if (lastSec && lastSec.endTime) {
+        defaultStartMins = timeToMinutes(lastSec.endTime) + 1; // Start 1 min after previous end time!
+      }
+
+      const newRow = {
+        id: `sec-${Math.random().toString(36).substr(2, 6)}`,
+        title: `Topic Section ${existingSections.length + 1}`,
+        startTime: minutesToTime(defaultStartMins),
+        durationMinutes: 45,
+        duration: '45 mins',
+        endTime: minutesToTime(defaultStartMins + 45),
+        activityType: '📚 Training Class',
+        presenterName: 'Primary Trainer',
+        presentationId: 'sample-pres-1',
+        customUrl: ''
+      };
+
+      const updatedSections = [...existingSections, newRow];
+      daysCopy[dayIdx] = {
+        ...daysCopy[dayIdx],
+        sections: recalculateCascadingScheduleTimes(updatedSections)
+      };
+
+      return {
+        ...prev,
+        days: daysCopy
+      };
+    });
+  };
+
+  const handlePrintSchedulePDF = (sess) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${sess.title} - Official Program Schedule</title>
+        <style>
+          body { font-family: 'Inter', system-ui, -apple-system, sans-serif; padding: 40px; color: #0f172a; background: #ffffff; line-height: 1.5; }
+          .header { border-bottom: 3px solid #06b6d4; padding-bottom: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end; }
+          .title { font-size: 24px; font-weight: 800; color: #0f172a; margin: 0 0 6px 0; }
+          .subtitle { font-size: 14px; color: #475569; margin: 0; }
+          table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 13px; text-align: left; }
+          th { background: #f1f5f9; color: #0f172a; font-weight: 700; padding: 10px 12px; border-bottom: 2px solid #cbd5e1; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; }
+          td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+          tr:nth-child(even) td { background: #f8fafc; }
+          .badge { background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; display: inline-block; }
+          .footer { margin-top: 40px; font-size: 11px; color: #94a3b8; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 14px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div>
+            <div class="title">${sess.title}</div>
+            <div class="subtitle">Subject: <strong>${sess.subject || 'General Training'}</strong> • Scheduled: <strong>${sess.scheduledDate || 'Flexible Date'}</strong> (${sess.numDays || 1} Days)</div>
+          </div>
+          <div style="text-align: right; font-size: 12px; color: #0284c7; font-weight: 700;">
+            PulsePoll Workshop Schedule
+          </div>
+        </div>
+
+        ${(sess.days || []).map(day => `
+          <h3 style="font-size: 16px; margin-top: 28px; margin-bottom: 8px; color: #0284c7;">📅 ${day.title}</h3>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 30px;">#</th>
+                <th style="width: 140px;">Time Slot</th>
+                <th>Activity / Topic Title</th>
+                <th style="width: 140px;">Activity Type</th>
+                <th style="width: 140px;">Presenter / Trainer</th>
+                <th style="width: 80px;">Duration</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${(day.sections || []).map((sec, idx) => `
+                <tr>
+                  <td><strong>${idx + 1}</strong></td>
+                  <td><strong>${sec.startTime || ''} - ${sec.endTime || ''}</strong></td>
+                  <td><strong>${sec.title}</strong></td>
+                  <td><span class="badge">${sec.activityType || '📚 Training Class'}</span></td>
+                  <td>${sec.presenterName || 'Primary Instructor'}</td>
+                  <td>${sec.duration || '60 mins'}</td>
+                </tr>
+              `).join('')}
+              ${(day.sections || []).length === 0 ? `<tr><td colspan="6" style="text-align:center; color:#94a3b8;">No program sections scheduled for this day yet.</td></tr>` : ''}
+            </tbody>
+          </table>
+        `).join('')}
+
+        <div class="footer">
+          Generated & Exported via PulsePoll Interactive Platform • https://harithahavana.in
+        </div>
+        <script>
+          window.onload = function() { window.print(); }
+        </script>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
   };
 
   const activeSession = sessions.find(s => s.id === activeSessionId) || sessions[0];
@@ -514,6 +706,15 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
               <button 
                 className="btn btn-secondary"
+                onClick={() => handlePrintSchedulePDF(activeSession)}
+                style={{ fontSize: '0.82rem', fontWeight: 600, display: 'flex', gap: '6px', alignItems: 'center' }}
+                title="Export schedule as printable PDF"
+              >
+                <Printer size={15} color="var(--accent)" /> Export PDF Schedule
+              </button>
+
+              <button 
+                className="btn btn-secondary"
                 onClick={() => handleOpenEditWorkshopModal(activeSession)}
                 style={{ fontSize: '0.82rem', fontWeight: 500, display: 'flex', gap: '6px', alignItems: 'center' }}
                 title="Edit Title, Subject, Date, Time & Days"
@@ -535,85 +736,161 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
           </div>
 
           <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-            Click on any <strong>Day Card (Day 1, Day 2, Day 3...)</strong> below to add sections, link existing presentation decks, or create new decks:
+            Enter your schedule rows in tabular format below. Start times automatically cascade (+1 minute after previous end time), and end times are auto-calculated from duration!
           </div>
 
-          {/* DAY CARDS GRID */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '20px', alignItems: 'start' }}>
+          {/* TABULAR SCHEDULE BUILDER MATRIX */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             {(activeSession.days || []).map((day, dIdx) => (
               <div 
                 key={day.dayNumber || dIdx}
                 className="glass-card"
                 style={{
-                  padding: '20px', borderRadius: '12px', background: 'var(--surface)', border: '1px solid var(--border)',
-                  display: 'flex', flexDirection: 'column', gap: '14px'
+                  padding: '24px', borderRadius: '16px', background: 'var(--surface)', border: '1px solid var(--border)',
+                  display: 'flex', flexDirection: 'column', gap: '16px'
                 }}
               >
-                {/* Day Card Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-soft)', paddingBottom: '10px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontSize: '1.1rem' }}>📅</span>
-                    <span style={{ fontWeight: 600, fontSize: '0.98rem', color: 'var(--text-primary)' }}>{day.title}</span>
+                {/* Day Header with Add Row Button */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-soft)', paddingBottom: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontSize: '1.2rem' }}>📅</span>
+                    <span style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--text-primary)' }}>{day.title}</span>
                   </div>
+
                   <button 
                     className="btn btn-secondary btn-sm"
-                    onClick={() => handleOpenAddSectionModal(dIdx)}
-                    style={{ fontSize: '0.78rem', padding: '4px 10px', gap: '4px' }}
+                    onClick={() => handleAddQuickScheduleRow(dIdx)}
+                    style={{ fontSize: '0.8rem', padding: '6px 12px', gap: '6px', background: 'var(--accent-soft)', color: 'var(--accent)', fontWeight: 600, border: 'none' }}
+                    title="Add a new schedule row with start time auto-set to +1 min after previous row!"
                   >
-                    <Plus size={13} /> Add Section
+                    <Plus size={14} /> + Add Schedule Row
                   </button>
                 </div>
 
-                {/* Day Sections List */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {(day.sections || []).map((sec, sIdx) => (
-                    <div 
-                      key={sec.id || sIdx}
-                      style={{
-                        padding: '12px 14px', borderRadius: '8px', background: 'var(--surface-2)',
-                        border: '1px solid var(--border-soft)', display: 'flex', flexDirection: 'column', gap: '8px'
-                      }}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <div>
-                          <div style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>{sec.title}</div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', gap: '8px', marginTop: '2px' }}>
-                            <span>🕒 {sec.startTime} - {sec.endTime} ({sec.duration})</span>
-                          </div>
-                        </div>
-                        <button 
-                          className="btn btn-secondary btn-icon"
-                          onClick={() => handleDeleteSection(dIdx, sIdx)}
-                          title="Remove Section"
-                          style={{ width: '26px', height: '26px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                        >
-                          <Trash2 size={13} color="var(--danger)" />
-                        </button>
-                      </div>
+                {/* Tabular Schedule Entry Table */}
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
+                    <thead>
+                      <tr style={{ background: 'var(--surface-2)', borderBottom: '1px solid var(--border-soft)', color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        <th style={{ padding: '8px 10px', width: '35px' }}>#</th>
+                        <th style={{ padding: '8px 10px', width: '110px' }}>Start Time</th>
+                        <th style={{ padding: '8px 10px', width: '90px' }}>Duration</th>
+                        <th style={{ padding: '8px 10px', width: '110px' }}>End Time</th>
+                        <th style={{ padding: '8px 10px', minWidth: '180px' }}>Topic / Activity Title</th>
+                        <th style={{ padding: '8px 10px', width: '170px' }}>Type of Activity</th>
+                        <th style={{ padding: '8px 10px', width: '140px' }}>Presenter Name</th>
+                        <th style={{ padding: '8px 10px', width: '160px' }}>Linked Deck</th>
+                        <th style={{ padding: '8px 10px', width: '40px', textAlign: 'center' }}></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(day.sections || []).map((sec, sIdx) => (
+                        <tr key={sec.id || sIdx} style={{ borderBottom: '1px solid var(--border-soft)' }}>
+                          <td style={{ padding: '8px 10px', fontWeight: 700, color: 'var(--text-muted)' }}>{sIdx + 1}</td>
+                          
+                          {/* Start Time Input */}
+                          <td style={{ padding: '6px 8px' }}>
+                            <input 
+                              type="text" 
+                              value={sec.startTime || '09:00 AM'}
+                              onChange={(e) => handleUpdateSectionRowField(dIdx, sIdx, 'startTime', e.target.value)}
+                              style={{ width: '95px', padding: '5px 8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600 }}
+                            />
+                          </td>
 
-                      {/* Presentation Link Dropdown */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--surface)', padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--border)' }}>
-                        <Layers size={14} color="var(--accent)" />
-                        <select 
-                          value={sec.presentationId || 'sample-pres-1'}
-                          onChange={(e) => handleUpdateSectionDeck(dIdx, sIdx, e.target.value)}
-                          style={{
-                            background: 'transparent', border: 'none', color: 'var(--text-primary)',
-                            fontSize: '0.78rem', fontWeight: 500, outline: 'none', flex: 1, cursor: 'pointer'
-                          }}
-                        >
-                          <option value="sample-pres-1">Diagnostic Polls & Alignment Quiz</option>
-                          <option value="sample-pres-2">Escape Room Vault Challenge</option>
-                          <option value="sample-pres-3">Strategic Impact 2x2 Grid</option>
-                          <option value="__CREATE_NEW__">✨ + Create New Presentation Deck...</option>
-                        </select>
-                      </div>
-                    </div>
-                  ))}
+                          {/* Duration Minutes Input */}
+                          <td style={{ padding: '6px 8px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <input 
+                                type="number" 
+                                min="5"
+                                max="480"
+                                value={sec.durationMinutes || parseInt(sec.duration, 10) || 60}
+                                onChange={(e) => handleUpdateSectionRowField(dIdx, sIdx, 'durationMinutes', e.target.value)}
+                                style={{ width: '55px', padding: '5px 6px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600 }}
+                              />
+                              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>m</span>
+                            </div>
+                          </td>
+
+                          {/* Calculated End Time */}
+                          <td style={{ padding: '8px 10px', fontWeight: 700, color: 'var(--accent)', fontSize: '0.85rem' }}>
+                            {sec.endTime || '10:00 AM'}
+                          </td>
+
+                          {/* Topic / Activity Title */}
+                          <td style={{ padding: '6px 8px' }}>
+                            <input 
+                              type="text" 
+                              value={sec.title || ''}
+                              onChange={(e) => handleUpdateSectionRowField(dIdx, sIdx, 'title', e.target.value)}
+                              placeholder="e.g. Executive Alignment Quiz"
+                              style={{ width: '100%', padding: '5px 8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 500 }}
+                            />
+                          </td>
+
+                          {/* Type of Activity Dropdown */}
+                          <td style={{ padding: '6px 8px' }}>
+                            <select 
+                              value={sec.activityType || '📚 Training Class'}
+                              onChange={(e) => handleUpdateSectionRowField(dIdx, sIdx, 'activityType', e.target.value)}
+                              style={{ width: '100%', padding: '5px 6px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', borderRadius: '6px', fontSize: '0.78rem' }}
+                            >
+                              <option value="📊 Live Poll / Quiz">📊 Live Poll / Quiz</option>
+                              <option value="🎮 Interactive Game">🎮 Interactive Game</option>
+                              <option value="🧩 Puzzle Vault">🧩 Puzzle Vault</option>
+                              <option value="⚡ Challenge / Competition">⚡ Challenge / Competition</option>
+                              <option value="📚 Training Class">📚 Training Class</option>
+                              <option value="💬 Group Discussion">💬 Group Discussion</option>
+                              <option value="☕ Break / Networking">☕ Break / Networking</option>
+                            </select>
+                          </td>
+
+                          {/* Presenter Name */}
+                          <td style={{ padding: '6px 8px' }}>
+                            <input 
+                              type="text" 
+                              value={sec.presenterName || ''}
+                              onChange={(e) => handleUpdateSectionRowField(dIdx, sIdx, 'presenterName', e.target.value)}
+                              placeholder="e.g. Prof. Pradeep"
+                              style={{ width: '100%', padding: '5px 8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', borderRadius: '6px', fontSize: '0.8rem' }}
+                            />
+                          </td>
+
+                          {/* Linked Presentation Deck Dropdown */}
+                          <td style={{ padding: '6px 8px' }}>
+                            <select 
+                              value={sec.presentationId || 'sample-pres-1'}
+                              onChange={(e) => handleUpdateSectionDeck(dIdx, sIdx, e.target.value)}
+                              style={{ width: '100%', padding: '5px 6px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', borderRadius: '6px', fontSize: '0.78rem' }}
+                            >
+                              <option value="sample-pres-1">Diagnostic Quiz</option>
+                              <option value="sample-pres-2">Escape Vault</option>
+                              <option value="sample-pres-3">2x2 Grid</option>
+                              <option value="__CREATE_NEW__">✨ + New Deck...</option>
+                            </select>
+                          </td>
+
+                          {/* Delete Row */}
+                          <td style={{ padding: '6px 8px', textAlign: 'center' }}>
+                            <button 
+                              className="btn btn-secondary btn-icon"
+                              onClick={() => handleDeleteSection(dIdx, sIdx)}
+                              title="Delete Row"
+                              style={{ width: '26px', height: '26px', padding: 0 }}
+                            >
+                              <Trash2 size={13} color="var(--danger)" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
 
                   {(day.sections || []).length === 0 && (
-                    <div style={{ padding: '16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem', background: 'var(--surface-2)', borderRadius: '8px', border: '1px dashed var(--border-soft)' }}>
-                      No sections added to this day yet. Click "+ Add Section" above.
+                    <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem', background: 'var(--surface-2)', borderRadius: '8px', border: '1px dashed var(--border-soft)', margin: '12px 0' }}>
+                      No schedule rows entered for {day.title} yet.<br />
+                      Click <strong>"+ Add Schedule Row"</strong> above to enter your first topic!
                     </div>
                   )}
                 </div>
