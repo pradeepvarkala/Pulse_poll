@@ -1500,14 +1500,16 @@ export default function App() {
             flexDirection: 'column',
             overflowY: 'auto',
             overflowX: 'hidden',
-            transition: 'width 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+            whiteSpace: 'nowrap',
+            willChange: 'width',
+            transition: 'width 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
             padding: isSidebarCollapsed ? '0' : '16px 10px',
             boxShadow: isSidebarCollapsed ? 'none' : '6px 0 25px rgba(0,0,0,0.3)'
           }}
         >
           {/* Navigation Group 1: ENVIRONMENT */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '16px' }}>
-            <div style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', fontWeight: 800, padding: '4px 12px' }}>
+            <div style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', fontWeight: 800, padding: '4px 12px', whiteSpace: 'nowrap' }}>
               ENVIRONMENT
             </div>
             
@@ -1520,11 +1522,11 @@ export default function App() {
                 color: view === 'dashboard' ? '#ffffff' : 'var(--text-secondary)',
                 background: view === 'dashboard' ? 'linear-gradient(90deg, rgba(6, 182, 212, 0.18), rgba(99, 102, 241, 0.22))' : 'transparent',
                 borderLeft: view === 'dashboard' ? '3px solid var(--accent)' : '3px solid transparent',
-                border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s ease'
+                border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s ease', whiteSpace: 'nowrap'
               }}
             >
-              <Layout size={16} color={view === 'dashboard' ? 'var(--accent)' : 'var(--text-muted)'} />
-              <span>Dashboard</span>
+              <Layout size={16} color={view === 'dashboard' ? 'var(--accent)' : 'var(--text-muted)'} style={{ flexShrink: 0 }} />
+              <span style={{ whiteSpace: 'nowrap' }}>Dashboard</span>
             </button>
 
             <button 
@@ -1536,11 +1538,11 @@ export default function App() {
                 color: view === 'sessions' ? '#ffffff' : 'var(--text-secondary)',
                 background: view === 'sessions' ? 'linear-gradient(90deg, rgba(6, 182, 212, 0.18), rgba(99, 102, 241, 0.22))' : 'transparent',
                 borderLeft: view === 'sessions' ? '3px solid var(--accent)' : '3px solid transparent',
-                border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s ease'
+                border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s ease', whiteSpace: 'nowrap'
               }}
             >
-              <Calendar size={16} color={view === 'sessions' ? 'var(--accent)' : 'var(--text-muted)'} />
-              <span>Multi-Day Workshops</span>
+              <Calendar size={16} color={view === 'sessions' ? 'var(--accent)' : 'var(--text-muted)'} style={{ flexShrink: 0 }} />
+              <span style={{ whiteSpace: 'nowrap' }}>Workshops</span>
             </button>
 
             <button 
@@ -1552,11 +1554,11 @@ export default function App() {
                 color: view === 'creator' ? '#ffffff' : 'var(--text-secondary)',
                 background: view === 'creator' ? 'linear-gradient(90deg, rgba(6, 182, 212, 0.18), rgba(99, 102, 241, 0.22))' : 'transparent',
                 borderLeft: view === 'creator' ? '3px solid var(--accent)' : '3px solid transparent',
-                border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s ease'
+                border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s ease', whiteSpace: 'nowrap'
               }}
             >
-              <PresIcon size={16} color={view === 'creator' ? 'var(--accent)' : 'var(--text-muted)'} />
-              <span>Presentation Creator</span>
+              <PresIcon size={16} color={view === 'creator' ? 'var(--accent)' : 'var(--text-muted)'} style={{ flexShrink: 0 }} />
+              <span style={{ whiteSpace: 'nowrap' }}>Presentation Creator</span>
             </button>
 
             <button 
@@ -1568,17 +1570,17 @@ export default function App() {
                 color: view === 'analytics' ? '#ffffff' : 'var(--text-secondary)',
                 background: view === 'analytics' ? 'linear-gradient(90deg, rgba(6, 182, 212, 0.18), rgba(99, 102, 241, 0.22))' : 'transparent',
                 borderLeft: view === 'analytics' ? '3px solid var(--accent)' : '3px solid transparent',
-                border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s ease'
+                border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s ease', whiteSpace: 'nowrap'
               }}
             >
-              <PieChart size={16} color={view === 'analytics' ? 'var(--accent)' : 'var(--text-muted)'} />
-              <span>Analytics & Metrics</span>
+              <PieChart size={16} color={view === 'analytics' ? 'var(--accent)' : 'var(--text-muted)'} style={{ flexShrink: 0 }} />
+              <span style={{ whiteSpace: 'nowrap' }}>Analytics & Metrics</span>
             </button>
           </div>
 
           {/* Navigation Group 2: MONITOR */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '16px' }}>
-            <div style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', fontWeight: 800, padding: '4px 12px' }}>
+            <div style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', fontWeight: 800, padding: '4px 12px', whiteSpace: 'nowrap' }}>
               MONITOR
             </div>
 
@@ -1591,11 +1593,11 @@ export default function App() {
                 color: view === 'escaperoom' ? '#ffffff' : 'var(--text-secondary)',
                 background: view === 'escaperoom' ? 'linear-gradient(90deg, rgba(6, 182, 212, 0.18), rgba(99, 102, 241, 0.22))' : 'transparent',
                 borderLeft: view === 'escaperoom' ? '3px solid var(--accent)' : '3px solid transparent',
-                border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s ease'
+                border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s ease', whiteSpace: 'nowrap'
               }}
             >
-              <Key size={16} color={view === 'escaperoom' ? 'var(--accent)' : 'var(--text-muted)'} />
-              <span>Breakout Vault</span>
+              <Key size={16} color={view === 'escaperoom' ? 'var(--accent)' : 'var(--text-muted)'} style={{ flexShrink: 0 }} />
+              <span style={{ whiteSpace: 'nowrap' }}>Breakout Vault</span>
             </button>
 
             <button 
@@ -1607,11 +1609,11 @@ export default function App() {
                 color: view === 'meeting' ? '#ffffff' : 'var(--text-secondary)',
                 background: view === 'meeting' ? 'linear-gradient(90deg, rgba(6, 182, 212, 0.18), rgba(99, 102, 241, 0.22))' : 'transparent',
                 borderLeft: view === 'meeting' ? '3px solid var(--accent)' : '3px solid transparent',
-                border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s ease'
+                border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s ease', whiteSpace: 'nowrap'
               }}
             >
-              <Video size={16} color={view === 'meeting' ? 'var(--accent)' : 'var(--text-muted)'} />
-              <span>Virtual Video Room</span>
+              <Video size={16} color={view === 'meeting' ? 'var(--accent)' : 'var(--text-muted)'} style={{ flexShrink: 0 }} />
+              <span style={{ whiteSpace: 'nowrap' }}>Virtual Video Room</span>
             </button>
 
             <button 
@@ -1623,17 +1625,17 @@ export default function App() {
                 color: view === 'remote' ? '#ffffff' : 'var(--text-secondary)',
                 background: view === 'remote' ? 'linear-gradient(90deg, rgba(6, 182, 212, 0.18), rgba(99, 102, 241, 0.22))' : 'transparent',
                 borderLeft: view === 'remote' ? '3px solid var(--accent)' : '3px solid transparent',
-                border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s ease'
+                border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s ease', whiteSpace: 'nowrap'
               }}
             >
-              <Smartphone size={16} color={view === 'remote' ? 'var(--accent)' : 'var(--text-muted)'} />
-              <span>Trainer Companion</span>
+              <Smartphone size={16} color={view === 'remote' ? 'var(--accent)' : 'var(--text-muted)'} style={{ flexShrink: 0 }} />
+              <span style={{ whiteSpace: 'nowrap' }}>Trainer Companion</span>
             </button>
           </div>
 
           {/* Navigation Group 3: MANAGE */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: 'auto' }}>
-            <div style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', fontWeight: 800, padding: '4px 12px' }}>
+            <div style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', fontWeight: 800, padding: '4px 12px', whiteSpace: 'nowrap' }}>
               MANAGE
             </div>
 
@@ -1646,11 +1648,11 @@ export default function App() {
                 color: view === 'pricing' ? '#ffffff' : 'var(--text-secondary)',
                 background: view === 'pricing' ? 'linear-gradient(90deg, rgba(6, 182, 212, 0.18), rgba(99, 102, 241, 0.22))' : 'transparent',
                 borderLeft: view === 'pricing' ? '3px solid var(--accent)' : '3px solid transparent',
-                border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s ease'
+                border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s ease', whiteSpace: 'nowrap'
               }}
             >
-              <Zap size={16} color="var(--accent)" />
-              <span>Upgrade Plan</span>
+              <Zap size={16} color="var(--accent)" style={{ flexShrink: 0 }} />
+              <span style={{ whiteSpace: 'nowrap' }}>Upgrade Plan</span>
             </button>
 
             <button 
@@ -1662,11 +1664,11 @@ export default function App() {
                 color: view === 'admin' ? '#ffffff' : 'var(--text-secondary)',
                 background: view === 'admin' ? 'linear-gradient(90deg, rgba(6, 182, 212, 0.18), rgba(99, 102, 241, 0.22))' : 'transparent',
                 borderLeft: view === 'admin' ? '3px solid var(--accent)' : '3px solid transparent',
-                border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s ease'
+                border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s ease', whiteSpace: 'nowrap'
               }}
             >
-              <Shield size={16} color={view === 'admin' ? 'var(--accent)' : 'var(--text-muted)'} />
-              <span>System Settings</span>
+              <Shield size={16} color={view === 'admin' ? 'var(--accent)' : 'var(--text-muted)'} style={{ flexShrink: 0 }} />
+              <span style={{ whiteSpace: 'nowrap' }}>System Settings</span>
             </button>
           </div>
         </aside>
@@ -1677,7 +1679,7 @@ export default function App() {
         <div style={{
           padding: '8px 24px', background: 'var(--surface-2)', borderBottom: '1px solid var(--border-soft)',
           display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'var(--text-muted)',
-          marginLeft: isSidebarCollapsed ? '0px' : '230px', transition: 'margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+          marginLeft: isSidebarCollapsed ? '0px' : '230px', transition: 'margin-left 0.35s cubic-bezier(0.16, 1, 0.3, 1)'
         }}>
           <span 
             style={{ cursor: 'pointer', color: 'var(--accent)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }} 
@@ -1689,7 +1691,7 @@ export default function App() {
             <>
               <span>/</span>
               <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-                {view === 'sessions' && '📅 Multi-Day Workshops'}
+                {view === 'sessions' && '📅 Workshops'}
                 {view === 'creator' && '🎨 Presentation Creator'}
                 {view === 'analytics' && '📊 Analytics Report'}
                 {view === 'pricing' && '⚡ Subscriptions & Plans'}
@@ -1715,7 +1717,7 @@ export default function App() {
             margin: isSidebarCollapsed ? '20px auto' : '20px 20px 20px 250px', 
             maxWidth: isSidebarCollapsed ? '1280px' : 'calc(100% - 270px)', 
             boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
-            transition: 'margin 0.3s cubic-bezier(0.16, 1, 0.3, 1), max-width 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+            transition: 'margin 0.35s cubic-bezier(0.16, 1, 0.3, 1), max-width 0.35s cubic-bezier(0.16, 1, 0.3, 1)'
           }}
         >
           {view === 'dashboard' && (
