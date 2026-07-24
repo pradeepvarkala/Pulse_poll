@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
 import { 
-  ArrowLeft, Plus, Trash2, Play, BarChart3, Cloud, HelpCircle, 
-  Trophy, Sliders, ArrowDownUp, Hash, Grid3X3, FileSpreadsheet, MapPin, AlignLeft, Timer, FileUp
+  ArrowLeft, Plus, Minus, Trash2, Play, BarChart3, Cloud, HelpCircle, 
+  Trophy, Sliders, ArrowDownUp, Hash, Grid3X3, FileSpreadsheet, MapPin, AlignLeft, Timer, FileUp,
+  ChevronLeft, ChevronRight, Sparkles
 } from 'lucide-react';
 
 const AVAILABLE_THEMES = [
@@ -108,7 +108,7 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
   const [aiPromptText, setAiPromptText] = useState('');
   const [isAiGenerating, setIsAiGenerating] = useState(false);
   const [draggedSlideIndex, setDraggedSlideIndex] = useState(null);
-  const [isRightSidebarCollapsed, setIsRightSidebarCollapsed] = useState(false);
+  const [isRightSidebarCollapsed, setIsRightSidebarCollapsed] = useState(true);
   const [isRadialPickerOpen, setIsRadialPickerOpen] = useState(false);
   const [typePickerViewMode, setTypePickerViewMode] = useState('radial'); // 'radial' or 'grid'
 
@@ -710,12 +710,64 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
         }}
       >
         {/* Left Side: Icon-Only Slide List (Thumbnails) with Tooltips */}
-        <div className="sidebar-left" style={{ padding: '1rem 0.4rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
-          <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-            Slides
-          </span>
+        <div className="sidebar-left" style={{ padding: '0.8rem 0.4rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', width: '100%', marginBottom: '6px' }}>
+            <span style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              Slides
+            </span>
+
+            {/* Quick Add Slide (+) Button */}
+            <button 
+              type="button"
+              className="btn btn-secondary btn-icon" 
+              onClick={handleAddSlide} 
+              title="Add New Slide (+)"
+              style={{ 
+                width: '42px', 
+                height: '42px', 
+                borderRadius: '50%', 
+                background: 'var(--accent)', 
+                color: '#08211E', 
+                border: 'none', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                cursor: 'pointer',
+                boxShadow: '0 4px 12px rgba(6, 182, 212, 0.4)',
+                transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.15)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              <Plus size={22} strokeWidth={2.8} />
+            </button>
+
+            {/* Import PPTX/PDF Circular Button */}
+            <label 
+              title="Import PPTX / PDF Presentation"
+              style={{ 
+                width: '36px', 
+                height: '36px', 
+                borderRadius: '50%', 
+                background: 'var(--surface-2)', 
+                color: 'var(--accent)', 
+                border: '1.5px solid var(--accent)', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                cursor: 'pointer',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              <FileUp size={16} />
+              <input type="file" accept=".pptx,.pdf" onChange={handleImportPptFile} style={{ display: 'none' }} />
+            </label>
+          </div>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', alignItems: 'center', overflowY: 'auto', maxHeight: 'calc(100vh - 220px)', padding: '4px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', alignItems: 'center', overflowY: 'auto', maxHeight: 'calc(100vh - 260px)', padding: '4px' }}>
             {slides.map((slide, index) => {
               const IconComp = SLIDE_TYPE_ITEMS.find(t => t.type === slide.type)?.icon || BarChart3;
               const iconColor = SLIDE_TYPE_ITEMS.find(t => t.type === slide.type)?.color || '#38bdf8';
@@ -775,51 +827,27 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                   {/* Icon */}
                   {isPpt ? <FileUp size={20} color="#3b82f6" /> : <IconComp size={20} color={iconColor} />}
 
-                  {/* Delete Button on Hover */}
+                  {/* Minus (-) Remove Slide Button */}
                   <button 
-                    className="btn-icon" 
+                    type="button"
                     style={{ 
-                      position: 'absolute', top: '-4px', right: '-4px', 
-                      width: '18px', height: '18px', borderRadius: '50%',
-                      background: 'rgba(239, 68, 68, 0.85)', color: '#ffffff',
+                      position: 'absolute', top: '-6px', right: '-6px', 
+                      width: '20px', height: '20px', borderRadius: '50%',
+                      background: '#ef4444', color: '#ffffff',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      border: 'none', cursor: 'pointer', opacity: 0.85
+                      border: '1.5px solid var(--surface)', cursor: 'pointer',
+                      boxShadow: '0 2px 6px rgba(239, 68, 68, 0.4)',
+                      zIndex: 10
                     }}
                     onClick={(e) => handleDeleteSlide(slide.id, e)}
-                    title="Delete Slide"
+                    title={`Remove / Delete Slide ${index + 1}`}
                   >
-                    <Trash2 size={10} />
+                    <Minus size={12} strokeWidth={3} />
                   </button>
                 </div>
               );
             })}
-          </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: 'auto', alignItems: 'center' }}>
-            {/* Add Slide Icon Button */}
-            <button 
-              className="btn btn-secondary btn-icon" 
-              onClick={handleAddSlide} 
-              title="Add Interactive Slide (+)"
-              style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--accent-soft)', color: 'var(--accent)', border: '1px solid var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            >
-              <Plus size={22} />
-            </button>
-
-            {/* Import PPTX / PDF Icon Button */}
-            <label 
-              className="btn btn-secondary btn-icon" 
-              style={{ width: '48px', height: '48px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed var(--accent)', color: 'var(--accent)', background: 'rgba(6, 182, 212, 0.08)' }}
-              title="Import PowerPoint PPTX or PDF document (PRO)"
-            >
-              <FileUp size={20} />
-              <input 
-                type="file" 
-                accept=".pptx,.ppt,.pdf,.png,.jpg,.jpeg" 
-                style={{ display: 'none' }}
-                onChange={handleImportPptFile}
-              />
-            </label>
           </div>
         </div>
 
@@ -1296,35 +1324,117 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
           }}
         >
           {isRightSidebarCollapsed ? (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', marginTop: '10px' }}>
+            <div style={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              height: '100%', 
+              position: 'relative',
+              gap: '16px'
+            }}>
+              {/* Circular Arrow Toggle Button Vertically Centered along presentation height */}
               <button 
                 type="button"
-                className="btn btn-secondary btn-icon"
+                className="btn btn-primary btn-icon"
                 onClick={() => setIsRightSidebarCollapsed(false)}
-                title="Expand Slide Settings & Customization Panel"
-                style={{ width: '36px', height: '36px', background: 'var(--accent-soft)', color: 'var(--accent)', border: 'none', borderRadius: '8px', cursor: 'pointer' }}
+                title="Expand Slide Settings"
+                style={{ 
+                  width: '38px', 
+                  height: '38px', 
+                  borderRadius: '50%', 
+                  background: 'var(--accent)', 
+                  color: '#08211E', 
+                  border: 'none', 
+                  boxShadow: '0 4px 14px rgba(6, 182, 212, 0.4)', 
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'transform 0.2s ease, boxShadow 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.12)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
               >
-                <Sliders size={18} />
+                <ChevronLeft size={20} color="#08211E" />
               </button>
-              <span style={{ writingMode: 'vertical-rl', textTransform: 'uppercase', fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.12em', color: 'var(--text-muted)' }}>
-                Slide Properties
-              </span>
+
+              {/* Hover Popout Tab Items (Sharp Popout without blur, no text on load) */}
+              {[
+                { id: 'type', label: 'Slide Type', icon: Sliders },
+                { id: 'content', label: 'Slide Content', icon: AlignLeft },
+                { id: 'design', label: 'Customize Design', icon: Grid3X3 },
+                { id: 'ai', label: 'AI Assistant', icon: Sparkles }
+              ].map((item) => {
+                const IconComp = item.icon;
+                return (
+                  <div 
+                    key={item.id}
+                    style={{ position: 'relative' }}
+                    className="collapsed-hover-item"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveSidebarTab(item.id);
+                        setIsRightSidebarCollapsed(false);
+                      }}
+                      title={item.label}
+                      style={{
+                        width: '34px',
+                        height: '34px',
+                        borderRadius: '50%',
+                        background: activeSidebarTab === item.id ? 'var(--accent-soft)' : 'var(--surface-2)',
+                        color: activeSidebarTab === item.id ? 'var(--accent)' : 'var(--text-secondary)',
+                        border: '1px solid var(--border-glass)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      <IconComp size={16} />
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <>
-              {/* Header with Minimize Button */}
+              {/* Header with Toggleable Arrow Key & Tight Line-Height */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-glass)', paddingBottom: '10px' }}>
-                <span style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Slide Settings & Customize
+                <span style={{ 
+                  fontSize: '0.82rem', 
+                  fontWeight: 800, 
+                  color: 'var(--primary)', 
+                  textTransform: 'uppercase', 
+                  letterSpacing: '0.04em',
+                  lineHeight: 1.2,
+                  margin: 0
+                }}>
+                  Slide Settings &<br />Customize
                 </span>
                 <button 
                   type="button"
-                  className="btn btn-secondary btn-sm"
+                  className="btn btn-secondary btn-icon"
                   onClick={() => setIsRightSidebarCollapsed(true)}
-                  title="Minimize Right Panel to give slide preview maximum space"
-                  style={{ fontSize: '0.72rem', padding: '3px 8px', gap: '4px', background: 'var(--surface-2)', border: 'none' }}
+                  title="Minimize Sidebar"
+                  style={{ 
+                    width: '32px', 
+                    height: '32px', 
+                    borderRadius: '50%', 
+                    background: 'var(--surface-2)', 
+                    color: 'var(--primary)', 
+                    border: '1px solid var(--border-glass)', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    cursor: 'pointer',
+                    padding: 0
+                  }}
                 >
-                  <span>Minimize</span> ➔
+                  <ChevronRight size={18} />
                 </button>
               </div>
 
@@ -1380,7 +1490,7 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                 </div>
 
                 {typePickerViewMode === 'radial' ? (
-                  /* 2-Row Layout (7 Items Each) with Visible Gap for Center Button */
+                  /* 2-Row Layout (7 Items Each) with Visible Gap for Center Button - Collapsed By Default */
                   <div 
                     onMouseEnter={() => setIsRadialPickerOpen(true)}
                     onMouseLeave={() => setIsRadialPickerOpen(false)}
@@ -1389,22 +1499,22 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                       flexDirection: 'column', 
                       alignItems: 'center', 
                       width: '100%', 
-                      margin: '12px 0', 
-                      gap: '16px',
+                      margin: '6px 0', 
+                      gap: '12px',
                       position: 'relative'
                     }}
                   >
-                    {/* ROW 1: TOP 7 ITEMS */}
+                    {/* ROW 1: TOP 7 ITEMS (Hidden by default unless open/hovered) */}
                     <div 
                       style={{
-                        display: 'flex',
+                        display: isRadialPickerOpen ? 'flex' : 'none',
                         flexWrap: 'wrap',
-                        gap: '8px',
+                        gap: '6px',
                         justifyContent: 'center',
                         width: '100%',
-                        opacity: isRadialPickerOpen ? 1 : 0.45,
-                        transform: isRadialPickerOpen ? 'translateY(0) scale(1)' : 'translateY(12px) scale(0.94)',
-                        transition: 'all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                        opacity: isRadialPickerOpen ? 1 : 0,
+                        transform: isRadialPickerOpen ? 'translateY(0) scale(1)' : 'translateY(12px) scale(0.9)',
+                        transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
                       }}
                     >
                       {SLIDE_TYPE_ITEMS.slice(0, 7).map((item, idx) => {
@@ -1426,70 +1536,69 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                               background: isActive ? 'var(--accent-soft)' : 'var(--surface-2)',
                               border: isActive ? '2px solid var(--accent)' : '1.5px solid var(--border)',
                               color: isActive ? 'var(--accent)' : 'var(--text-primary)',
-                              padding: '6px 12px',
+                              padding: '5px 11px',
                               borderRadius: '20px',
-                              fontSize: '0.78rem',
+                              fontSize: '0.76rem',
                               fontWeight: 800,
                               cursor: 'pointer',
-                              boxShadow: isActive ? '0 0 16px var(--accent-soft)' : '0 4px 12px rgba(0,0,0,0.25)',
-                              transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                              transitionDelay: `${idx * 20}ms`
+                              boxShadow: isActive ? '0 0 14px var(--accent-soft)' : '0 4px 10px rgba(0,0,0,0.2)',
+                              transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
                             }}
                             className="hover-scale"
                           >
-                            <IconComp size={15} color={item.color} />
+                            <IconComp size={14} color={item.color} />
                             <span>{item.label}</span>
                           </button>
                         );
                       })}
                     </div>
 
-                    {/* VISIBLE GAP & CENTER BUTTON */}
+                    {/* VISIBLE GAP & CLEAN CENTER HUB BUTTON */}
                     <div 
                       onClick={() => setIsRadialPickerOpen(!isRadialPickerOpen)}
                       style={{
-                        width: '125px',
-                        height: '125px',
+                        width: '110px',
+                        height: '110px',
                         borderRadius: '50%',
                         background: 'radial-gradient(circle, rgba(6, 182, 212, 0.25) 0%, var(--surface-2) 85%)',
                         border: '3px solid var(--accent)',
-                        boxShadow: '0 0 30px rgba(6, 182, 212, 0.45)',
+                        boxShadow: '0 0 25px rgba(6, 182, 212, 0.45)',
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
                         cursor: 'pointer',
                         zIndex: 20,
-                        margin: '4px 0',
+                        margin: '2px 0',
                         transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
                       }}
                       className="kinetic-hub-pulse hover-scale"
-                      title="Active Selected Question Type (Click or Hover to Toggle Rows)"
+                      title="Active Selected Question Type (Click or Hover to View All 14 Options)"
                     >
                       {(() => {
                         const IconComp = SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.icon || BarChart3;
                         const iconColor = SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.color || '#38bdf8';
-                        return <IconComp size={34} color={iconColor} />;
+                        return <IconComp size={32} color={iconColor} />;
                       })()}
-                      <span style={{ fontSize: '0.82rem', fontWeight: 900, color: 'var(--text-primary)', marginTop: '4px', textAlign: 'center', padding: '0 6px' }}>
+                      <span style={{ fontSize: '0.8rem', fontWeight: 900, color: 'var(--text-primary)', marginTop: '3px', textAlign: 'center', padding: '0 4px' }}>
                         {SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.label}
                       </span>
-                      <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--accent)', marginTop: '2px' }}>
-                        {isRadialPickerOpen ? '✕ Close' : '✨ Hover Rows'}
+                      <span style={{ fontSize: '0.62rem', fontWeight: 800, color: 'var(--accent)', marginTop: '1px' }}>
+                        {isRadialPickerOpen ? '✕ Close' : '⚡ Hover Options'}
                       </span>
                     </div>
 
-                    {/* ROW 2: BOTTOM 7 ITEMS */}
+                    {/* ROW 2: BOTTOM 7 ITEMS (Hidden by default unless open/hovered) */}
                     <div 
                       style={{
-                        display: 'flex',
+                        display: isRadialPickerOpen ? 'flex' : 'none',
                         flexWrap: 'wrap',
-                        gap: '8px',
+                        gap: '6px',
                         justifyContent: 'center',
                         width: '100%',
-                        opacity: isRadialPickerOpen ? 1 : 0.45,
-                        transform: isRadialPickerOpen ? 'translateY(0) scale(1)' : 'translateY(-12px) scale(0.94)',
-                        transition: 'all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                        opacity: isRadialPickerOpen ? 1 : 0,
+                        transform: isRadialPickerOpen ? 'translateY(0) scale(1)' : 'translateY(-12px) scale(0.9)',
+                        transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
                       }}
                     >
                       {SLIDE_TYPE_ITEMS.slice(7, 14).map((item, idx) => {
@@ -1511,18 +1620,17 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                               background: isActive ? 'var(--accent-soft)' : 'var(--surface-2)',
                               border: isActive ? '2px solid var(--accent)' : '1.5px solid var(--border)',
                               color: isActive ? 'var(--accent)' : 'var(--text-primary)',
-                              padding: '6px 12px',
+                              padding: '5px 11px',
                               borderRadius: '20px',
-                              fontSize: '0.78rem',
+                              fontSize: '0.76rem',
                               fontWeight: 800,
                               cursor: 'pointer',
-                              boxShadow: isActive ? '0 0 16px var(--accent-soft)' : '0 4px 12px rgba(0,0,0,0.25)',
-                              transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                              transitionDelay: `${idx * 20}ms`
+                              boxShadow: isActive ? '0 0 14px var(--accent-soft)' : '0 4px 10px rgba(0,0,0,0.2)',
+                              transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
                             }}
                             className="hover-scale"
                           >
-                            <IconComp size={15} color={item.color} />
+                            <IconComp size={14} color={item.color} />
                             <span>{item.label}</span>
                           </button>
                         );
@@ -1967,10 +2075,10 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
               )}
             </div>
           )}
-          </>
-          )}
-        </div>
-      </div>
+        </>
+      )}
+    </div>
+  </div>
 
       {/* Floating Global Emoji Picker Panel */}
       {activeEmojiPickerId && emojiPickerCoords && (
