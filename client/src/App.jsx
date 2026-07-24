@@ -1678,7 +1678,7 @@ export default function App() {
       )}
 
       {/* Universal Path-Based Breadcrumb Navigation Bar */}
-      {view !== 'presenter' && view !== 'audience' && (
+      {view !== 'presenter' && view !== 'audience' && view !== 'creator' && (
         <div style={{
           padding: '8px 24px', background: 'var(--surface-2)', borderBottom: '1px solid var(--border-soft)',
           display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'var(--text-muted)',
