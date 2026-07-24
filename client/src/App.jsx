@@ -12,7 +12,10 @@ import AnalyticsReport from './components/AnalyticsReport';
 import EscapeRoomBuilder from './components/EscapeRoomBuilder';
 import VirtualMeetingScheduler from './components/VirtualMeetingScheduler';
 import SessionManager from './components/SessionManager';
-import { Presentation as PresIcon, User as UserIcon, Settings, Menu, Volume2, VolumeX, Sun, Moon, Calendar, LogOut } from 'lucide-react';
+import { 
+  Presentation as PresIcon, User as UserIcon, Settings, Menu, Volume2, VolumeX, 
+  Sun, Moon, Calendar, LogOut, Search, Layout, Activity, ExternalLink, Shield, Zap, Key, Video, Smartphone, PieChart, HelpCircle, Plus 
+} from 'lucide-react';
 import { playThemeToggleSound, toggleMuteAudio } from './utils/soundEffects';
 
 const CATEGORY_TEMPLATES = [
@@ -1357,15 +1360,16 @@ export default function App() {
 
   return (
     <div className="app-container">
-      {/* Header (hidden in presenter & audience fullscreen views) */}
+      {/* RENDER-STYLE LOCKED TOP HEADER ROW */}
       {view !== 'presenter' && view !== 'audience' && (
-        <header className="app-header" style={{ position: 'relative', zIndex: 1000 }}>
+        <header className="app-header" style={{ position: 'sticky', top: 0, zIndex: 1000, background: 'rgba(15, 23, 42, 0.94)', backdropFilter: 'blur(16px)', borderBottom: '1px solid var(--border-soft)', height: '60px', padding: '0 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          {/* Left: Menu Toggle + Brand Logo + Render Breadcrumb Path */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <button 
               className="btn btn-secondary btn-icon" 
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
-              title={isSidebarCollapsed ? "Expand Sidebar Menu" : "Collapse Sidebar Menu"}
-              style={{ width: '38px', height: '38px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              title={isSidebarCollapsed ? "Expand Render Dock Menu" : "Collapse Render Dock Menu"}
+              style={{ width: '36px', height: '36px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
               <Menu size={18} />
             </button>
@@ -1373,89 +1377,50 @@ export default function App() {
             <div 
               className="logo" 
               onClick={() => setView('dashboard')} 
-              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', userSelect: 'none' }}
-              title="PulsePoll Interactive Platform"
+              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', userSelect: 'none' }}
+              title="PulsePoll Platform"
             >
-              <div className="logo-icon">
-                <PresIcon size={18} color="white" />
+              <div className="logo-icon" style={{ width: '28px', height: '28px', borderRadius: '7px' }}>
+                <PresIcon size={16} color="white" />
               </div>
-              <span style={{ fontWeight: 700, fontSize: '1.1rem', letterSpacing: '-0.01em' }}>PulsePoll</span>
+              <span style={{ fontWeight: 800, fontSize: '1.05rem', letterSpacing: '-0.02em', background: 'linear-gradient(90deg, var(--accent), #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                PulsePoll
+              </span>
             </div>
 
-            {/* Direct 1-Click Workshops Button */}
-            <button 
-              className="btn btn-secondary"
-              onClick={() => setView('sessions')}
-              style={{ padding: '6px 14px', fontSize: '0.82rem', fontWeight: 600, display: 'flex', gap: '6px', alignItems: 'center', background: 'var(--surface-2)', border: '1px solid var(--border)', flexShrink: 0 }}
-            >
-              <span>📅 Workshops</span>
-            </button>
-
-            {/* Consolidated Explore Catalog Dropdown */}
-            <div 
-              style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 600, color: activeDropdown === 'explore' ? 'var(--accent)' : 'var(--text-primary)' }}
-              onMouseEnter={() => setActiveDropdown('explore')}
-              onMouseLeave={() => setActiveDropdown(null)}
-              onClick={() => setActiveDropdown(activeDropdown === 'explore' ? null : 'explore')}
-            >
-              <span>Explore Catalog</span>
-              <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>▼</span>
-
-              {activeDropdown === 'explore' && (
-                <div style={{ position: 'absolute', top: '100%', left: 0, paddingTop: '10px', zIndex: 1001 }}>
-                  <div className="glass-card" style={{
-                    width: '450px', padding: '20px', background: 'var(--surface)', border: '1px solid var(--border)',
-                    borderRadius: '16px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px',
-                    boxShadow: '0 20px 40px rgba(0,0,0,0.4)', textAlign: 'left'
-                  }}>
-                    {/* Education */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <div style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--accent)', borderBottom: '1px solid var(--border-soft)', paddingBottom: '4px' }}>
-                        🎓 Education
-                      </div>
-                      <span className="dropdown-link" style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-primary)' }} onClick={() => { handleTriggerContextualSlide('K-12 Education', false); setActiveDropdown(null); }}>K-12 Education</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-primary)' }} onClick={() => { handleTriggerContextualSlide('Higher Education', false); setActiveDropdown(null); }}>Higher Ed</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-primary)' }} onClick={() => { handleTriggerContextualSlide('Student Activities', false); setActiveDropdown(null); }}>Student Activities</span>
-                    </div>
-
-                    {/* Enterprise */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <div style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--accent)', borderBottom: '1px solid var(--border-soft)', paddingBottom: '4px' }}>
-                        💼 Enterprise
-                      </div>
-                      <span className="dropdown-link" style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-primary)' }} onClick={() => { handleTriggerContextualSlide('Corporate Training', true); setActiveDropdown(null); }}>Corporate 🔒</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-primary)' }} onClick={() => { handleTriggerContextualSlide('Staff Meetings', false); setActiveDropdown(null); }}>Staff Meetings</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-primary)' }} onClick={() => { handleTriggerContextualSlide('Security & Compliance', true); setActiveDropdown(null); }}>Security 🔒</span>
-                    </div>
-
-                    {/* Features */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <div style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--gold)', borderBottom: '1px solid var(--border-soft)', paddingBottom: '4px' }}>
-                        ⚡ Features
-                      </div>
-                      <span className="dropdown-link" style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-primary)' }} onClick={() => { handleTriggerContextualSlide('AI quiz generator', true); setActiveDropdown(null); }}>PulseAI 🔒</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-primary)' }} onClick={() => { handleTriggerContextualSlide('PulseAcademy', false); setActiveDropdown(null); }}>PulseAcademy</span>
-                      <span className="dropdown-link" style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-primary)' }} onClick={() => { handleTriggerContextualSlide('Templates', false); setActiveDropdown(null); }}>Templates Catalog</span>
-                    </div>
-                  </div>
-                </div>
-              )}
+            {/* Render-style Path Breadcrumbs */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', color: 'var(--text-muted)', marginLeft: '6px' }}>
+              <span>/</span>
+              <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>Production</span>
+              <span>/</span>
+              <span className="live-status-pill" style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'rgba(16, 185, 129, 0.12)', color: '#10b981', padding: '2px 8px', borderRadius: '12px', fontSize: '0.72rem', fontWeight: 700, border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 8px #10b981', animation: 'pulseLive 1.5s infinite' }} />
+                Live v2.5
+              </span>
             </div>
           </div>
 
-          {/* Scrollable Middle Actions Bar */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflowX: 'auto', flex: 1, padding: '0 8px', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-            {/* Audio Mute Toggle */}
+          {/* Center: Command Search Bar */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--border-soft)', padding: '5px 14px', borderRadius: '20px', width: '260px' }}>
+            <Search size={14} color="var(--text-muted)" />
+            <input 
+              type="text" 
+              placeholder="Quick Search or Jump... ⌘K" 
+              style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', fontSize: '0.78rem', outline: 'none', width: '100%' }}
+            />
+          </div>
+
+          {/* Right: Quick Action Controls & User Profile */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <button 
-              className="btn btn-secondary" 
-              onClick={handleGlobalToggleMute}
-              title={audioMuted ? "Unmute Audio Themes" : "Mute Audio Themes"}
-              style={{ padding: '6px 10px', display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}
+              className="btn btn-primary"
+              onClick={() => handleNavigateToCreator(null)}
+              style={{ padding: '5px 12px', fontSize: '0.78rem', fontWeight: 600, background: 'var(--accent)', color: '#08211E', border: 'none', borderRadius: '8px', gap: '4px' }}
             >
-              {audioMuted ? <VolumeX size={15} color="#ef4444" /> : <Volume2 size={15} color="#2563eb" />}
+              <Plus size={14} /> New Deck
             </button>
 
-            {/* User Design System Theme Toggle Knob */}
+            {/* User Design System Theme Toggle */}
             <div 
               className="theme-toggle" 
               onClick={handleGlobalToggleTheme}
@@ -1471,167 +1436,247 @@ export default function App() {
               </div>
             </div>
 
-            {/* Consolidated Apps & Workspace Dropdown Menu */}
-            <div 
-              style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 500, flexShrink: 0 }}
-              onMouseEnter={() => setActiveDropdown('apps')}
-              onMouseLeave={() => setActiveDropdown(null)}
-              onClick={() => setActiveDropdown(activeDropdown === 'apps' ? null : 'apps')}
-            >
-              <button 
-                className="btn btn-secondary" 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setActiveDropdown(activeDropdown === 'apps' ? null : 'apps');
-                }}
-                style={{ padding: '6px 14px', fontSize: '0.82rem', fontWeight: 500, display: 'flex', gap: '6px', alignItems: 'center' }}
-              >
-                <span>Workspace Apps</span>
-                <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>▼</span>
-              </button>
-
-              {activeDropdown === 'apps' && (
-                <div style={{ position: 'absolute', top: '100%', right: 0, paddingTop: '8px', zIndex: 1002 }}>
-                  <div className="glass-card" style={{
-                    width: '240px', padding: '8px', background: 'var(--surface)', border: '1px solid var(--border)',
-                    borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '4px',
-                    boxShadow: '0 15px 35px rgba(0,0,0,0.3)', textAlign: 'left'
-                  }}>
-                    <div 
-                      className="dropdown-link" 
-                      style={{ padding: '8px 12px', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
-                      onClick={() => { handleTriggerContextualSlide('AI quiz generator', true); setActiveDropdown(null); }}
-                    >
-                      <span>🤖 PulseAI Quiz Generator ⚡</span>
-                    </div>
-                    <div 
-                      className="dropdown-link" 
-                      style={{ padding: '8px 12px', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
-                      onClick={() => { setView('sessions'); setActiveDropdown(null); }}
-                    >
-                      <span>📅 Multi-Day Workshops</span>
-                    </div>
-                    <div 
-                      className="dropdown-link" 
-                      style={{ padding: '8px 12px', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
-                      onClick={() => { setView('remote'); setActiveDropdown(null); }}
-                    >
-                      <span>📱 Trainer Companion App</span>
-                    </div>
-                    <div 
-                      className="dropdown-link" 
-                      style={{ padding: '8px 12px', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
-                      onClick={() => { handleNavigateToAudience(); setActiveDropdown(null); }}
-                    >
-                      <span>🧩 Join Audience Room</span>
-                    </div>
-                    <div style={{ height: '1px', background: 'var(--border-soft)', margin: '4px 0' }} />
-                    <div 
-                      className="dropdown-link" 
-                      style={{ padding: '8px 12px', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: 'var(--accent)' }}
-                      onClick={() => { setView('pricing'); setActiveDropdown(null); }}
-                    >
-                      <span>⚡ View Subscriptions & Plans</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {user?.email === 'pradeepvarkala@gmail.com' && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--surface-2)', padding: '4px 10px', borderRadius: '10px', border: '1px solid var(--border-soft)', flexShrink: 0 }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-muted)' }}>Plan:</span>
-                <select 
-                  value={user.tier}
-                  onChange={async (e) => {
-                    const targetTier = e.target.value;
-                    try {
-                      const res = await fetch('/api/admin/update-tier', {
-                        method: 'POST',
-                        headers: { 
-                          'Content-Type': 'application/json',
-                          'x-user-email': user.email
-                        },
-                        body: JSON.stringify({ targetEmail: user.email, tier: targetTier })
-                      });
-                      const data = await res.json();
-                      if (data.success) {
-                        const updatedUser = { ...user, tier: targetTier, subscription_status: targetTier === 'free' ? 'inactive' : 'active' };
-                        setUser(updatedUser);
-                        localStorage.setItem('pulse-poll-user', JSON.stringify(updatedUser));
-                        alert(`Switched active plan environment to: ${targetTier.toUpperCase()}`);
-                      }
-                    } catch(err) {
-                      console.error(err);
-                    }
-                  }}
-                  style={{
-                    background: 'transparent', border: 'none', color: 'var(--text-primary)',
-                    fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', padding: '2px 4px', outline: 'none'
-                  }}
-                >
-                  <option value="admin">Admin</option>
-                  <option value="pro">Pro</option>
-                  <option value="free">Free</option>
-                </select>
-              </div>
-            )}
-          </div>
-
-          {/* STICKY ALWAYS-VISIBLE RIGHT SECTION: Profile & Logout */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0, marginLeft: 'auto' }}>
+            {/* Profile Avatar & Settings */}
             <button 
               className="btn btn-secondary" 
               onClick={() => setView('admin')}
-              title="View Profile Settings"
-              style={{
-                display: 'flex', alignItems: 'center', gap: '8px', padding: '5px 12px',
-                borderRadius: '20px', border: '1px solid var(--border-soft)',
-                background: 'var(--surface-2)', flexShrink: 0
-              }}
+              title="View Settings"
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 10px', borderRadius: '20px', border: '1px solid var(--border-soft)', background: 'var(--surface-2)' }}
             >
-              <div 
-                style={{ 
-                  width: '26px', height: '26px', borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #7C6FF0, #4C7CF0)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontWeight: 600, color: 'white', fontSize: '0.75rem', overflow: 'hidden'
-                }}
-              >
-                {user?.avatar ? (
-                  <img src={user.avatar} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                ) : (
-                  (user?.name || user?.email || 'U').slice(0, 1).toUpperCase()
-                )}
+              <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'linear-gradient(135deg, #7C6FF0, #4C7CF0)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, color: 'white', fontSize: '0.75rem' }}>
+                {(user?.name || user?.email || 'U').slice(0, 1).toUpperCase()}
               </div>
-              <span style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-primary)', maxWidth: '110px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {user?.name || user?.email?.split('@')[0] || 'Profile'}
+              <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                {user?.name || 'Account'}
               </span>
             </button>
 
             <button 
               className="btn"
               onClick={handleLogout}
-              title="Logout of PulsePoll"
-              style={{
-                padding: '6px 14px', fontSize: '0.82rem', fontWeight: 500,
-                color: 'var(--danger)', background: 'var(--danger-soft)',
-                border: '1px solid transparent', borderRadius: '10px',
-                display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0
-              }}
+              title="Logout"
+              style={{ padding: '6px 12px', fontSize: '0.78rem', fontWeight: 500, color: 'var(--danger)', background: 'var(--danger-soft)', borderRadius: '8px', gap: '4px' }}
             >
-              <LogOut size={15} color="var(--danger)" />
+              <LogOut size={14} color="var(--danger)" />
               <span>Logout</span>
             </button>
           </div>
         </header>
       )}
 
+      {/* RENDER-STYLE LOCKED LEFT SIDEBAR NAVIGATION DOCK */}
+      {view !== 'presenter' && view !== 'audience' && (
+        <aside 
+          className="render-sidebar-dock"
+          style={{
+            position: 'fixed',
+            top: '60px',
+            left: 0,
+            bottom: 0,
+            width: isSidebarCollapsed ? '0px' : '230px',
+            background: 'rgba(15, 23, 42, 0.94)',
+            backdropFilter: 'blur(16px)',
+            borderRight: isSidebarCollapsed ? 'none' : '1px solid var(--border-soft)',
+            zIndex: 950,
+            display: 'flex',
+            flexDirection: 'column',
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            transition: 'width 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+            padding: isSidebarCollapsed ? '0' : '16px 10px',
+            boxShadow: isSidebarCollapsed ? 'none' : '6px 0 25px rgba(0,0,0,0.3)'
+          }}
+        >
+          {/* Header Card: Active Service / Environment (Render Style) */}
+          <div style={{ padding: '10px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: '10px', border: '1px solid var(--border-soft)', marginBottom: '16px' }}>
+            <div style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', fontWeight: 800 }}>
+              WEB SERVICE
+            </div>
+            <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-primary)', margin: '2px 0 4px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span>PulsePoll</span>
+              <span style={{ fontSize: '0.65rem', background: 'var(--accent-soft)', color: 'var(--accent)', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>Node</span>
+            </div>
+            <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 6px #10b981' }} />
+              <a href="https://harithahavana.in" target="_blank" rel="noreferrer" style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}>
+                harithahavana.in ↗
+              </a>
+            </div>
+          </div>
+
+          {/* Navigation Group 1: ENVIRONMENT */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '16px' }}>
+            <div style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', fontWeight: 800, padding: '4px 12px' }}>
+              ENVIRONMENT
+            </div>
+            
+            <button 
+              className={`sidebar-dock-btn ${view === 'dashboard' ? 'active' : ''}`}
+              onClick={handleNavigateToDashboard}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 12px', borderRadius: '8px',
+                fontSize: '0.82rem', fontWeight: view === 'dashboard' ? 700 : 500,
+                color: view === 'dashboard' ? '#ffffff' : 'var(--text-secondary)',
+                background: view === 'dashboard' ? 'linear-gradient(90deg, rgba(6, 182, 212, 0.18), rgba(99, 102, 241, 0.22))' : 'transparent',
+                borderLeft: view === 'dashboard' ? '3px solid var(--accent)' : '3px solid transparent',
+                border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s ease'
+              }}
+            >
+              <Layout size={16} color={view === 'dashboard' ? 'var(--accent)' : 'var(--text-muted)'} />
+              <span>Dashboard</span>
+            </button>
+
+            <button 
+              className={`sidebar-dock-btn ${view === 'sessions' ? 'active' : ''}`}
+              onClick={() => setView('sessions')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 12px', borderRadius: '8px',
+                fontSize: '0.82rem', fontWeight: view === 'sessions' ? 700 : 500,
+                color: view === 'sessions' ? '#ffffff' : 'var(--text-secondary)',
+                background: view === 'sessions' ? 'linear-gradient(90deg, rgba(6, 182, 212, 0.18), rgba(99, 102, 241, 0.22))' : 'transparent',
+                borderLeft: view === 'sessions' ? '3px solid var(--accent)' : '3px solid transparent',
+                border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s ease'
+              }}
+            >
+              <Calendar size={16} color={view === 'sessions' ? 'var(--accent)' : 'var(--text-muted)'} />
+              <span>Multi-Day Workshops</span>
+            </button>
+
+            <button 
+              className={`sidebar-dock-btn ${view === 'creator' ? 'active' : ''}`}
+              onClick={() => handleNavigateToCreator(selectedPresentationId)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 12px', borderRadius: '8px',
+                fontSize: '0.82rem', fontWeight: view === 'creator' ? 700 : 500,
+                color: view === 'creator' ? '#ffffff' : 'var(--text-secondary)',
+                background: view === 'creator' ? 'linear-gradient(90deg, rgba(6, 182, 212, 0.18), rgba(99, 102, 241, 0.22))' : 'transparent',
+                borderLeft: view === 'creator' ? '3px solid var(--accent)' : '3px solid transparent',
+                border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s ease'
+              }}
+            >
+              <PresIcon size={16} color={view === 'creator' ? 'var(--accent)' : 'var(--text-muted)'} />
+              <span>Presentation Creator</span>
+            </button>
+
+            <button 
+              className={`sidebar-dock-btn ${view === 'analytics' ? 'active' : ''}`}
+              onClick={() => setView('analytics')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 12px', borderRadius: '8px',
+                fontSize: '0.82rem', fontWeight: view === 'analytics' ? 700 : 500,
+                color: view === 'analytics' ? '#ffffff' : 'var(--text-secondary)',
+                background: view === 'analytics' ? 'linear-gradient(90deg, rgba(6, 182, 212, 0.18), rgba(99, 102, 241, 0.22))' : 'transparent',
+                borderLeft: view === 'analytics' ? '3px solid var(--accent)' : '3px solid transparent',
+                border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s ease'
+              }}
+            >
+              <PieChart size={16} color={view === 'analytics' ? 'var(--accent)' : 'var(--text-muted)'} />
+              <span>Analytics & Metrics</span>
+            </button>
+          </div>
+
+          {/* Navigation Group 2: MONITOR */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '16px' }}>
+            <div style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', fontWeight: 800, padding: '4px 12px' }}>
+              MONITOR
+            </div>
+
+            <button 
+              className={`sidebar-dock-btn ${view === 'escaperoom' ? 'active' : ''}`}
+              onClick={() => setView('escaperoom')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 12px', borderRadius: '8px',
+                fontSize: '0.82rem', fontWeight: view === 'escaperoom' ? 700 : 500,
+                color: view === 'escaperoom' ? '#ffffff' : 'var(--text-secondary)',
+                background: view === 'escaperoom' ? 'linear-gradient(90deg, rgba(6, 182, 212, 0.18), rgba(99, 102, 241, 0.22))' : 'transparent',
+                borderLeft: view === 'escaperoom' ? '3px solid var(--accent)' : '3px solid transparent',
+                border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s ease'
+              }}
+            >
+              <Key size={16} color={view === 'escaperoom' ? 'var(--accent)' : 'var(--text-muted)'} />
+              <span>Breakout Vault</span>
+            </button>
+
+            <button 
+              className={`sidebar-dock-btn ${view === 'meeting' ? 'active' : ''}`}
+              onClick={() => setView('meeting')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 12px', borderRadius: '8px',
+                fontSize: '0.82rem', fontWeight: view === 'meeting' ? 700 : 500,
+                color: view === 'meeting' ? '#ffffff' : 'var(--text-secondary)',
+                background: view === 'meeting' ? 'linear-gradient(90deg, rgba(6, 182, 212, 0.18), rgba(99, 102, 241, 0.22))' : 'transparent',
+                borderLeft: view === 'meeting' ? '3px solid var(--accent)' : '3px solid transparent',
+                border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s ease'
+              }}
+            >
+              <Video size={16} color={view === 'meeting' ? 'var(--accent)' : 'var(--text-muted)'} />
+              <span>Virtual Video Room</span>
+            </button>
+
+            <button 
+              className={`sidebar-dock-btn ${view === 'remote' ? 'active' : ''}`}
+              onClick={() => setView('remote')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 12px', borderRadius: '8px',
+                fontSize: '0.82rem', fontWeight: view === 'remote' ? 700 : 500,
+                color: view === 'remote' ? '#ffffff' : 'var(--text-secondary)',
+                background: view === 'remote' ? 'linear-gradient(90deg, rgba(6, 182, 212, 0.18), rgba(99, 102, 241, 0.22))' : 'transparent',
+                borderLeft: view === 'remote' ? '3px solid var(--accent)' : '3px solid transparent',
+                border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s ease'
+              }}
+            >
+              <Smartphone size={16} color={view === 'remote' ? 'var(--accent)' : 'var(--text-muted)'} />
+              <span>Trainer Companion</span>
+            </button>
+          </div>
+
+          {/* Navigation Group 3: MANAGE */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: 'auto' }}>
+            <div style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', fontWeight: 800, padding: '4px 12px' }}>
+              MANAGE
+            </div>
+
+            <button 
+              className={`sidebar-dock-btn ${view === 'pricing' ? 'active' : ''}`}
+              onClick={() => setView('pricing')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 12px', borderRadius: '8px',
+                fontSize: '0.82rem', fontWeight: view === 'pricing' ? 700 : 500,
+                color: view === 'pricing' ? '#ffffff' : 'var(--text-secondary)',
+                background: view === 'pricing' ? 'linear-gradient(90deg, rgba(6, 182, 212, 0.18), rgba(99, 102, 241, 0.22))' : 'transparent',
+                borderLeft: view === 'pricing' ? '3px solid var(--accent)' : '3px solid transparent',
+                border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s ease'
+              }}
+            >
+              <Zap size={16} color="var(--accent)" />
+              <span>Upgrade Plan</span>
+            </button>
+
+            <button 
+              className={`sidebar-dock-btn ${view === 'admin' ? 'active' : ''}`}
+              onClick={() => setView('admin')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 12px', borderRadius: '8px',
+                fontSize: '0.82rem', fontWeight: view === 'admin' ? 700 : 500,
+                color: view === 'admin' ? '#ffffff' : 'var(--text-secondary)',
+                background: view === 'admin' ? 'linear-gradient(90deg, rgba(6, 182, 212, 0.18), rgba(99, 102, 241, 0.22))' : 'transparent',
+                borderLeft: view === 'admin' ? '3px solid var(--accent)' : '3px solid transparent',
+                border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s ease'
+              }}
+            >
+              <Shield size={16} color={view === 'admin' ? 'var(--accent)' : 'var(--text-muted)'} />
+              <span>System Settings</span>
+            </button>
+          </div>
+        </aside>
+      )}
+
       {/* Universal Path-Based Breadcrumb Navigation Bar */}
       {view !== 'presenter' && view !== 'audience' && (
         <div style={{
           padding: '8px 24px', background: 'var(--surface-2)', borderBottom: '1px solid var(--border-soft)',
-          display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'var(--text-muted)'
+          display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'var(--text-muted)',
+          marginLeft: isSidebarCollapsed ? '0px' : '230px', transition: 'margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
         }}>
           <span 
             style={{ cursor: 'pointer', color: 'var(--accent)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }} 
@@ -1659,7 +1704,19 @@ export default function App() {
 
       {/* Primary Routing Panel */}
       {view !== 'presenter' && view !== 'audience' ? (
-        <main className="main-content" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '24px', margin: '20px auto', maxWidth: '1280px', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}>
+        <main 
+          className="main-content animate-fade-in" 
+          style={{ 
+            background: 'var(--surface)', 
+            border: '1px solid var(--border)', 
+            borderRadius: '16px', 
+            padding: '24px', 
+            margin: isSidebarCollapsed ? '20px auto' : '20px 20px 20px 250px', 
+            maxWidth: isSidebarCollapsed ? '1280px' : 'calc(100% - 270px)', 
+            boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+            transition: 'margin 0.3s cubic-bezier(0.16, 1, 0.3, 1), max-width 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+          }}
+        >
           {view === 'dashboard' && (
             <Dashboard 
               user={user}
