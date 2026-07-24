@@ -1380,53 +1380,84 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                 </div>
 
                 {typePickerViewMode === 'radial' ? (
-                  /* Circular Radial Trigger Hub (Image 3 Style with Hover Kinetic Effect) */
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', width: '100%', margin: '10px 0' }}>
+                  /* Clean One-Sided Popout Hub without Backdrop Darkening */
+                  <div 
+                    className={`one-side-popout-container ${isRadialPickerOpen ? 'open' : ''}`}
+                    onMouseEnter={() => setIsRadialPickerOpen(true)}
+                    onMouseLeave={() => setIsRadialPickerOpen(false)}
+                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', margin: '14px 0', position: 'relative', minHeight: '380px', justifyContent: 'center' }}
+                  >
+                    {/* Radial Center Hub Trigger */}
                     <div 
-                      onMouseEnter={() => setIsRadialPickerOpen(true)}
-                      onClick={() => setIsRadialPickerOpen(true)}
+                      onClick={() => setIsRadialPickerOpen(!isRadialPickerOpen)}
                       style={{
-                        width: '135px',
-                        height: '135px',
+                        width: '120px',
+                        height: '120px',
                         borderRadius: '50%',
-                        background: 'radial-gradient(circle, rgba(6, 182, 212, 0.35) 0%, rgba(15, 23, 42, 0.95) 75%)',
+                        background: 'radial-gradient(circle, rgba(6, 182, 212, 0.25) 0%, var(--surface-2) 85%)',
                         border: '3px solid var(--accent)',
-                        boxShadow: '0 0 35px rgba(6, 182, 212, 0.55)',
+                        boxShadow: '0 0 25px rgba(6, 182, 212, 0.4)',
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
                         cursor: 'pointer',
-                        transition: 'all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                        position: 'relative'
+                        zIndex: 20,
+                        transition: 'all 0.3s ease'
                       }}
-                      className="radial-hub-trigger kinetic-hub-pulse hover-scale"
-                      title="Hover or Click to open kinetic animated bubble menu"
+                      className="kinetic-hub-pulse hover-scale"
                     >
-                      {/* Active Type Icon */}
                       {(() => {
                         const IconComp = SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.icon || BarChart3;
                         const iconColor = SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.color || '#38bdf8';
-                        return <IconComp size={36} color={iconColor} />;
+                        return <IconComp size={32} color={iconColor} />;
                       })()}
-                      
-                      <span style={{ fontSize: '0.88rem', fontWeight: 900, color: '#ffffff', marginTop: '6px', textAlign: 'center', padding: '0 8px' }}>
-                        {SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.label || 'Multiple Choice'}
+                      <span style={{ fontSize: '0.82rem', fontWeight: 900, color: 'var(--text-primary)', marginTop: '4px', textAlign: 'center', padding: '0 6px' }}>
+                        {SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.label}
                       </span>
-                      <span style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--accent)', marginTop: '3px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                        ✨ Hover to Expand
+                      <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--accent)', marginTop: '2px' }}>
+                        {isRadialPickerOpen ? '✕ Close' : '✨ Hover to Select'}
                       </span>
                     </div>
 
-                    <button 
-                      type="button" 
-                      className="btn btn-secondary btn-sm"
-                      onMouseEnter={() => setIsRadialPickerOpen(true)}
-                      onClick={() => setIsRadialPickerOpen(true)}
-                      style={{ borderRadius: '20px', fontSize: '0.78rem', padding: '6px 16px', gap: '6px', border: '1px solid var(--accent)', color: 'var(--accent)', background: 'rgba(6, 182, 212, 0.08)' }}
-                    >
-                      ⭕ Open Kinetic Radial Menu (Hover / Click)
-                    </button>
+                    {/* Popout Question Type Items (One-Sided Layout, Readable Text Pills, No Screen Darkening) */}
+                    {SLIDE_TYPE_ITEMS.map((item, idx) => {
+                      const IconComp = item.icon;
+                      const isActive = activeSlide.type === item.type;
+                      
+                      // Compute 2-column or semi-circular offset around hub
+                      const angleDeg = (idx / SLIDE_TYPE_ITEMS.length) * 360 - 90;
+                      const angleRad = (angleDeg * Math.PI) / 180;
+                      const radius = 120;
+                      const x = Math.round(Math.cos(angleRad) * radius);
+                      const y = Math.round(Math.sin(angleRad) * radius);
+
+                      return (
+                        <div
+                          key={item.type}
+                          className="one-side-item"
+                          onClick={() => {
+                            handleChangeSlideType(item.type);
+                            setIsRadialPickerOpen(false);
+                          }}
+                          style={{
+                            transform: isRadialPickerOpen ? `translate(${x}px, ${y}px) scale(1)` : 'translate(0px, 0px) scale(0.3)',
+                            transitionDelay: isRadialPickerOpen ? `${idx * 25}ms` : '0ms',
+                            background: isActive ? 'var(--accent-soft)' : 'var(--surface-2)',
+                            borderColor: isActive ? 'var(--accent)' : 'var(--border)',
+                            color: isActive ? 'var(--accent)' : 'var(--text-primary)',
+                            padding: '6px 12px',
+                            borderRadius: '20px',
+                            boxShadow: isActive ? '0 0 16px var(--accent-soft)' : '0 6px 18px rgba(0,0,0,0.3)',
+                            fontSize: '0.78rem',
+                            fontWeight: 700
+                          }}
+                        >
+                          <IconComp size={15} color={item.color} />
+                          <span>{item.label}</span>
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : (
                   /* Standard Grid View */
@@ -1894,114 +1925,6 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
               {emoji}
             </div>
           ))}
-        </div>
-      )}
-
-      {/* Radial Wheel Arc Selector Dial Modal Overlay (Image 3) */}
-      {isRadialPickerOpen && (
-        <div 
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 999999,
-            background: 'rgba(11, 15, 25, 0.85)',
-            backdropFilter: 'blur(12px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-          className="animate-fade-in"
-          onClick={() => setIsRadialPickerOpen(false)}
-        >
-          <div 
-            style={{
-              position: 'relative',
-              width: '420px',
-              height: '420px',
-              borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(15, 23, 42, 0.95) 30%, rgba(30, 41, 59, 0.92) 100%)',
-              border: '2px solid rgba(6, 182, 212, 0.4)',
-              boxShadow: '0 0 60px rgba(6, 182, 212, 0.4), inset 0 0 40px rgba(0,0,0,0.8)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Center Hub */}
-            <div style={{
-              width: '130px',
-              height: '130px',
-              borderRadius: '50%',
-              background: '#0f172a',
-              border: '2px solid var(--accent)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 10,
-              boxShadow: '0 0 25px rgba(6, 182, 212, 0.5)'
-            }}>
-              <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Selected Type</span>
-              <span style={{ fontSize: '0.85rem', fontWeight: 900, color: '#ffffff', textAlign: 'center', padding: '0 4px', margin: '2px 0' }}>
-                {SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.label}
-              </span>
-              <button 
-                type="button" 
-                onClick={() => setIsRadialPickerOpen(false)}
-                style={{ marginTop: '4px', background: 'rgba(239, 68, 68, 0.2)', border: '1px solid #ef4444', color: '#ef4444', borderRadius: '10px', fontSize: '0.7rem', padding: '3px 10px', fontWeight: 800, cursor: 'pointer' }}
-              >
-                Close ✕
-              </button>
-            </div>
-
-            {/* Radial Sectors placed around 360 Degree Circle (Image 3) */}
-            {SLIDE_TYPE_ITEMS.map((item, idx) => {
-              const total = SLIDE_TYPE_ITEMS.length;
-              const angle = (idx / total) * (2 * Math.PI) - (Math.PI / 2);
-              const radius = 150; // 150px radius
-              const x = Math.round(210 + radius * Math.cos(angle) - 28);
-              const y = Math.round(210 + radius * Math.sin(angle) - 28);
-              const IconComp = item.icon;
-              const isActive = activeSlide.type === item.type;
-
-              return (
-                <div 
-                  key={item.type}
-                  onClick={() => {
-                    handleChangeSlideType(item.type);
-                    setIsRadialPickerOpen(false);
-                  }}
-                  title={item.label}
-                  style={{
-                    position: 'absolute',
-                    left: `${x}px`,
-                    top: `${y}px`,
-                    width: '60px',
-                    height: '60px',
-                    borderRadius: '50%',
-                    background: isActive ? item.color : 'rgba(15, 23, 42, 0.95)',
-                    border: `2.5px solid ${isActive ? '#ffffff' : item.color}`,
-                    color: isActive ? '#08211E' : '#ffffff',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    boxShadow: isActive ? `0 0 28px ${item.color}` : '0 6px 18px rgba(0,0,0,0.6)',
-                    animationDelay: `${idx * 0.035}s`,
-                    zIndex: 20
-                  }}
-                  className="kinetic-bubble-sector hover-scale"
-                >
-                  <IconComp size={20} color={isActive ? '#08211E' : item.color} />
-                  <span style={{ fontSize: '0.58rem', fontWeight: 800, marginTop: '2px', textAlign: 'center', lineHeight: 1, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '50px' }}>
-                    {item.label}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
         </div>
       )}
     </div>

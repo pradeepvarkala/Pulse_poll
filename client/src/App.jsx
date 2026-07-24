@@ -2097,32 +2097,30 @@ export default function App() {
         </div>
       )}
 
-      {/* Global Floating FAB Cute Radial Popup Menu */}
+      {/* Global Floating FAB One-Sided Popout Menu (No Screen Darkening) */}
       {user && view !== 'presenter' && view !== 'audience' && (
         <div 
           style={{
             position: 'fixed',
-            bottom: '32px',
-            right: '32px',
+            bottom: '36px',
+            right: '36px',
             zIndex: 99999
           }}
           className={`radial-menu-container ${isGlobalRadialOpen ? 'open' : ''}`}
           onMouseEnter={() => setIsGlobalRadialOpen(true)}
           onMouseLeave={() => setIsGlobalRadialOpen(false)}
         >
-          <div className="radial-ring"></div>
-
           {[
             { label: 'Workshops', icon: <Calendar size={19} />, action: () => setView('sessions') },
-            { label: 'Present', icon: <Play size={19} />, action: () => handleNavigateToPresenter() },
-            { label: 'Audience', icon: <Users size={19} />, action: () => handleNavigateToAudience() },
+            { label: 'Present Live', icon: <Play size={19} />, action: () => handleNavigateToPresenter() },
+            { label: 'Audience View', icon: <Users size={19} />, action: () => handleNavigateToAudience() },
             { label: 'Analytics', icon: <BarChart2 size={19} />, action: () => setView('analytics') },
-            { label: 'Escape Room', icon: <Lock size={19} />, action: () => setView('escaperoom') },
+            { label: 'Escape Vault', icon: <Lock size={19} />, action: () => setView('escaperoom') },
             { label: 'AI Generator', icon: <Sparkles size={19} />, action: () => handleTriggerContextualSlide('AI Quiz Generator', true) }
           ].map((item, i) => {
-            const radius = 135;
-            const startAngle = -90;
-            const angleDeg = startAngle + (360 / 6) * i;
+            const radius = 130;
+            // Arc popping out on top-left side (-90° to -180°)
+            const angleDeg = -90 - (90 / 5) * i;
             const angleRad = (angleDeg * Math.PI) / 180;
             const x = Math.round(Math.cos(angleRad) * radius);
             const y = Math.round(Math.sin(angleRad) * radius);
