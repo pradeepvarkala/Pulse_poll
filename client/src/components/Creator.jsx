@@ -121,7 +121,17 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
   });
 
   const toggleAccordionSection = (key) => {
-    setOpenAccordions(prev => ({ ...prev, [key]: !prev[key] }));
+    setOpenAccordions(prev => {
+      const isCurrentlyOpen = prev[key];
+      return {
+        audio: false,
+        image: false,
+        theme: false,
+        media: false,
+        ai: false,
+        [key]: !isCurrentlyOpen
+      };
+    });
   };
 
   // Close Module Guide & Slide Type Picker Modal on Escape key press
