@@ -107,23 +107,21 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
       const newPptSlide = {
         id: Math.random().toString(36).substr(2, 9),
         type: 'ppt',
-        question: `PPT Slide: ${fileName}`,
+        question: `📄 PPTX / PDF Document: ${fileName}`,
         bgImage: isImg ? result : null,
-        content: `Imported static presentation file: ${file.name}`
+        pptUrl: result,
+        customUrl: result,
+        content: `Imported static document slide file: ${file.name}`
       };
 
       const updatedSlides = [...(presentation?.slides || []), newPptSlide];
       const updatedPres = { ...presentation, slides: updatedSlides };
       savePresentation(updatedPres);
       setActiveSlideId(newPptSlide.id);
-      alert(`Successfully imported static PPT slide from: ${file.name}!`);
+      alert(`🎉 Successfully imported document file "${file.name}"! The slide preview is now active and ready for live presentation!`);
     };
 
-    if (file.type.startsWith('image/')) {
-      reader.readAsDataURL(file);
-    } else {
-      reader.readAsText(file);
-    }
+    reader.readAsDataURL(file);
   };
 
   const handleToggleEmojiPicker = (e, optId) => {
@@ -1114,6 +1112,68 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                         </div>
                       );
                     })}
+                  </div>
+                </div>
+              )}
+
+              {activeSlide.type === 'ppt' && (
+                <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', width: '100%', maxWidth: '780px' }}>
+                  <div style={{
+                    width: '100%', height: '280px', background: 'rgba(15, 23, 42, 0.85)', border: '2px solid var(--accent)',
+                    borderRadius: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    gap: '12px', padding: '16px', position: 'relative', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
+                  }}>
+                    {(activeSlide.customUrl || activeSlide.pptUrl) && !activeSlide.bgImage ? (
+                      <iframe 
+                        src={activeSlide.customUrl || activeSlide.pptUrl}
+                        title="Imported PPT / PDF Preview"
+                        style={{ width: '100%', height: '100%', border: 'none', borderRadius: '12px', background: '#ffffff' }}
+                      />
+                    ) : activeSlide.bgImage ? (
+                      <img 
+                        src={activeSlide.bgImage} 
+                        alt="PPT Slide" 
+                        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '12px' }} 
+                      />
+                    ) : (
+                      <>
+                        <FileUp size={48} color="var(--accent)" />
+                        <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#ffffff' }}>
+                          {activeSlide.question || '📄 Imported PPTX / PDF Presentation Document'}
+                        </div>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                          {activeSlide.content || 'Non-interactive lecture deck slide'}
+                        </div>
+                      </>
+                    )}
+                    <span style={{ position: 'absolute', top: '12px', right: '12px', fontSize: '0.72rem', background: 'var(--accent)', color: '#08211E', padding: '4px 10px', borderRadius: '12px', fontWeight: 800, zIndex: 10 }}>
+                      PRO Slide View
+                    </span>
+                  </div>
+                  
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    <label 
+                      className="btn btn-secondary btn-sm" 
+                      style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', background: 'var(--accent-soft)', color: 'var(--accent)', border: 'none', fontWeight: 600 }}
+                      title="Replace or upload a new PowerPoint PPTX or PDF document"
+                    >
+                      <FileUp size={14} /> Upload / Replace Document
+                      <input 
+                        type="file" 
+                        accept=".pptx,.ppt,.pdf,.png,.jpg,.jpeg" 
+                        style={{ display: 'none' }}
+                        onChange={handleImportPptFile}
+                      />
+                    </label>
+
+                    <button 
+                      type="button"
+                      className="btn btn-primary btn-sm"
+                      onClick={() => onPresent(presentation.id)}
+                      style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 700, fontSize: '0.8rem', border: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <Play size={14} /> Present Document Live
+                    </button>
                   </div>
                 </div>
               )}

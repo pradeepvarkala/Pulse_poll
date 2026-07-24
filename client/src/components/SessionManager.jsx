@@ -859,16 +859,27 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
 
                           {/* Linked Presentation Deck Dropdown */}
                           <td style={{ padding: '6px 8px' }}>
-                            <select 
-                              value={sec.presentationId || 'sample-pres-1'}
-                              onChange={(e) => handleUpdateSectionDeck(dIdx, sIdx, e.target.value)}
-                              style={{ width: '100%', padding: '5px 6px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', borderRadius: '6px', fontSize: '0.78rem' }}
-                            >
-                              <option value="sample-pres-1">Diagnostic Quiz</option>
-                              <option value="sample-pres-2">Escape Vault</option>
-                              <option value="sample-pres-3">2x2 Grid</option>
-                              <option value="__CREATE_NEW__">✨ + New Deck...</option>
-                            </select>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <select 
+                                value={sec.presentationId || 'sample-pres-1'}
+                                onChange={(e) => handleUpdateSectionDeck(dIdx, sIdx, e.target.value)}
+                                style={{ width: '100%', padding: '5px 6px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', borderRadius: '6px', fontSize: '0.78rem' }}
+                              >
+                                <option value="sample-pres-1">Diagnostic Quiz</option>
+                                <option value="sample-pres-2">Escape Vault</option>
+                                <option value="sample-pres-3">2x2 Grid</option>
+                                <option value="__CREATE_NEW__">✨ + New Deck...</option>
+                              </select>
+                              <button 
+                                type="button"
+                                className="btn btn-secondary btn-icon"
+                                onClick={() => onViewCreator(sec.presentationId || 'sample-pres-1', { returnView: 'sessions', returnTab: 'schedule', returnSessionId: activeSession.id })}
+                                title="Open & View Linked Presentation Deck"
+                                style={{ width: '26px', height: '26px', padding: 0, flexShrink: 0 }}
+                              >
+                                <Eye size={13} color="var(--accent)" />
+                              </button>
+                            </div>
                           </td>
 
                           {/* Delete Row */}
@@ -1261,29 +1272,29 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
                   <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
-                    Scheduled Start Date
+                    Scheduled Start Date <span style={{ fontSize: '0.7rem', color: 'var(--accent)' }}>(🔒 Managed via Schedule)</span>
                   </label>
                   <input 
-                    type="date"
+                    type="text"
                     className="input-text"
-                    value={editDate}
-                    onChange={(e) => setEditDate(e.target.value)}
-                    required
-                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text-primary)' }}
+                    value={editDate || 'Flexible Start Date'}
+                    readOnly={true}
+                    disabled={true}
+                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.05)', color: 'var(--text-muted)', cursor: 'not-allowed', fontWeight: 600 }}
                   />
                 </div>
 
                 <div>
                   <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
-                    Scheduled Time Slots
+                    Scheduled Time Slots <span style={{ fontSize: '0.7rem', color: 'var(--accent)' }}>(🔒 Auto-Calculated)</span>
                   </label>
                   <input 
                     type="text"
                     className="input-text"
-                    value={editTime}
-                    onChange={(e) => setEditTime(e.target.value)}
-                    required
-                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text-primary)' }}
+                    value={editTime || 'Auto-generated from Schedule Matrix'}
+                    readOnly={true}
+                    disabled={true}
+                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.05)', color: 'var(--text-muted)', cursor: 'not-allowed', fontWeight: 600 }}
                   />
                 </div>
               </div>
