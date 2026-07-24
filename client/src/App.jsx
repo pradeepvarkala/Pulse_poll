@@ -1766,6 +1766,7 @@ export default function App() {
               returnNavContext={returnNavContext}
               onPresent={handleNavigateToPresenter}
               user={user}
+              isMainSidebarCollapsed={isSidebarCollapsed}
               onRequestUpgrade={() => setShowUpgradeModal(true)}
             />
           )}

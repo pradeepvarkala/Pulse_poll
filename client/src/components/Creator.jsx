@@ -99,7 +99,7 @@ const SLIDE_TYPE_ITEMS = [
   { type: 'brainstorm', label: 'Brainstorm', icon: Grid3X3, color: '#06b6d4' }
 ];
 
-export default function Creator({ presentationId, onBack, onPresent, user, onRequestUpgrade, returnNavContext }) {
+export default function Creator({ presentationId, onBack, onPresent, user, onRequestUpgrade, returnNavContext, isMainSidebarCollapsed }) {
   const [presentation, setPresentation] = useState(null);
   const [activeSlideId, setActiveSlideId] = useState(null);
   const [activeEmojiPickerId, setActiveEmojiPickerId] = useState(null);
@@ -119,6 +119,13 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
     media: false,
     ai: false
   });
+
+  // Auto-collapse right sidebar when main left sidebar expands!
+  useEffect(() => {
+    if (isMainSidebarCollapsed === false) {
+      setIsRightSidebarCollapsed(true);
+    }
+  }, [isMainSidebarCollapsed]);
 
   const toggleAccordionSection = (key) => {
     setOpenAccordions(prev => {
