@@ -1098,81 +1098,7 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
               </div>
             )}
 
-            {/* Slide Type Selection 5x3 Grid Popup Modal */}
-            {showSlideTypeModal && (
-              <div style={{
-                position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-                backgroundColor: 'rgba(9, 13, 22, 0.88)', backdropFilter: 'blur(10px)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1200,
-                padding: '20px'
-              }}>
-                <div className="glass-card animate-fade" style={{
-                  width: '100%', maxWidth: '680px', padding: '26px', textAlign: 'left',
-                  border: '1.5px solid rgba(6, 182, 212, 0.5)', background: '#090d16',
-                  boxShadow: '0 20px 50px rgba(6, 182, 212, 0.35)',
-                  maxHeight: '88vh', overflowY: 'auto', borderRadius: '20px'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
-                    <div>
-                      <h3 style={{ fontSize: '1.25rem', fontWeight: 900, margin: 0, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        ✨ Select Slide Type
-                      </h3>
-                      <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>Choose an interactive module to add a new slide to your deck</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setShowSlideTypeModal(false)}
-                      title="Close (Esc)"
-                      style={{
-                        background: 'rgba(255,255,255,0.1)', border: 'none', color: 'var(--text-primary)',
-                        width: '32px', height: '32px', borderRadius: '50%', display: 'flex',
-                        alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontWeight: 800, fontSize: '1rem'
-                      }}
-                    >
-                      ✕
-                    </button>
-                  </div>
 
-                  {/* 5x3 Responsive Grid Layout of all 14 Slide Types */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', width: '100%' }}>
-                    {SLIDE_TYPE_ITEMS.map((item) => {
-                      const IconComp = item.icon;
-                      return (
-                        <button
-                          key={item.type}
-                          type="button"
-                          onClick={() => handleAddSlideWithType(item.type)}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '10px',
-                            background: 'var(--surface-2)',
-                            border: '1.5px solid var(--border-glass)',
-                            borderRadius: '12px',
-                            padding: '10px 12px',
-                            color: 'var(--text-primary)',
-                            fontWeight: 800,
-                            fontSize: '0.82rem',
-                            cursor: 'pointer',
-                            textAlign: 'left',
-                            transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
-                          }}
-                          className="hover-scale"
-                        >
-                          <div style={{ padding: '8px', borderRadius: '8px', background: `${item.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            <IconComp size={18} color={item.color} />
-                          </div>
-                          <div>
-                            <div style={{ fontWeight: 800, color: 'var(--text-primary)', fontSize: '0.84rem' }}>{item.label}</div>
-                            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 500 }}>Click to Add</div>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            )}
 
             <textarea 
               className="preview-question-input"
@@ -2152,9 +2078,81 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
               className="emoji-select-option"
               onClick={() => handleUpdateOptionEmoji(activeEmojiPickerId, emoji)}
             >
-              {emoji}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* True Global Full-Viewport Slide Type Selection Popup Modal */}
+      {showSlideTypeModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, width: '100vw', height: '100vh',
+          backgroundColor: 'rgba(5, 9, 18, 0.90)', backdropFilter: 'blur(12px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000,
+          padding: '24px'
+        }}>
+          <div className="glass-card animate-fade" style={{
+            width: '100%', maxWidth: '780px', padding: '28px 32px', textAlign: 'left',
+            border: '1.5px solid rgba(6, 182, 212, 0.5)', background: '#090d16',
+            boxShadow: '0 25px 60px rgba(6, 182, 212, 0.4)',
+            maxHeight: '88vh', overflowY: 'auto', borderRadius: '24px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <div>
+                <h3 style={{ fontSize: '1.35rem', fontWeight: 900, margin: 0, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  ✨ Select Slide Type
+                </h3>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Choose an interactive module capsule to add a new slide to your presentation</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowSlideTypeModal(false)}
+                title="Close (Esc)"
+                style={{
+                  background: 'rgba(255,255,255,0.1)', border: 'none', color: 'var(--text-primary)',
+                  width: '36px', height: '36px', borderRadius: '50%', display: 'flex',
+                  alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontWeight: 800, fontSize: '1.1rem'
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Sleek Horizontal Capsule Pills Line Structure Expanding Left to Right */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', width: '100%', justifyContent: 'flex-start' }}>
+              {SLIDE_TYPE_ITEMS.map((item) => {
+                const IconComp = item.icon;
+                return (
+                  <button
+                    key={item.type}
+                    type="button"
+                    onClick={() => handleAddSlideWithType(item.type)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      background: 'var(--surface-2)',
+                      border: `1.5px solid ${item.color}55`,
+                      borderRadius: '24px',
+                      padding: '9px 18px',
+                      color: 'var(--text-primary)',
+                      fontWeight: 800,
+                      fontSize: '0.84rem',
+                      cursor: 'pointer',
+                      boxShadow: `0 4px 14px ${item.color}22`,
+                      transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                    }}
+                    className="hover-scale"
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <IconComp size={16} color={item.color} />
+                    </div>
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
       )}
     </div>
