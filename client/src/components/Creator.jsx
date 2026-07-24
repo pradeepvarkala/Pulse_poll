@@ -166,6 +166,31 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
     reader.readAsDataURL(file);
   };
 
+  const handleUploadSlideMedia = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target.result;
+      const isVideo = file.type.startsWith('video/') || file.name.endsWith('.mp4') || file.name.endsWith('.webm') || file.name.endsWith('.mov') || file.name.endsWith('.ogg');
+      
+      if (isVideo) {
+        handleUpdateActiveSlide({
+          videoUrl: dataUrl,
+          imageUrl: null
+        });
+      } else {
+        handleUpdateActiveSlide({
+          imageUrl: dataUrl,
+          bgImage: dataUrl,
+          videoUrl: null
+        });
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleToggleEmojiPicker = (e, optId) => {
     if (activeEmojiPickerId === optId) {
       setActiveEmojiPickerId(null);
@@ -1027,6 +1052,29 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
               }}
               onBlur={(e) => e.target.style.borderBottomColor = 'transparent'}
             />
+
+            {/* Embedded Video / Image Media Display */}
+            {activeSlide.videoUrl && (
+              <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginBottom: '14px' }}>
+                <video 
+                  src={activeSlide.videoUrl} 
+                  controls 
+                  autoPlay 
+                  loop 
+                  muted 
+                  style={{ maxWidth: '85%', maxHeight: '180px', borderRadius: '12px', boxShadow: '0 8px 24px rgba(0,0,0,0.5)', border: '1.5px solid var(--accent)' }} 
+                />
+              </div>
+            )}
+            {activeSlide.imageUrl && !activeSlide.videoUrl && (
+              <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginBottom: '14px' }}>
+                <img 
+                  src={activeSlide.imageUrl} 
+                  alt="Slide Media Banner" 
+                  style={{ maxWidth: '85%', maxHeight: '180px', borderRadius: '12px', objectFit: 'cover', boxShadow: '0 8px 24px rgba(0,0,0,0.5)', border: '1.5px solid var(--border-glass)' }} 
+                />
+              </div>
+            )}
 
             {/* Inline Timer Pill directly on the slide preview */}
             <div style={{ 
@@ -2029,6 +2077,84 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                         </select>
                       </div>
                     )}
+
+                    {/* Slide Media (Images & Videos) Upload Provision */}
+                    <div className="settings-group" style={{ padding: '12px', background: 'rgba(6,182,212,0.04)', border: '1px solid var(--border-glass)', borderRadius: '10px' }}>
+                      <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <span style={{ fontWeight: 800, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          🖼️ 🎥 Add Image or Video
+                        </span>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--accent)', fontWeight: 800 }}>Media Provision</span>
+                      </label>
+
+                      {/* File Upload Button for Image or Video */}
+                      <label 
+                        className="btn btn-secondary" 
+                        style={{ 
+                          width: '100%', 
+                          padding: '8px', 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center', 
+                          gap: '8px', 
+                          cursor: 'pointer',
+                          background: 'var(--surface-2)',
+                          border: '1.5px dashed var(--accent)',
+                          color: 'var(--accent)',
+                          fontWeight: 700,
+                          fontSize: '0.8rem',
+                          marginBottom: '8px'
+                        }}
+                      >
+                        <FileUp size={16} />
+                        <span>Upload Image / Video File</span>
+                        <input 
+                          type="file" 
+                          accept="image/*,video/*,.png,.jpg,.jpeg,.gif,.webp,.mp4,.webm,.mov,.ogg"
+                          onChange={handleUploadSlideMedia}
+                          style={{ display: 'none' }}
+                        />
+                      </label>
+
+                      {/* Or Paste Media URL Input */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '8px' }}>
+                        <label style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>Or Paste Direct Image / Video URL:</label>
+                        <input 
+                          type="url" 
+                          className="input-text"
+                          placeholder="https://example.com/media.mp4 or .jpg"
+                          value={activeSlide.videoUrl || activeSlide.imageUrl || ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            const isVid = val.endsWith('.mp4') || val.endsWith('.webm') || val.includes('youtube.com') || val.includes('vimeo.com');
+                            if (isVid) {
+                              handleUpdateActiveSlide({ videoUrl: val, imageUrl: null });
+                            } else {
+                              handleUpdateActiveSlide({ imageUrl: val, bgImage: val, videoUrl: null });
+                            }
+                          }}
+                          style={{ fontSize: '0.78rem', padding: '6px 10px' }}
+                        />
+                      </div>
+
+                      {/* Active Media Status & Clear Button */}
+                      {(activeSlide.videoUrl || activeSlide.imageUrl) && (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px', padding: '6px 10px', background: 'rgba(255,255,255,0.03)', borderRadius: '6px' }}>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--accent-green)', fontWeight: 700 }}>
+                            {activeSlide.videoUrl ? '🎥 Video Attached' : '🖼️ Image Attached'}
+                          </span>
+                          <button 
+                            type="button" 
+                            className="btn btn-secondary btn-icon"
+                            onClick={() => handleUpdateActiveSlide({ videoUrl: null, imageUrl: null })}
+                            title="Remove Media"
+                            style={{ background: 'none', border: 'none', color: 'var(--accent-red)', cursor: 'pointer', padding: 0 }}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
 
                     {/* Slide Background Artwork Image Picker */}
                     <div className="settings-group">
