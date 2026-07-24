@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   ArrowLeft, Plus, Minus, Trash2, Play, BarChart3, Cloud, HelpCircle, 
   Trophy, Sliders, ArrowDownUp, Hash, Grid3X3, FileSpreadsheet, MapPin, AlignLeft, Timer, FileUp,
-  ChevronLeft, ChevronRight, Sparkles
+  ChevronLeft, ChevronRight, ChevronDown, Sparkles
 } from 'lucide-react';
 
 const AVAILABLE_THEMES = [
@@ -112,6 +112,16 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
   const [isRightSidebarCollapsed, setIsRightSidebarCollapsed] = useState(true);
   const [isRadialPickerOpen, setIsRadialPickerOpen] = useState(false);
   const [typePickerViewMode, setTypePickerViewMode] = useState('radial'); // 'radial' or 'grid'
+  const [openAccordions, setOpenAccordions] = useState({
+    type: true,
+    content: true,
+    design: true,
+    ai: false
+  });
+
+  const toggleAccordionSection = (key) => {
+    setOpenAccordions(prev => ({ ...prev, [key]: !prev[key] }));
+  };
 
 
   const handleImportPptFile = (e) => {
@@ -1362,8 +1372,7 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
 
               {/* Hover Popout Tab Items (Sharp Popout without blur, no text on load) */}
               {[
-                { id: 'type', label: 'Slide Type', icon: Sliders },
-                { id: 'content', label: 'Slide Content', icon: AlignLeft },
+                { id: 'type', label: 'Slide Type & Options', icon: Sliders },
                 { id: 'design', label: 'Customize Design', icon: Grid3X3 },
                 { id: 'ai', label: 'AI Assistant', icon: Sparkles }
               ].map((item) => {
@@ -1403,18 +1412,17 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
             </div>
           ) : (
             <>
-              {/* Header with Toggleable Arrow Key & Tight Line-Height */}
+              {/* Header with SETTINGS Label */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-glass)', paddingBottom: '10px' }}>
                 <span style={{ 
-                  fontSize: '0.82rem', 
-                  fontWeight: 800, 
+                  fontSize: '0.88rem', 
+                  fontWeight: 900, 
                   color: 'var(--primary)', 
                   textTransform: 'uppercase', 
-                  letterSpacing: '0.04em',
-                  lineHeight: 1.2,
+                  letterSpacing: '0.08em',
                   margin: 0
                 }}>
-                  Slide Settings &<br />Customize
+                  SETTINGS
                 </span>
                 <button 
                   type="button"
@@ -1439,7 +1447,7 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                 </button>
               </div>
 
-              {/* Sidebar Tab Header */}
+              {/* Sidebar Tab Header (Type, Customize, AI - No Content Tab) */}
               <div className="sidebar-tabs" style={{ display: 'flex', borderBottom: '1px solid var(--border-glass)', marginBottom: '15px' }}>
             <button 
               type="button"
@@ -1448,14 +1456,6 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
               onClick={() => setActiveSidebarTab('type')}
             >
               Type
-            </button>
-            <button 
-              type="button"
-              className={`sidebar-tab-btn ${activeSidebarTab === 'content' ? 'active' : ''}`}
-              style={{ flex: 1, background: 'transparent', border: 'none', borderBottom: activeSidebarTab === 'content' ? '2px solid var(--primary)' : '2px solid transparent', padding: '10px 4px', color: activeSidebarTab === 'content' ? 'var(--primary)' : 'var(--text-secondary)', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', transition: 'all 0.15s ease' }}
-              onClick={() => setActiveSidebarTab('content')}
-            >
-              Content
             </button>
             <button 
               type="button"
@@ -1475,605 +1475,673 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
             </button>
           </div>
 
-          {/* 1. TYPE TAB */}
+          {/* 1. TYPE TAB (With Vertical Collapsible PowerPoint-style Tables) */}
           {activeSidebarTab === 'type' && (
-            <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
-              <div className="settings-group" style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '14px' }}>
-                  <label style={{ margin: 0 }}>Question Type Selector</label>
-                  <button 
-                    type="button" 
-                    onClick={() => setTypePickerViewMode(typePickerViewMode === 'radial' ? 'grid' : 'radial')}
-                    style={{ background: 'none', border: 'none', color: 'var(--accent)', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
-                  >
-                    {typePickerViewMode === 'radial' ? '🔳 Switch to Grid View' : '⭕ Switch to Radial Wheel'}
-                  </button>
-                </div>
-
-                {typePickerViewMode === 'radial' ? (
-                  /* 2-Row Layout (7 Items Each) with Visible Gap for Center Button - Collapsed By Default */
-                  <div 
-                    onMouseEnter={() => setIsRadialPickerOpen(true)}
-                    onMouseLeave={() => setIsRadialPickerOpen(false)}
-                    style={{ 
-                      display: 'flex', 
-                      flexDirection: 'column', 
-                      alignItems: 'center', 
-                      width: '100%', 
-                      margin: '6px 0', 
-                      gap: '12px',
-                      position: 'relative'
-                    }}
-                  >
-                    {/* ROW 1: TOP 7 ITEMS (Hidden by default unless open/hovered) */}
-                    <div 
-                      style={{
-                        display: isRadialPickerOpen ? 'flex' : 'none',
-                        flexWrap: 'wrap',
-                        gap: '6px',
-                        justifyContent: 'center',
-                        width: '100%',
-                        opacity: isRadialPickerOpen ? 1 : 0,
-                        transform: isRadialPickerOpen ? 'translateY(0) scale(1)' : 'translateY(12px) scale(0.9)',
-                        transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
-                      }}
-                    >
-                      {SLIDE_TYPE_ITEMS.slice(0, 7).map((item, idx) => {
-                        const IconComp = item.icon;
-                        const isActive = activeSlide.type === item.type;
-
-                        return (
-                          <button
-                            key={item.type}
-                            type="button"
-                            onClick={() => {
-                              handleChangeSlideType(item.type);
-                              setIsRadialPickerOpen(false);
-                            }}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '6px',
-                              background: isActive ? 'var(--accent-soft)' : 'var(--surface-2)',
-                              border: isActive ? '2px solid var(--accent)' : '1.5px solid var(--border)',
-                              color: isActive ? 'var(--accent)' : 'var(--text-primary)',
-                              padding: '5px 11px',
-                              borderRadius: '20px',
-                              fontSize: '0.76rem',
-                              fontWeight: 800,
-                              cursor: 'pointer',
-                              boxShadow: isActive ? '0 0 14px var(--accent-soft)' : '0 4px 10px rgba(0,0,0,0.2)',
-                              transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
-                            }}
-                            className="hover-scale"
-                          >
-                            <IconComp size={14} color={item.color} />
-                            <span>{item.label}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {/* VISIBLE GAP & CLEAN CENTER HUB BUTTON */}
-                    <div 
-                      onClick={() => setIsRadialPickerOpen(!isRadialPickerOpen)}
-                      style={{
-                        width: '110px',
-                        height: '110px',
-                        borderRadius: '50%',
-                        background: 'radial-gradient(circle, rgba(6, 182, 212, 0.25) 0%, var(--surface-2) 85%)',
-                        border: '3px solid var(--accent)',
-                        boxShadow: '0 0 25px rgba(6, 182, 212, 0.45)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        zIndex: 20,
-                        margin: '2px 0',
-                        transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
-                      }}
-                      className="kinetic-hub-pulse hover-scale"
-                      title="Active Selected Question Type (Click or Hover to View All 14 Options)"
-                    >
-                      {(() => {
-                        const IconComp = SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.icon || BarChart3;
-                        const iconColor = SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.color || '#38bdf8';
-                        return <IconComp size={32} color={iconColor} />;
-                      })()}
-                      <span style={{ fontSize: '0.8rem', fontWeight: 900, color: 'var(--text-primary)', marginTop: '3px', textAlign: 'center', padding: '0 4px' }}>
-                        {SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.label}
-                      </span>
-                      <span style={{ fontSize: '0.62rem', fontWeight: 800, color: 'var(--accent)', marginTop: '1px' }}>
-                        {isRadialPickerOpen ? '✕ Close' : '⚡ Hover Options'}
-                      </span>
-                    </div>
-
-                    {/* ROW 2: BOTTOM 7 ITEMS (Hidden by default unless open/hovered) */}
-                    <div 
-                      style={{
-                        display: isRadialPickerOpen ? 'flex' : 'none',
-                        flexWrap: 'wrap',
-                        gap: '6px',
-                        justifyContent: 'center',
-                        width: '100%',
-                        opacity: isRadialPickerOpen ? 1 : 0,
-                        transform: isRadialPickerOpen ? 'translateY(0) scale(1)' : 'translateY(-12px) scale(0.9)',
-                        transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
-                      }}
-                    >
-                      {SLIDE_TYPE_ITEMS.slice(7, 14).map((item, idx) => {
-                        const IconComp = item.icon;
-                        const isActive = activeSlide.type === item.type;
-
-                        return (
-                          <button
-                            key={item.type}
-                            type="button"
-                            onClick={() => {
-                              handleChangeSlideType(item.type);
-                              setIsRadialPickerOpen(false);
-                            }}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '6px',
-                              background: isActive ? 'var(--accent-soft)' : 'var(--surface-2)',
-                              border: isActive ? '2px solid var(--accent)' : '1.5px solid var(--border)',
-                              color: isActive ? 'var(--accent)' : 'var(--text-primary)',
-                              padding: '5px 11px',
-                              borderRadius: '20px',
-                              fontSize: '0.76rem',
-                              fontWeight: 800,
-                              cursor: 'pointer',
-                              boxShadow: isActive ? '0 0 14px var(--accent-soft)' : '0 4px 10px rgba(0,0,0,0.2)',
-                              transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
-                            }}
-                            className="hover-scale"
-                          >
-                            <IconComp size={14} color={item.color} />
-                            <span>{item.label}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
+            <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%' }}>
+              {/* Accordion 1: Question Type Selector */}
+              <div className="accordion-card" style={{ width: '100%', borderRadius: '10px', background: 'var(--surface-2)', border: '1px solid var(--border-glass)', overflow: 'hidden' }}>
+                <button
+                  type="button"
+                  onClick={() => toggleAccordionSection('type')}
+                  style={{ width: '100%', padding: '10px 14px', background: 'rgba(6,182,212,0.08)', border: 'none', borderBottom: openAccordions.type ? '1px solid var(--border-glass)' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', color: 'var(--primary)', fontWeight: 800, fontSize: '0.82rem' }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Sliders size={16} />
+                    <span>Question Type Selector</span>
                   </div>
-                ) : (
-                  /* Standard Grid View */
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', width: '100%' }}>
-                    {SLIDE_TYPE_ITEMS.map((item) => {
-                      const IconComp = item.icon;
-                      return (
-                        <button 
-                          key={item.type}
-                          className={`btn-type-option ${activeSlide.type === item.type ? 'active' : ''}`}
-                          onClick={() => handleChangeSlideType(item.type)}
+                  {openAccordions.type ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                </button>
+
+                {openAccordions.type && (
+                  <div style={{ padding: '12px 10px', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '10px' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 700 }}>Layout View:</span>
+                      <button 
+                        type="button" 
+                        onClick={() => setTypePickerViewMode(typePickerViewMode === 'radial' ? 'grid' : 'radial')}
+                        style={{ background: 'none', border: 'none', color: 'var(--accent)', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
+                      >
+                        {typePickerViewMode === 'radial' ? '🔳 Grid View' : '⭕ Radial Hub'}
+                      </button>
+                    </div>
+
+                    {typePickerViewMode === 'radial' ? (
+                      /* 2-Row Layout (7 Items Each) with Visible Gap for Center Button - Collapsed By Default */
+                      <div 
+                        onMouseEnter={() => setIsRadialPickerOpen(true)}
+                        onMouseLeave={() => setIsRadialPickerOpen(false)}
+                        style={{ 
+                          display: 'flex', 
+                          flexDirection: 'column', 
+                          alignItems: 'center', 
+                          width: '100%', 
+                          margin: '4px 0', 
+                          gap: '10px',
+                          position: 'relative'
+                        }}
+                      >
+                        {/* ROW 1: TOP 7 ITEMS */}
+                        <div 
+                          style={{
+                            display: isRadialPickerOpen ? 'flex' : 'none',
+                            flexWrap: 'wrap',
+                            gap: '6px',
+                            justifyContent: 'center',
+                            width: '100%',
+                            opacity: isRadialPickerOpen ? 1 : 0,
+                            transform: isRadialPickerOpen ? 'translateY(0) scale(1)' : 'translateY(12px) scale(0.9)',
+                            transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                          }}
                         >
-                          <IconComp size={14} color={item.color} /> {item.label}
+                          {SLIDE_TYPE_ITEMS.slice(0, 7).map((item) => {
+                            const IconComp = item.icon;
+                            const isActive = activeSlide.type === item.type;
+
+                            return (
+                              <button
+                                key={item.type}
+                                type="button"
+                                onClick={() => {
+                                  handleChangeSlideType(item.type);
+                                  setIsRadialPickerOpen(false);
+                                }}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  background: isActive ? 'var(--accent-soft)' : 'var(--surface-2)',
+                                  border: isActive ? '2px solid var(--accent)' : '1.5px solid var(--border)',
+                                  color: isActive ? 'var(--accent)' : 'var(--text-primary)',
+                                  padding: '5px 11px',
+                                  borderRadius: '20px',
+                                  fontSize: '0.76rem',
+                                  fontWeight: 800,
+                                  cursor: 'pointer',
+                                  boxShadow: isActive ? '0 0 14px var(--accent-soft)' : '0 4px 10px rgba(0,0,0,0.2)',
+                                  transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                                }}
+                                className="hover-scale"
+                              >
+                                <IconComp size={14} color={item.color} />
+                                <span>{item.label}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* VISIBLE GAP & CLEAN CENTER HUB BUTTON */}
+                        <div 
+                          onClick={() => setIsRadialPickerOpen(!isRadialPickerOpen)}
+                          style={{
+                            width: '105px',
+                            height: '105px',
+                            borderRadius: '50%',
+                            background: 'radial-gradient(circle, rgba(6, 182, 212, 0.25) 0%, var(--surface-2) 85%)',
+                            border: '3px solid var(--accent)',
+                            boxShadow: '0 0 25px rgba(6, 182, 212, 0.45)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            zIndex: 20,
+                            margin: '2px 0',
+                            transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                          }}
+                          className="kinetic-hub-pulse hover-scale"
+                          title="Active Selected Question Type (Click or Hover to View All 14 Options)"
+                        >
+                          {(() => {
+                            const IconComp = SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.icon || BarChart3;
+                            const iconColor = SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.color || '#38bdf8';
+                            return <IconComp size={30} color={iconColor} />;
+                          })()}
+                          <span style={{ fontSize: '0.78rem', fontWeight: 900, color: 'var(--text-primary)', marginTop: '2px', textAlign: 'center', padding: '0 4px' }}>
+                            {SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.label}
+                          </span>
+                          <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--accent)', marginTop: '1px' }}>
+                            {isRadialPickerOpen ? '✕ Close' : '⚡ Hover Options'}
+                          </span>
+                        </div>
+
+                        {/* ROW 2: BOTTOM 7 ITEMS */}
+                        <div 
+                          style={{
+                            display: isRadialPickerOpen ? 'flex' : 'none',
+                            flexWrap: 'wrap',
+                            gap: '6px',
+                            justifyContent: 'center',
+                            width: '100%',
+                            opacity: isRadialPickerOpen ? 1 : 0,
+                            transform: isRadialPickerOpen ? 'translateY(0) scale(1)' : 'translateY(-12px) scale(0.9)',
+                            transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                          }}
+                        >
+                          {SLIDE_TYPE_ITEMS.slice(7, 14).map((item) => {
+                            const IconComp = item.icon;
+                            const isActive = activeSlide.type === item.type;
+
+                            return (
+                              <button
+                                key={item.type}
+                                type="button"
+                                onClick={() => {
+                                  handleChangeSlideType(item.type);
+                                  setIsRadialPickerOpen(false);
+                                }}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  background: isActive ? 'var(--accent-soft)' : 'var(--surface-2)',
+                                  border: isActive ? '2px solid var(--accent)' : '1.5px solid var(--border)',
+                                  color: isActive ? 'var(--accent)' : 'var(--text-primary)',
+                                  padding: '5px 11px',
+                                  borderRadius: '20px',
+                                  fontSize: '0.76rem',
+                                  fontWeight: 800,
+                                  cursor: 'pointer',
+                                  boxShadow: isActive ? '0 0 14px var(--accent-soft)' : '0 4px 10px rgba(0,0,0,0.2)',
+                                  transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                                }}
+                                className="hover-scale"
+                              >
+                                <IconComp size={14} color={item.color} />
+                                <span>{item.label}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ) : (
+                      /* Standard Grid View */
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', width: '100%' }}>
+                        {SLIDE_TYPE_ITEMS.map((item) => {
+                          const IconComp = item.icon;
+                          return (
+                            <button 
+                              key={item.type}
+                              className={`btn-type-option ${activeSlide.type === item.type ? 'active' : ''}`}
+                              onClick={() => handleChangeSlideType(item.type)}
+                            >
+                              <IconComp size={14} color={item.color} /> {item.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Accordion 2: Slide Question & Content Options Table */}
+              <div className="accordion-card" style={{ width: '100%', borderRadius: '10px', background: 'var(--surface-2)', border: '1px solid var(--border-glass)', overflow: 'hidden' }}>
+                <button
+                  type="button"
+                  onClick={() => toggleAccordionSection('content')}
+                  style={{ width: '100%', padding: '10px 14px', background: 'rgba(6,182,212,0.08)', border: 'none', borderBottom: openAccordions.content ? '1px solid var(--border-glass)' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', color: 'var(--primary)', fontWeight: 800, fontSize: '0.82rem' }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <AlignLeft size={16} />
+                    <span>Slide Question & Options</span>
+                  </div>
+                  {openAccordions.content ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                </button>
+
+                {openAccordions.content && (
+                  <div style={{ padding: '14px 12px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    {/* Question Text */}
+                    <div className="settings-group">
+                      <label>Question Text</label>
+                      <textarea 
+                        className="input-text" 
+                        style={{ minHeight: '60px', resize: 'vertical' }}
+                        value={activeSlide.question}
+                        onChange={(e) => handleUpdateActiveSlide({ question: e.target.value })}
+                        placeholder="e.g. Rate your understanding:"
+                      />
+                    </div>
+
+                    {/* Dynamic Options Editors */}
+                    {['poll', 'quiz', 'scales', 'ranking', 'points', 'grid', 'form'].includes(activeSlide.type) && (
+                      <div className="settings-group">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                          <label>{getOptionsLabel()}</label>
+                          {activeSlide.type === 'quiz' && <span style={{ fontSize: '0.7rem', color: 'var(--accent-green)' }}>Select Correct</span>}
+                        </div>
+                        
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '350px', overflowY: 'auto', paddingRight: '4px' }}>
+                          {activeSlide.options?.map((opt, index) => (
+                            <div key={opt.id} className="option-edit-item" style={{ position: 'relative', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                              {['quiz', 'poll'].includes(activeSlide.type) && (
+                                <input 
+                                  type="checkbox" 
+                                  checked={(activeSlide.correctAnswerIndices || []).includes(index) || activeSlide.correctAnswerIndex === index}
+                                  onChange={() => handleToggleCorrectAnswer(index)}
+                                  style={{ cursor: 'pointer', accentColor: 'var(--accent-green)', width: '16px', height: '16px', flexShrink: 0 }}
+                                  title="Mark option as correct"
+                                />
+                              )}
+                              
+                              {/* Option Emoji Box */}
+                              <div style={{ position: 'relative', flexShrink: 0 }}>
+                                <button 
+                                  type="button"
+                                  className="emoji-picker-btn"
+                                  onClick={(e) => handleToggleEmojiPicker(e, opt.id)}
+                                >
+                                  {opt.emoji || '🚀'}
+                                </button>
+                              </div>
+
+                              <input 
+                                type="text" 
+                                className="input-text" 
+                                value={opt.text}
+                                onChange={(e) => handleOptionChange(opt.id, e.target.value)}
+                                placeholder={`Item ${index + 1}`}
+                              />
+                              <button 
+                                type="button"
+                                className="btn btn-secondary btn-icon" 
+                                style={{ width: '38px', height: '38px', border: 'none', background: 'transparent', flexShrink: 0 }}
+                                onClick={() => handleInsertOptionAfter(index)}
+                                title="Add Option Below"
+                              >
+                                <Plus size={12} color="var(--primary)" />
+                              </button>
+                              <button 
+                                className="btn btn-secondary btn-icon" 
+                                style={{ width: '38px', height: '38px', border: 'none', background: 'transparent', flexShrink: 0 }}
+                                onClick={() => handleDeleteOption(opt.id)}
+                                title="Delete Option"
+                              >
+                                <Trash2 size={12} color="var(--accent-red)" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+
+                        <button className="btn btn-secondary" onClick={handleAddOption} style={{ width: '100%', marginTop: '10px' }}>
+                          <Plus size={12} /> Add Item
                         </button>
-                      );
-                    })}
+                      </div>
+                    )}
+
+                    {/* Axis labels for 2x2 Grid */}
+                    {activeSlide.type === 'grid' && (
+                      <>
+                        <div className="settings-group">
+                          <label>X-Axis Label (Horizontal)</label>
+                          <input 
+                            type="text" 
+                            className="input-text"
+                            value={activeSlide.xAxisLabel || ''}
+                            onChange={(e) => handleUpdateActiveSlide({ xAxisLabel: e.target.value })}
+                          />
+                        </div>
+                        <div className="settings-group">
+                          <label>Y-Axis Label (Vertical)</label>
+                          <input 
+                            type="text" 
+                            className="input-text"
+                            value={activeSlide.yAxisLabel || ''}
+                            onChange={(e) => handleUpdateActiveSlide({ yAxisLabel: e.target.value })}
+                          />
+                        </div>
+                      </>
+                    )}
+
+                    {/* Guess Correct Number setting */}
+                    {activeSlide.type === 'guess' && (
+                      <div className="settings-group">
+                        <label>Correct Number Value</label>
+                        <input 
+                          type="number" 
+                          className="input-text"
+                          value={activeSlide.correctNumber}
+                          onChange={(e) => handleUpdateActiveSlide({ correctNumber: Number(e.target.value) || 0 })}
+                        />
+                      </div>
+                    )}
+
+                    {/* Stopwatch presets */}
+                    {activeSlide.type === 'stopwatch' && (
+                      <div className="settings-group">
+                        <label>Timer Duration Presets</label>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px', marginTop: '6px' }}>
+                          {[10, 15, 20, 30, 60].map((sec) => (
+                            <button
+                              key={sec}
+                              type="button"
+                              className={`btn ${activeSlide.timeLimit === sec ? 'btn-primary' : 'btn-secondary'}`}
+                              style={{ padding: '6px 2px', fontSize: '0.75rem', fontWeight: 800 }}
+                              onClick={() => handleUpdateActiveSlide({ timeLimit: sec })}
+                            >
+                              {sec}s
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Brainstorm Categories */}
+                    {activeSlide.type === 'brainstorm' && (
+                      <>
+                        <div className="settings-group">
+                          <label>Grid Category 1</label>
+                          <input 
+                            type="text" 
+                            className="input-text"
+                            value={activeSlide.category1 || ''}
+                            onChange={(e) => handleUpdateActiveSlide({ category1: e.target.value })}
+                            placeholder="e.g. Category A"
+                          />
+                        </div>
+                        <div className="settings-group">
+                          <label>Grid Category 2</label>
+                          <input 
+                            type="text" 
+                            className="input-text"
+                            value={activeSlide.category2 || ''}
+                            onChange={(e) => handleUpdateActiveSlide({ category2: e.target.value })}
+                            placeholder="e.g. Category B"
+                          />
+                        </div>
+                        <div className="settings-group">
+                          <label>Grid Category 3</label>
+                          <input 
+                            type="text" 
+                            className="input-text"
+                            value={activeSlide.category3 || ''}
+                            onChange={(e) => handleUpdateActiveSlide({ category3: e.target.value })}
+                            placeholder="e.g. Category C"
+                          />
+                        </div>
+                        <div className="settings-group">
+                          <label>Grid Category 4</label>
+                          <input 
+                            type="text" 
+                            className="input-text"
+                            value={activeSlide.category4 || ''}
+                            onChange={(e) => handleUpdateActiveSlide({ category4: e.target.value })}
+                            placeholder="e.g. Category D"
+                          />
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
             </div>
           )}
 
-          {/* 2. CONTENT TAB */}
-          {activeSidebarTab === 'content' && (
-            <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {/* Question Text */}
-              <div className="settings-group">
-                <label>Question Text</label>
-                <textarea 
-                  className="input-text" 
-                  style={{ minHeight: '60px', resize: 'vertical' }}
-                  value={activeSlide.question}
-                  onChange={(e) => handleUpdateActiveSlide({ question: e.target.value })}
-                  placeholder="e.g. Rate your understanding:"
-                />
-              </div>
-
-              {/* Dynamic Option Editors */}
-              {['poll', 'quiz', 'scales', 'ranking', 'points', 'grid', 'form'].includes(activeSlide.type) && (
-                <div className="settings-group">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                    <label>{getOptionsLabel()}</label>
-                    {activeSlide.type === 'quiz' && <span style={{ fontSize: '0.7rem', color: 'var(--accent-green)' }}>Select Correct</span>}
-                  </div>
-                  
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '350px', overflowY: 'auto', paddingRight: '4px' }}>
-                    {activeSlide.options?.map((opt, index) => (
-                      <div key={opt.id} className="option-edit-item" style={{ position: 'relative', display: 'flex', gap: '8px', alignItems: 'center' }}>
-                        {['quiz', 'poll'].includes(activeSlide.type) && (
-                          <input 
-                            type="checkbox" 
-                            checked={(activeSlide.correctAnswerIndices || []).includes(index) || activeSlide.correctAnswerIndex === index}
-                            onChange={() => handleToggleCorrectAnswer(index)}
-                            style={{ cursor: 'pointer', accentColor: 'var(--accent-green)', width: '16px', height: '16px', flexShrink: 0 }}
-                            title="Mark option as correct"
-                          />
-                        )}
-                        
-                        {/* Option Emoji Box */}
-                        <div style={{ position: 'relative', flexShrink: 0 }}>
-                          <button 
-                            type="button"
-                            className="emoji-picker-btn"
-                            onClick={(e) => handleToggleEmojiPicker(e, opt.id)}
-                          >
-                            {opt.emoji || '🚀'}
-                          </button>
-                        </div>
-
-                        <input 
-                          type="text" 
-                          className="input-text" 
-                          value={opt.text}
-                          onChange={(e) => handleOptionChange(opt.id, e.target.value)}
-                          placeholder={`Item ${index + 1}`}
-                        />
-                        <button 
-                          type="button"
-                          className="btn btn-secondary btn-icon" 
-                          style={{ width: '38px', height: '38px', border: 'none', background: 'transparent', flexShrink: 0 }}
-                          onClick={() => handleInsertOptionAfter(index)}
-                          title="Add Option Below"
-                        >
-                          <Plus size={12} color="var(--primary)" />
-                        </button>
-                        <button 
-                          className="btn btn-secondary btn-icon" 
-                          style={{ width: '38px', height: '38px', border: 'none', background: 'transparent', flexShrink: 0 }}
-                          onClick={() => handleDeleteOption(opt.id)}
-                          title="Delete Option"
-                        >
-                          <Trash2 size={12} color="var(--accent-red)" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-
-                  <button className="btn btn-secondary" onClick={handleAddOption} style={{ width: '100%', marginTop: '10px' }}>
-                    <Plus size={12} /> Add Item
-                  </button>
-                </div>
-              )}
-
-              {/* Axis labels for 2x2 Grid */}
-              {activeSlide.type === 'grid' && (
-                <>
-                  <div className="settings-group">
-                    <label>X-Axis Label (Horizontal)</label>
-                    <input 
-                      type="text" 
-                      className="input-text"
-                      value={activeSlide.xAxisLabel || ''}
-                      onChange={(e) => handleUpdateActiveSlide({ xAxisLabel: e.target.value })}
-                    />
-                  </div>
-                  <div className="settings-group">
-                    <label>Y-Axis Label (Vertical)</label>
-                    <input 
-                      type="text" 
-                      className="input-text"
-                      value={activeSlide.yAxisLabel || ''}
-                      onChange={(e) => handleUpdateActiveSlide({ yAxisLabel: e.target.value })}
-                    />
-                  </div>
-                </>
-              )}
-
-              {/* Guess Correct Number setting */}
-              {activeSlide.type === 'guess' && (
-                <div className="settings-group">
-                  <label>Correct Number Value</label>
-                  <input 
-                    type="number" 
-                    className="input-text"
-                    value={activeSlide.correctNumber}
-                    onChange={(e) => handleUpdateActiveSlide({ correctNumber: Number(e.target.value) || 0 })}
-                  />
-                </div>
-              )}
-
-              {/* Stopwatch presets */}
-              {activeSlide.type === 'stopwatch' && (
-                <div className="settings-group">
-                  <label>Timer Duration Presets</label>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px', marginTop: '6px' }}>
-                    {[10, 15, 20, 30, 60].map((sec) => (
-                      <button
-                        key={sec}
-                        type="button"
-                        className={`btn ${activeSlide.timeLimit === sec ? 'btn-primary' : 'btn-secondary'}`}
-                        style={{ padding: '6px 2px', fontSize: '0.75rem', fontWeight: 800 }}
-                        onClick={() => handleUpdateActiveSlide({ timeLimit: sec })}
-                      >
-                        {sec}s
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Brainstorm Categories */}
-              {activeSlide.type === 'brainstorm' && (
-                <>
-                  <div className="settings-group">
-                    <label>Grid Category 1</label>
-                    <input 
-                      type="text" 
-                      className="input-text"
-                      value={activeSlide.category1 || ''}
-                      onChange={(e) => handleUpdateActiveSlide({ category1: e.target.value })}
-                      placeholder="e.g. Category A"
-                    />
-                  </div>
-                  <div className="settings-group">
-                    <label>Grid Category 2</label>
-                    <input 
-                      type="text" 
-                      className="input-text"
-                      value={activeSlide.category2 || ''}
-                      onChange={(e) => handleUpdateActiveSlide({ category2: e.target.value })}
-                      placeholder="e.g. Category B"
-                    />
-                  </div>
-                  <div className="settings-group">
-                    <label>Grid Category 3</label>
-                    <input 
-                      type="text" 
-                      className="input-text"
-                      value={activeSlide.category3 || ''}
-                      onChange={(e) => handleUpdateActiveSlide({ category3: e.target.value })}
-                      placeholder="e.g. Category C"
-                    />
-                  </div>
-                  <div className="settings-group">
-                    <label>Grid Category 4</label>
-                    <input 
-                      type="text" 
-                      className="input-text"
-                      value={activeSlide.category4 || ''}
-                      onChange={(e) => handleUpdateActiveSlide({ category4: e.target.value })}
-                      placeholder="e.g. Category D"
-                    />
-                  </div>
-                </>
-              )}
-            </div>
-          )}
-
           {/* 3. DESIGN / CUSTOMIZE TAB */}
           {activeSidebarTab === 'design' && (
-            <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {/* 5 Countdown Audio Themes (Paid Feature) */}
-              <div className="settings-group">
-                <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span>Countdown Audio Theme</span>
-                  <span style={{ fontSize: '0.7rem', color: '#f59e0b', fontWeight: 800 }}>🔒 Paid Feature</span>
-                </label>
-                <select 
-                  value={activeSlide.audioTheme || presentation.audioTheme || 'classic'}
-                  onChange={(e) => {
-                    if (user?.tier === 'free') {
-                      onRequestUpgrade('audio_theme');
-                      return;
-                    }
-                    handleUpdateActiveSlide({ audioTheme: e.target.value });
-                  }}
-                  style={{
-                    width: '100%', padding: '10px 12px', background: '#0f172a',
-                    border: '1px solid var(--border-glass)', borderRadius: '8px',
-                    color: '#ffffff', fontSize: '0.85rem', fontWeight: 600, outline: 'none'
-                  }}
+            <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%' }}>
+              <div className="accordion-card" style={{ width: '100%', borderRadius: '10px', background: 'var(--surface-2)', border: '1px solid var(--border-glass)', overflow: 'hidden' }}>
+                <button
+                  type="button"
+                  onClick={() => toggleAccordionSection('design')}
+                  style={{ width: '100%', padding: '10px 14px', background: 'rgba(6,182,212,0.08)', border: 'none', borderBottom: openAccordions.design ? '1px solid var(--border-glass)' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', color: 'var(--primary)', fontWeight: 800, fontSize: '0.82rem' }}
                 >
-                  <option value="classic">⏱️ Classic Ticking Clock</option>
-                  <option value="synth">⚡ Synthesizer Energy Beat</option>
-                  <option value="gameshow">🎺 Game Show Fanfare</option>
-                  <option value="chill">🌊 Ambient Deep Chill</option>
-                  <option value="arcade">🚀 Space Arcade Rush</option>
-                </select>
-              </div>
-              {/* Customizable Time Limit */}
-              <div className="settings-group">
-                <label>Question Time Limit (0 to disable)</label>
-                <input 
-                  type="number" 
-                  className="input-text" 
-                  min="0" 
-                  max="120"
-                  value={activeSlide.timeLimit !== undefined ? activeSlide.timeLimit : 15}
-                  onChange={(e) => handleUpdateActiveSlide({ timeLimit: parseInt(e.target.value) || 0 })}
-                />
-              </div>
-
-              {/* Auto Start Timer Toggle */}
-              <div className="settings-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '8px', marginTop: '-10px' }}>
-                <input 
-                  type="checkbox"
-                  id="sidebar-timer-autostart"
-                  checked={activeSlide.timerAutoStart === true}
-                  onChange={(e) => handleUpdateActiveSlide({ timerAutoStart: e.target.checked })}
-                  style={{ accentColor: 'var(--primary)', cursor: 'pointer', width: '16px', height: '16px' }}
-                />
-                <label htmlFor="sidebar-timer-autostart" style={{ cursor: 'pointer', userSelect: 'none', margin: 0 }}>
-                  Auto-start timer on slide load
-                </label>
-              </div>
-
-              {/* Focus Mode / Anti-Cheat Toggle */}
-              <div className="settings-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '8px', marginTop: '-10px' }}>
-                <input 
-                  type="checkbox"
-                  id="sidebar-focus-mode"
-                  checked={activeSlide.focusMode === true}
-                  onChange={(e) => {
-                    if (e.target.checked && user?.tier === 'free') {
-                      let unlocks = [];
-                      try {
-                        unlocks = typeof user.unlocked_modules === 'string' 
-                          ? JSON.parse(user.unlocked_modules || '[]') 
-                          : (user.unlocked_modules || []);
-                      } catch(err) { unlocks = []; }
-                      const isFocusUnlocked = unlocks.some(i => i.module === 'focus_mode' && new Date(i.expiresAt) > new Date());
-                      if (!isFocusUnlocked) {
-                        onRequestUpgrade('focus_mode');
-                        return;
-                      }
-                    }
-                    handleUpdateActiveSlide({ focusMode: e.target.checked });
-                  }}
-                  style={{ accentColor: 'var(--primary)', cursor: 'pointer', width: '16px', height: '16px' }}
-                />
-                <label htmlFor="sidebar-focus-mode" style={{ cursor: 'pointer', userSelect: 'none', margin: 0, fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  🔒 Focus Mode (Anti-Cheat)
-                </label>
-              </div>
-
-              {/* Pin Image Background selection */}
-              {activeSlide.type === 'pin' && (
-                <div className="settings-group">
-                  <label>Pin Background Layout</label>
-                  <select 
-                    value={activeSlide.pinImageType || 'target'}
-                    onChange={(e) => handleUpdateActiveSlide({ pinImageType: e.target.value })}
-                  >
-                    <option value="target">Target / Bullseye Circles</option>
-                    <option value="quadrants">4-Quadrant Strategy Matrix</option>
-                  </select>
-                </div>
-              )}
-
-              {/* Slide Background Artwork Image Picker */}
-              <div className="settings-group">
-                <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span>Slide Background Artwork</span>
-                  <span style={{ fontSize: '0.7rem', color: '#06b6d4', fontWeight: 800 }}>🎨 AI Generated</span>
-                </label>
-                <select 
-                  value={activeSlide.bgImage || ''}
-                  onChange={(e) => handleUpdateActiveSlide({ bgImage: e.target.value })}
-                  style={{
-                    width: '100%', padding: '10px 12px', background: '#0f172a',
-                    border: '1px solid var(--border-glass)', borderRadius: '8px',
-                    color: '#ffffff', fontSize: '0.85rem', fontWeight: 600, outline: 'none'
-                  }}
-                >
-                  <option value="">Default Theme Wallpaper</option>
-                  <option value="/assets/theme_cyber_neon.jpg">🌌 Cyber Neon Artwork</option>
-                  <option value="/assets/theme_midnight_gold.jpg">👑 Midnight Gold Executive</option>
-                  <option value="/assets/theme_cosmic_nebula.jpg">✨ Cosmic Nebula Stardust</option>
-                  <option value="/assets/theme_playroom_magic.jpg">🎨 Playroom Magic Pastel</option>
-                </select>
-              </div>
-
-              {/* Theme Settings (Global for presentation) */}
-              <div className="settings-group">
-                <label>Presentation Theme</label>
-                <div className="theme-picker-section">
-                  <div className="theme-picker-category-title" style={{ color: '#06b6d4', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    🎨 Generated Artwork Themes
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Grid3X3 size={16} />
+                    <span>Theme & Visual Customization</span>
                   </div>
-                  <div className="theme-picker-grid" style={{ gridTemplateColumns: '1fr 1fr', marginBottom: '16px' }}>
-                    {AVAILABLE_THEMES.filter(t => t.type === 'art').map(t => (
-                      <div 
-                        key={t.id} 
-                        className={`theme-picker-item ${(presentation.theme || 'corporate') === t.id ? 'active' : ''}`}
-                        onClick={() => handleUpdateTheme(t.id)}
-                        style={{ overflow: 'hidden' }}
+                  {openAccordions.design ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                </button>
+
+                {openAccordions.design && (
+                  <div style={{ padding: '14px 12px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    {/* 5 Countdown Audio Themes (Paid Feature) */}
+                    <div className="settings-group">
+                      <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span>Countdown Audio Theme</span>
+                        <span style={{ fontSize: '0.7rem', color: '#f59e0b', fontWeight: 800 }}>🔒 Paid Feature</span>
+                      </label>
+                      <select 
+                        value={activeSlide.audioTheme || presentation.audioTheme || 'classic'}
+                        onChange={(e) => {
+                          if (user?.tier === 'free') {
+                            onRequestUpgrade('audio_theme');
+                            return;
+                          }
+                          handleUpdateActiveSlide({ audioTheme: e.target.value });
+                        }}
+                        style={{
+                          width: '100%', padding: '10px 12px', background: '#0f172a',
+                          border: '1px solid var(--border-glass)', borderRadius: '8px',
+                          color: '#ffffff', fontSize: '0.85rem', fontWeight: 600, outline: 'none'
+                        }}
                       >
-                        <div className="theme-palette-preview" style={{ backgroundImage: `url(${t.bg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
-                          {t.colors.map((c, i) => (
-                            <div key={i} className="theme-color-dot" style={{ backgroundColor: c }} />
+                        <option value="classic">⏱️ Classic Ticking Clock</option>
+                        <option value="synth">⚡ Synthesizer Energy Beat</option>
+                        <option value="gameshow">🎺 Game Show Fanfare</option>
+                        <option value="chill">🌊 Ambient Deep Chill</option>
+                        <option value="arcade">🚀 Space Arcade Rush</option>
+                      </select>
+                    </div>
+
+                    {/* Customizable Time Limit */}
+                    <div className="settings-group">
+                      <label>Question Time Limit (0 to disable)</label>
+                      <input 
+                        type="number" 
+                        className="input-text" 
+                        min="0" 
+                        max="120"
+                        value={activeSlide.timeLimit !== undefined ? activeSlide.timeLimit : 15}
+                        onChange={(e) => handleUpdateActiveSlide({ timeLimit: parseInt(e.target.value) || 0 })}
+                      />
+                    </div>
+
+                    {/* Auto Start Timer Toggle */}
+                    <div className="settings-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '8px', marginTop: '-6px' }}>
+                      <input 
+                        type="checkbox"
+                        id="sidebar-timer-autostart"
+                        checked={activeSlide.timerAutoStart === true}
+                        onChange={(e) => handleUpdateActiveSlide({ timerAutoStart: e.target.checked })}
+                        style={{ accentColor: 'var(--primary)', cursor: 'pointer', width: '16px', height: '16px' }}
+                      />
+                      <label htmlFor="sidebar-timer-autostart" style={{ cursor: 'pointer', userSelect: 'none', margin: 0 }}>
+                        Auto-start timer on slide load
+                      </label>
+                    </div>
+
+                    {/* Focus Mode / Anti-Cheat Toggle */}
+                    <div className="settings-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '8px', marginTop: '-6px' }}>
+                      <input 
+                        type="checkbox"
+                        id="sidebar-focus-mode"
+                        checked={activeSlide.focusMode === true}
+                        onChange={(e) => {
+                          if (e.target.checked && user?.tier === 'free') {
+                            let unlocks = [];
+                            try {
+                              unlocks = typeof user.unlocked_modules === 'string' 
+                                ? JSON.parse(user.unlocked_modules || '[]') 
+                                : (user.unlocked_modules || []);
+                            } catch(err) { unlocks = []; }
+                            const isFocusUnlocked = unlocks.some(i => i.module === 'focus_mode' && new Date(i.expiresAt) > new Date());
+                            if (!isFocusUnlocked) {
+                              onRequestUpgrade('focus_mode');
+                              return;
+                            }
+                          }
+                          handleUpdateActiveSlide({ focusMode: e.target.checked });
+                        }}
+                        style={{ accentColor: 'var(--primary)', cursor: 'pointer', width: '16px', height: '16px' }}
+                      />
+                      <label htmlFor="sidebar-focus-mode" style={{ cursor: 'pointer', userSelect: 'none', margin: 0, fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        🔒 Focus Mode (Anti-Cheat)
+                      </label>
+                    </div>
+
+                    {/* Pin Image Background selection */}
+                    {activeSlide.type === 'pin' && (
+                      <div className="settings-group">
+                        <label>Pin Background Layout</label>
+                        <select 
+                          value={activeSlide.pinImageType || 'target'}
+                          onChange={(e) => handleUpdateActiveSlide({ pinImageType: e.target.value })}
+                        >
+                          <option value="target">Target / Bullseye Circles</option>
+                          <option value="quadrants">4-Quadrant Strategy Matrix</option>
+                        </select>
+                      </div>
+                    )}
+
+                    {/* Slide Background Artwork Image Picker */}
+                    <div className="settings-group">
+                      <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span>Slide Background Artwork</span>
+                        <span style={{ fontSize: '0.7rem', color: '#06b6d4', fontWeight: 800 }}>🎨 AI Generated</span>
+                      </label>
+                      <select 
+                        value={activeSlide.bgImage || ''}
+                        onChange={(e) => handleUpdateActiveSlide({ bgImage: e.target.value })}
+                        style={{
+                          width: '100%', padding: '10px 12px', background: '#0f172a',
+                          border: '1px solid var(--border-glass)', borderRadius: '8px',
+                          color: '#ffffff', fontSize: '0.85rem', fontWeight: 600, outline: 'none'
+                        }}
+                      >
+                        <option value="">Default Theme Wallpaper</option>
+                        <option value="/assets/theme_cyber_neon.jpg">🌌 Cyber Neon Artwork</option>
+                        <option value="/assets/theme_midnight_gold.jpg">👑 Midnight Gold Executive</option>
+                        <option value="/assets/theme_cosmic_nebula.jpg">✨ Cosmic Nebula Stardust</option>
+                        <option value="/assets/theme_playroom_magic.jpg">🎨 Playroom Magic Pastel</option>
+                      </select>
+                    </div>
+
+                    {/* Theme Settings (Global for presentation) */}
+                    <div className="settings-group">
+                      <label>Presentation Theme</label>
+                      <div className="theme-picker-section">
+                        <div className="theme-picker-category-title" style={{ color: '#06b6d4', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          🎨 Generated Artwork Themes
+                        </div>
+                        <div className="theme-picker-grid" style={{ gridTemplateColumns: '1fr 1fr', marginBottom: '16px' }}>
+                          {AVAILABLE_THEMES.filter(t => t.type === 'art').map(t => (
+                            <div 
+                              key={t.id} 
+                              className={`theme-picker-item ${(presentation.theme || 'corporate') === t.id ? 'active' : ''}`}
+                              onClick={() => handleUpdateTheme(t.id)}
+                              style={{ overflow: 'hidden' }}
+                            >
+                              <div className="theme-palette-preview" style={{ backgroundImage: `url(${t.bg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+                                {t.colors.map((c, i) => (
+                                  <div key={i} className="theme-color-dot" style={{ backgroundColor: c }} />
+                                ))}
+                              </div>
+                              <div className="theme-picker-name">{t.name}</div>
+                            </div>
                           ))}
                         </div>
-                        <div className="theme-picker-name">{t.name}</div>
-                      </div>
-                    ))}
-                  </div>
 
-                  <div className="theme-picker-category-title">Light Themes</div>
-                  <div className="theme-picker-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
-                    {AVAILABLE_THEMES.filter(t => t.type === 'light').map(t => (
-                      <div 
-                        key={t.id} 
-                        className={`theme-picker-item ${(presentation.theme || 'corporate') === t.id ? 'active' : ''}`}
-                        onClick={() => handleUpdateTheme(t.id)}
-                      >
-                        <div className="theme-palette-preview" style={{ backgroundColor: t.bg }}>
-                          {t.colors.map((c, i) => (
-                            <div key={i} className="theme-color-dot" style={{ backgroundColor: c }} />
+                        <div className="theme-picker-category-title">Light Themes</div>
+                        <div className="theme-picker-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                          {AVAILABLE_THEMES.filter(t => t.type === 'light').map(t => (
+                            <div 
+                              key={t.id} 
+                              className={`theme-picker-item ${(presentation.theme || 'corporate') === t.id ? 'active' : ''}`}
+                              onClick={() => handleUpdateTheme(t.id)}
+                            >
+                              <div className="theme-palette-preview" style={{ backgroundColor: t.bg }}>
+                                {t.colors.map((c, i) => (
+                                  <div key={i} className="theme-color-dot" style={{ backgroundColor: c }} />
+                                ))}
+                              </div>
+                              <div className="theme-picker-name">{t.name}</div>
+                            </div>
                           ))}
                         </div>
-                        <div className="theme-picker-name">{t.name}</div>
-                      </div>
-                    ))}
-                  </div>
 
-                  <div className="theme-picker-category-title" style={{ marginTop: '12px' }}>Dark Themes</div>
-                  <div className="theme-picker-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
-                    {AVAILABLE_THEMES.filter(t => t.type === 'dark').map(t => (
-                      <div 
-                        key={t.id} 
-                        className={`theme-picker-item ${(presentation.theme || 'corporate') === t.id ? 'active' : ''}`}
-                        onClick={() => handleUpdateTheme(t.id)}
-                      >
-                        <div className="theme-palette-preview" style={{ backgroundColor: t.bg }}>
-                          {t.colors.map((c, i) => (
-                            <div key={i} className="theme-color-dot" style={{ backgroundColor: c }} />
+                        <div className="theme-picker-category-title" style={{ marginTop: '12px' }}>Dark Themes</div>
+                        <div className="theme-picker-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                          {AVAILABLE_THEMES.filter(t => t.type === 'dark').map(t => (
+                            <div 
+                              key={t.id} 
+                              className={`theme-picker-item ${(presentation.theme || 'corporate') === t.id ? 'active' : ''}`}
+                              onClick={() => handleUpdateTheme(t.id)}
+                            >
+                              <div className="theme-palette-preview" style={{ backgroundColor: t.bg }}>
+                                {t.colors.map((c, i) => (
+                                  <div key={i} className="theme-color-dot" style={{ backgroundColor: c }} />
+                                ))}
+                              </div>
+                              <div className="theme-picker-name">{t.name}</div>
+                            </div>
                           ))}
                         </div>
-                        <div className="theme-picker-name">{t.name}</div>
                       </div>
-                    ))}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           )}
 
           {/* 4. AI TAB PANEL */}
           {activeSidebarTab === 'ai' && (
-            <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {!isAiGenerating ? (
-                <form onSubmit={handleAiGenerate} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                  <div style={{ padding: '12px', background: 'rgba(6,182,212,0.05)', border: '1px solid var(--border-glass)', borderRadius: '10px', fontSize: '0.8rem', color: 'var(--primary)', lineHeight: 1.4 }}>
-                    🤖 <strong>PulseAI slide generator:</strong> Type any topic below and hit generate. We will dynamically rewrite this presentation with custom interactive slides.
+            <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%' }}>
+              <div className="accordion-card" style={{ width: '100%', borderRadius: '10px', background: 'var(--surface-2)', border: '1px solid var(--border-glass)', overflow: 'hidden' }}>
+                <button
+                  type="button"
+                  onClick={() => toggleAccordionSection('ai')}
+                  style={{ width: '100%', padding: '10px 14px', background: 'rgba(6,182,212,0.08)', border: 'none', borderBottom: openAccordions.ai ? '1px solid var(--border-glass)' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', color: 'var(--primary)', fontWeight: 800, fontSize: '0.82rem' }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Sparkles size={16} />
+                    <span>PulseAI Slide Generator</span>
                   </div>
+                  {openAccordions.ai ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                </button>
 
-                  <div className="settings-group">
-                    <label>Generate Slides for Topic:</label>
-                    <input 
-                      type="text" 
-                      className="input-text" 
-                      placeholder="e.g. World War II history, Basic Algebra, Python syntax"
-                      value={aiPromptText}
-                      onChange={(e) => setAiPromptText(e.target.value)}
-                      required
-                    />
-                  </div>
+                {openAccordions.ai && (
+                  <div style={{ padding: '14px 12px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    {!isAiGenerating ? (
+                      <form onSubmit={handleAiGenerate} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                        <div style={{ padding: '12px', background: 'rgba(6,182,212,0.05)', border: '1px solid var(--border-glass)', borderRadius: '10px', fontSize: '0.8rem', color: 'var(--primary)', lineHeight: 1.4 }}>
+                          🤖 <strong>PulseAI slide generator:</strong> Type any topic below and hit generate. We will dynamically rewrite this presentation with custom interactive slides.
+                        </div>
 
-                  <button 
-                    type="submit" 
-                    className="btn btn-primary" 
-                    style={{ width: '100%', padding: '12px', fontWeight: 800, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
-                  >
-                    Generate with AI ⚡
-                  </button>
-                </form>
-              ) : (
-                <div style={{ textAlign: 'center', padding: '30px 10px' }}>
-                  <div style={{ display: 'inline-block', width: '36px', height: '36px', border: '3px solid rgba(6,182,212,0.1)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: '15px' }} />
-                  <h4 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px' }}>
-                    Generating AI Slides...
-                  </h4>
-                  <div style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: 'var(--primary)', background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '6px' }}>
-                    {aiProgressText}
+                        <div className="settings-group">
+                          <label>Generate Slides for Topic:</label>
+                          <input 
+                            type="text" 
+                            className="input-text" 
+                            placeholder="e.g. World War II history, Basic Algebra, Python syntax"
+                            value={aiPromptText}
+                            onChange={(e) => setAiPromptText(e.target.value)}
+                            required
+                          />
+                        </div>
+
+                        <button 
+                          type="submit" 
+                          className="btn btn-primary" 
+                          style={{ width: '100%', padding: '12px', fontWeight: 800, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                        >
+                          Generate with AI ⚡
+                        </button>
+                      </form>
+                    ) : (
+                      <div style={{ textAlign: 'center', padding: '30px 10px' }}>
+                        <div style={{ display: 'inline-block', width: '36px', height: '36px', border: '3px solid rgba(6,182,212,0.1)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: '15px' }} />
+                        <h4 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px' }}>
+                          Generating AI Slides...
+                        </h4>
+                        <div style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: 'var(--primary)', background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '6px' }}>
+                          {aiProgressText}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           )}
         </>
