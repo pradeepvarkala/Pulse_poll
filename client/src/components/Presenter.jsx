@@ -2432,6 +2432,30 @@ export default function Presenter({ presentationId, onBack, user: userProp }) {
                 </div>
               )}
 
+              {/* 13. Static Non-Interactive PPT Slide */}
+              {activeSlide.type === 'ppt' && (
+                <div className="animate-fade" style={{ width: '100%', height: 'calc(100vh - 180px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                  <div style={{ position: 'absolute', top: '10px', right: '20px', background: 'rgba(15, 23, 42, 0.85)', padding: '6px 14px', borderRadius: '20px', border: '1px solid var(--border-soft)', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>📄 Static PPT Presentation Slide (Non-Interactive)</span>
+                  </div>
+                  {activeSlide.bgImage ? (
+                    <img 
+                      src={activeSlide.bgImage} 
+                      alt={activeSlide.question || 'PPT Slide'} 
+                      style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '12px', boxShadow: '0 12px 40px rgba(0,0,0,0.5)' }} 
+                    />
+                  ) : (
+                    <div style={{ padding: '60px', textAlign: 'center', background: 'var(--surface)', border: '1px solid var(--border-soft)', borderRadius: '16px', maxWidth: '650px', boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }}>
+                      <div style={{ fontSize: '2.5rem', marginBottom: '16px' }}>📄</div>
+                      <h2 style={{ fontSize: '1.6rem', marginBottom: '12px', color: 'var(--text-primary)' }}>{activeSlide.question || 'PPT Slide Title'}</h2>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: 1.6 }}>
+                        {activeSlide.content || 'Static PowerPoint slide for lecture and keynote presentation.'}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* 12. Quiz (Alternative Quiz View) */}
               {activeSlide.type === 'quiz' && (
                 <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Calendar, Plus, Trash2, Play, Users, Lock, Unlock, Shuffle, 
   ChevronRight, Award, Sparkles, CheckCircle2, Copy, Eye, ArrowLeft, Layers, 
-  Clock, Edit3, Link as LinkIcon, FileText, Check, X, ExternalLink
+  Clock, Edit3, Link as LinkIcon, FileText, Check, X, ExternalLink, HelpCircle, FileUp
 } from 'lucide-react';
 import { solveGroupAllocation, getGroupNames, GROUP_NAMING_THEMES } from '../utils/groupingAlgorithm';
 

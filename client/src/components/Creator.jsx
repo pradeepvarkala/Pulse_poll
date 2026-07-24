@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ArrowLeft, Plus, Trash2, Play, BarChart3, Cloud, HelpCircle, 
-  Trophy, Sliders, ArrowDownUp, Hash, Grid3X3, FileSpreadsheet, MapPin, AlignLeft, Timer 
+  Trophy, Sliders, ArrowDownUp, Hash, Grid3X3, FileSpreadsheet, MapPin, AlignLeft, Timer, FileUp
 } from 'lucide-react';
 
 const AVAILABLE_THEMES = [
@@ -93,6 +93,38 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
   const [aiProgressText, setAiProgressText] = useState('');
   const [draggedSlideIndex, setDraggedSlideIndex] = useState(null);
 
+
+  const handleImportPptFile = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const fileName = file.name.replace(/\.[^/.]+$/, "");
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target.result;
+      const isImg = file.type.startsWith('image/') || file.name.endsWith('.png') || file.name.endsWith('.jpg') || file.name.endsWith('.jpeg');
+      
+      const newPptSlide = {
+        id: Math.random().toString(36).substr(2, 9),
+        type: 'ppt',
+        question: `PPT Slide: ${fileName}`,
+        bgImage: isImg ? result : null,
+        content: `Imported static presentation file: ${file.name}`
+      };
+
+      const updatedSlides = [...(presentation?.slides || []), newPptSlide];
+      const updatedPres = { ...presentation, slides: updatedSlides };
+      savePresentation(updatedPres);
+      setActiveSlideId(newPptSlide.id);
+      alert(`Successfully imported static PPT slide from: ${file.name}!`);
+    };
+
+    if (file.type.startsWith('image/')) {
+      reader.readAsDataURL(file);
+    } else {
+      reader.readAsText(file);
+    }
+  };
 
   const handleToggleEmojiPicker = (e, optId) => {
     if (activeEmojiPickerId === optId) {
@@ -693,9 +725,25 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
               </button>
             </div>
           ))}
-          <button className="btn btn-secondary" onClick={handleAddSlide} style={{ marginTop: '10px' }}>
-            <Plus size={16} /> Add Slide
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '10px' }}>
+            <button className="btn btn-secondary" onClick={handleAddSlide} style={{ fontSize: '0.82rem' }}>
+              <Plus size={16} /> Add Interactive Slide
+            </button>
+            <label 
+              className="btn btn-secondary" 
+              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '0.78rem', border: '1px dashed var(--accent)', color: 'var(--accent)', background: 'rgba(6, 182, 212, 0.06)' }}
+              title="Import PowerPoint PPTX or PDF slides (Non-Interactive Slide Mode - Pro Plan)"
+            >
+              <FileUp size={14} /> Import PPTX / PDF
+              <span style={{ fontSize: '0.68rem', background: 'var(--accent)', color: '#08211E', padding: '1px 5px', borderRadius: '4px', fontWeight: 800 }}>PRO</span>
+              <input 
+                type="file" 
+                accept=".pptx,.ppt,.pdf,.png,.jpg,.jpeg" 
+                style={{ display: 'none' }}
+                onChange={handleImportPptFile}
+              />
+            </label>
+          </div>
         </div>
 
         {/* Center: Slide Preview Mockup */}
