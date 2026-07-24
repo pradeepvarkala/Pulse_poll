@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { 
   ArrowLeft, Plus, Minus, Trash2, Play, BarChart3, Cloud, HelpCircle, 
   Trophy, Sliders, ArrowDownUp, Hash, Grid3X3, FileSpreadsheet, MapPin, AlignLeft, Timer, FileUp,
