@@ -898,24 +898,28 @@ h1, h2, h3, h4, h5, h6, .font-display {
 }
 
 .editor-center {
-  padding: 2.5rem;
+  padding: 1rem 1.25rem;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   background: rgba(0,0,0,0.15);
 }
 
 .slide-preview-container {
   width: 100%;
-  max-width: 800px;
+  max-width: 920px;
+  min-height: 490px;
   aspect-ratio: 16/9;
-  padding: 2rem;
+  padding: 2rem 2.2rem;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+  border-radius: 20px;
 }
 
 .preview-question {

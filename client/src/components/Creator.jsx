@@ -90,8 +90,8 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
   const [showInstructionPopup, setShowInstructionPopup] = useState(false);
   const [aiPromptText, setAiPromptText] = useState('');
   const [isAiGenerating, setIsAiGenerating] = useState(false);
-  const [aiProgressText, setAiProgressText] = useState('');
   const [draggedSlideIndex, setDraggedSlideIndex] = useState(null);
+  const [isRightSidebarCollapsed, setIsRightSidebarCollapsed] = useState(false);
 
 
   const handleImportPptFile = (e) => {
@@ -682,9 +682,18 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
       </div>
 
       {/* Editor Workspace Panels */}
-      <div className="creator-container">
+      <div 
+        className="creator-container"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: isRightSidebarCollapsed ? '170px 1fr 44px' : '170px 1fr 320px',
+          flex: 1,
+          overflow: 'hidden',
+          transition: 'grid-template-columns 0.35s cubic-bezier(0.16, 1, 0.3, 1)'
+        }}
+      >
         {/* Left Side: Slide List (Thumbnails) */}
-        <div className="sidebar-left">
+        <div className="sidebar-left" style={{ padding: '1rem 0.8rem' }}>
           <h3 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Slides</h3>
           {slides.map((slide, index) => (
             <div 
@@ -747,14 +756,24 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
         </div>
 
         {/* Center: Slide Preview Mockup */}
-        <div className="editor-center" style={{ position: 'relative' }}>
+        <div className="editor-center" style={{ position: 'relative', padding: '1rem', overflowY: 'auto' }}>
           <div 
             className={`glass-card slide-preview-container theme-${presentation?.theme || 'corporate'}`} 
             style={{ 
               position: 'relative',
+              width: '100%',
+              maxWidth: '920px',
+              minHeight: '490px',
+              aspectRatio: '16/9',
+              padding: '1.8rem 2.2rem',
               backgroundImage: activeSlide?.bgImage ? `linear-gradient(rgba(11, 15, 25, 0.65), rgba(11, 15, 25, 0.85)), url(${activeSlide.bgImage})` : undefined,
               backgroundSize: 'cover',
-              backgroundPosition: 'center'
+              backgroundPosition: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              boxShadow: '0 16px 40px rgba(0, 0, 0, 0.4)',
+              borderRadius: '20px'
             }}
           >
             {/* Top Bar: Slide Counter Badge & Help Badge */}
@@ -917,19 +936,19 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
             
             <div className="preview-content">
               {activeSlide.type === 'poll' && (
-                <div style={{ width: '100%', maxWidth: '650px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ width: '100%', maxWidth: '780px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                    gap: '10px',
-                    maxHeight: '230px',
+                    gridTemplateColumns: 'repeat(2, 1fr)',
+                    gap: '12px',
+                    maxHeight: '280px',
                     overflowY: 'auto',
                     paddingRight: '4px'
                   }}>
                     {activeSlide.options?.map((opt, i) => renderEditableOption(opt, i))}
                   </div>
-                  <button className="btn btn-secondary" onClick={handleAddOption} style={{ alignSelf: 'flex-start', fontSize: '0.85rem' }}>
-                    <Plus size={12} /> Add Option
+                  <button className="btn btn-secondary" onClick={handleAddOption} style={{ alignSelf: 'center', fontSize: '0.85rem', padding: '6px 20px', gap: '6px', background: 'rgba(255,255,255,0.06)' }}>
+                    <Plus size={14} /> Add Option
                   </button>
                 </div>
               )}
@@ -976,19 +995,23 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
               )}
 
               {activeSlide.type === 'scales' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '400px', maxHeight: '185px', overflowY: 'auto', paddingRight: '4px' }}>
-                  {activeSlide.options?.map((opt, i) => renderEditableOption(opt, i))}
-                  <button className="btn btn-secondary" onClick={handleAddOption} style={{ marginTop: '10px', fontSize: '0.85rem' }}>
-                    <Plus size={12} /> Add Dimension
+                <div style={{ width: '100%', maxWidth: '780px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', maxHeight: '250px', overflowY: 'auto', paddingRight: '4px' }}>
+                    {activeSlide.options?.map((opt, i) => renderEditableOption(opt, i))}
+                  </div>
+                  <button className="btn btn-secondary" onClick={handleAddOption} style={{ alignSelf: 'center', fontSize: '0.85rem', padding: '6px 18px', gap: '6px', background: 'rgba(255,255,255,0.06)' }}>
+                    <Plus size={14} /> Add Dimension
                   </button>
                 </div>
               )}
 
               {activeSlide.type === 'ranking' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', maxWidth: '400px', maxHeight: '185px', overflowY: 'auto', paddingRight: '4px' }}>
-                  {activeSlide.options?.map((opt, i) => renderEditableOption(opt, i))}
-                  <button className="btn btn-secondary" onClick={handleAddOption} style={{ marginTop: '10px', fontSize: '0.85rem' }}>
-                    <Plus size={12} /> Add Item to Rank
+                <div style={{ width: '100%', maxWidth: '780px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', maxHeight: '250px', overflowY: 'auto', paddingRight: '4px' }}>
+                    {activeSlide.options?.map((opt, i) => renderEditableOption(opt, i))}
+                  </div>
+                  <button className="btn btn-secondary" onClick={handleAddOption} style={{ alignSelf: 'center', fontSize: '0.85rem', padding: '6px 18px', gap: '6px', background: 'rgba(255,255,255,0.06)' }}>
+                    <Plus size={14} /> Add Item to Rank
                   </button>
                 </div>
               )}
@@ -1008,10 +1031,12 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
               )}
 
               {activeSlide.type === 'points' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', maxWidth: '400px', maxHeight: '185px', overflowY: 'auto', paddingRight: '4px' }}>
-                  {activeSlide.options?.map((opt, i) => renderEditableOption(opt, i))}
-                  <button className="btn btn-secondary" onClick={handleAddOption} style={{ marginTop: '10px', fontSize: '0.85rem' }}>
-                    <Plus size={12} /> Add Distribution Item
+                <div style={{ width: '100%', maxWidth: '780px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', maxHeight: '250px', overflowY: 'auto', paddingRight: '4px' }}>
+                    {activeSlide.options?.map((opt, i) => renderEditableOption(opt, i))}
+                  </div>
+                  <button className="btn btn-secondary" onClick={handleAddOption} style={{ alignSelf: 'center', fontSize: '0.85rem', padding: '6px 18px', gap: '6px', background: 'rgba(255,255,255,0.06)' }}>
+                    <Plus size={14} /> Add Distribution Item
                   </button>
                 </div>
               )}
@@ -1026,10 +1051,12 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
               )}
 
               {activeSlide.type === 'form' && (
-                <div style={{ width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '185px', overflowY: 'auto', paddingRight: '4px' }}>
-                  {activeSlide.options?.map((opt, i) => renderEditableOption(opt, i))}
-                  <button className="btn btn-secondary" onClick={handleAddOption} style={{ marginTop: '10px', fontSize: '0.85rem' }}>
-                    <Plus size={12} /> Add Form Field
+                <div style={{ width: '100%', maxWidth: '780px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', maxHeight: '250px', overflowY: 'auto', paddingRight: '4px' }}>
+                    {activeSlide.options?.map((opt, i) => renderEditableOption(opt, i))}
+                  </div>
+                  <button className="btn btn-secondary" onClick={handleAddOption} style={{ alignSelf: 'center', fontSize: '0.85rem', padding: '6px 18px', gap: '6px', background: 'rgba(255,255,255,0.06)' }}>
+                    <Plus size={14} /> Add Form Field
                   </button>
                 </div>
               )}
@@ -1043,19 +1070,19 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
               )}
 
               {activeSlide.type === 'quiz' && (
-                <div style={{ width: '100%', maxWidth: '650px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ width: '100%', maxWidth: '780px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                    gap: '10px',
-                    maxHeight: '230px',
+                    gridTemplateColumns: 'repeat(2, 1fr)',
+                    gap: '12px',
+                    maxHeight: '280px',
                     overflowY: 'auto',
                     paddingRight: '4px'
                   }}>
                     {activeSlide.options?.map((opt, i) => renderEditableOption(opt, i))}
                   </div>
-                  <button className="btn btn-secondary" onClick={handleAddOption} style={{ alignSelf: 'flex-start', fontSize: '0.85rem' }}>
-                    <Plus size={12} /> Add Quiz Option
+                  <button className="btn btn-secondary" onClick={handleAddOption} style={{ alignSelf: 'center', fontSize: '0.85rem', padding: '6px 18px', gap: '6px', background: 'rgba(255,255,255,0.06)' }}>
+                    <Plus size={14} /> Add Quiz Option
                   </button>
                 </div>
               )}
@@ -1123,10 +1150,56 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
           </div>
         </div>
 
-        {/* Right Side: Settings & Options */}
-        <div className="sidebar-right">
-          {/* Sidebar Tab Header */}
-          <div className="sidebar-tabs" style={{ display: 'flex', borderBottom: '1px solid var(--border-glass)', marginBottom: '15px' }}>
+        {/* Right Side: Settings & Options (Collapsible) */}
+        <div 
+          className="sidebar-right"
+          style={{
+            padding: isRightSidebarCollapsed ? '12px 4px' : '1.25rem',
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px',
+            position: 'relative',
+            background: 'var(--surface)',
+            borderLeft: '1px solid var(--border-glass)',
+            transition: 'padding 0.3s ease'
+          }}
+        >
+          {isRightSidebarCollapsed ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', marginTop: '10px' }}>
+              <button 
+                type="button"
+                className="btn btn-secondary btn-icon"
+                onClick={() => setIsRightSidebarCollapsed(false)}
+                title="Expand Slide Settings & Customization Panel"
+                style={{ width: '36px', height: '36px', background: 'var(--accent-soft)', color: 'var(--accent)', border: 'none', borderRadius: '8px', cursor: 'pointer' }}
+              >
+                <Sliders size={18} />
+              </button>
+              <span style={{ writingMode: 'vertical-rl', textTransform: 'uppercase', fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.12em', color: 'var(--text-muted)' }}>
+                Slide Properties
+              </span>
+            </div>
+          ) : (
+            <>
+              {/* Header with Minimize Button */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-glass)', paddingBottom: '10px' }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Slide Settings & Customize
+                </span>
+                <button 
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setIsRightSidebarCollapsed(true)}
+                  title="Minimize Right Panel to give slide preview maximum space"
+                  style={{ fontSize: '0.72rem', padding: '3px 8px', gap: '4px', background: 'var(--surface-2)', border: 'none' }}
+                >
+                  <span>Minimize</span> ➔
+                </button>
+              </div>
+
+              {/* Sidebar Tab Header */}
+              <div className="sidebar-tabs" style={{ display: 'flex', borderBottom: '1px solid var(--border-glass)', marginBottom: '15px' }}>
             <button 
               type="button"
               className={`sidebar-tab-btn ${activeSidebarTab === 'type' ? 'active' : ''}`}
@@ -1672,6 +1745,8 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                 </div>
               )}
             </div>
+          )}
+          </>
           )}
         </div>
       </div>
