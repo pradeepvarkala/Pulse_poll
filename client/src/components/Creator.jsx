@@ -1380,84 +1380,154 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                 </div>
 
                 {typePickerViewMode === 'radial' ? (
-                  /* Clean One-Sided Popout Hub without Backdrop Darkening */
+                  /* 2-Row Layout (7 Items Each) with Visible Gap for Center Button */
                   <div 
-                    className={`one-side-popout-container ${isRadialPickerOpen ? 'open' : ''}`}
                     onMouseEnter={() => setIsRadialPickerOpen(true)}
                     onMouseLeave={() => setIsRadialPickerOpen(false)}
-                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', margin: '14px 0', position: 'relative', minHeight: '380px', justifyContent: 'center' }}
+                    style={{ 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      alignItems: 'center', 
+                      width: '100%', 
+                      margin: '12px 0', 
+                      gap: '16px',
+                      position: 'relative'
+                    }}
                   >
-                    {/* Radial Center Hub Trigger */}
+                    {/* ROW 1: TOP 7 ITEMS */}
+                    <div 
+                      style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '8px',
+                        justifyContent: 'center',
+                        width: '100%',
+                        opacity: isRadialPickerOpen ? 1 : 0.45,
+                        transform: isRadialPickerOpen ? 'translateY(0) scale(1)' : 'translateY(12px) scale(0.94)',
+                        transition: 'all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                      }}
+                    >
+                      {SLIDE_TYPE_ITEMS.slice(0, 7).map((item, idx) => {
+                        const IconComp = item.icon;
+                        const isActive = activeSlide.type === item.type;
+
+                        return (
+                          <button
+                            key={item.type}
+                            type="button"
+                            onClick={() => {
+                              handleChangeSlideType(item.type);
+                              setIsRadialPickerOpen(false);
+                            }}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              background: isActive ? 'var(--accent-soft)' : 'var(--surface-2)',
+                              border: isActive ? '2px solid var(--accent)' : '1.5px solid var(--border)',
+                              color: isActive ? 'var(--accent)' : 'var(--text-primary)',
+                              padding: '6px 12px',
+                              borderRadius: '20px',
+                              fontSize: '0.78rem',
+                              fontWeight: 800,
+                              cursor: 'pointer',
+                              boxShadow: isActive ? '0 0 16px var(--accent-soft)' : '0 4px 12px rgba(0,0,0,0.25)',
+                              transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                              transitionDelay: `${idx * 20}ms`
+                            }}
+                            className="hover-scale"
+                          >
+                            <IconComp size={15} color={item.color} />
+                            <span>{item.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* VISIBLE GAP & CENTER BUTTON */}
                     <div 
                       onClick={() => setIsRadialPickerOpen(!isRadialPickerOpen)}
                       style={{
-                        width: '120px',
-                        height: '120px',
+                        width: '125px',
+                        height: '125px',
                         borderRadius: '50%',
                         background: 'radial-gradient(circle, rgba(6, 182, 212, 0.25) 0%, var(--surface-2) 85%)',
                         border: '3px solid var(--accent)',
-                        boxShadow: '0 0 25px rgba(6, 182, 212, 0.4)',
+                        boxShadow: '0 0 30px rgba(6, 182, 212, 0.45)',
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
                         cursor: 'pointer',
                         zIndex: 20,
-                        transition: 'all 0.3s ease'
+                        margin: '4px 0',
+                        transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
                       }}
                       className="kinetic-hub-pulse hover-scale"
+                      title="Active Selected Question Type (Click or Hover to Toggle Rows)"
                     >
                       {(() => {
                         const IconComp = SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.icon || BarChart3;
                         const iconColor = SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.color || '#38bdf8';
-                        return <IconComp size={32} color={iconColor} />;
+                        return <IconComp size={34} color={iconColor} />;
                       })()}
                       <span style={{ fontSize: '0.82rem', fontWeight: 900, color: 'var(--text-primary)', marginTop: '4px', textAlign: 'center', padding: '0 6px' }}>
                         {SLIDE_TYPE_ITEMS.find(t => t.type === activeSlide.type)?.label}
                       </span>
                       <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--accent)', marginTop: '2px' }}>
-                        {isRadialPickerOpen ? '✕ Close' : '✨ Hover to Select'}
+                        {isRadialPickerOpen ? '✕ Close' : '✨ Hover Rows'}
                       </span>
                     </div>
 
-                    {/* Popout Question Type Items (One-Sided Layout, Readable Text Pills, No Screen Darkening) */}
-                    {SLIDE_TYPE_ITEMS.map((item, idx) => {
-                      const IconComp = item.icon;
-                      const isActive = activeSlide.type === item.type;
-                      
-                      // Compute 2-column or semi-circular offset around hub
-                      const angleDeg = (idx / SLIDE_TYPE_ITEMS.length) * 360 - 90;
-                      const angleRad = (angleDeg * Math.PI) / 180;
-                      const radius = 120;
-                      const x = Math.round(Math.cos(angleRad) * radius);
-                      const y = Math.round(Math.sin(angleRad) * radius);
+                    {/* ROW 2: BOTTOM 7 ITEMS */}
+                    <div 
+                      style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '8px',
+                        justifyContent: 'center',
+                        width: '100%',
+                        opacity: isRadialPickerOpen ? 1 : 0.45,
+                        transform: isRadialPickerOpen ? 'translateY(0) scale(1)' : 'translateY(-12px) scale(0.94)',
+                        transition: 'all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                      }}
+                    >
+                      {SLIDE_TYPE_ITEMS.slice(7, 14).map((item, idx) => {
+                        const IconComp = item.icon;
+                        const isActive = activeSlide.type === item.type;
 
-                      return (
-                        <div
-                          key={item.type}
-                          className="one-side-item"
-                          onClick={() => {
-                            handleChangeSlideType(item.type);
-                            setIsRadialPickerOpen(false);
-                          }}
-                          style={{
-                            transform: isRadialPickerOpen ? `translate(${x}px, ${y}px) scale(1)` : 'translate(0px, 0px) scale(0.3)',
-                            transitionDelay: isRadialPickerOpen ? `${idx * 25}ms` : '0ms',
-                            background: isActive ? 'var(--accent-soft)' : 'var(--surface-2)',
-                            borderColor: isActive ? 'var(--accent)' : 'var(--border)',
-                            color: isActive ? 'var(--accent)' : 'var(--text-primary)',
-                            padding: '6px 12px',
-                            borderRadius: '20px',
-                            boxShadow: isActive ? '0 0 16px var(--accent-soft)' : '0 6px 18px rgba(0,0,0,0.3)',
-                            fontSize: '0.78rem',
-                            fontWeight: 700
-                          }}
-                        >
-                          <IconComp size={15} color={item.color} />
-                          <span>{item.label}</span>
-                        </div>
-                      );
-                    })}
+                        return (
+                          <button
+                            key={item.type}
+                            type="button"
+                            onClick={() => {
+                              handleChangeSlideType(item.type);
+                              setIsRadialPickerOpen(false);
+                            }}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              background: isActive ? 'var(--accent-soft)' : 'var(--surface-2)',
+                              border: isActive ? '2px solid var(--accent)' : '1.5px solid var(--border)',
+                              color: isActive ? 'var(--accent)' : 'var(--text-primary)',
+                              padding: '6px 12px',
+                              borderRadius: '20px',
+                              fontSize: '0.78rem',
+                              fontWeight: 800,
+                              cursor: 'pointer',
+                              boxShadow: isActive ? '0 0 16px var(--accent-soft)' : '0 4px 12px rgba(0,0,0,0.25)',
+                              transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                              transitionDelay: `${idx * 20}ms`
+                            }}
+                            className="hover-scale"
+                          >
+                            <IconComp size={15} color={item.color} />
+                            <span>{item.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 ) : (
                   /* Standard Grid View */
