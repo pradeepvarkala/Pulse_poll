@@ -14,7 +14,8 @@ import VirtualMeetingScheduler from './components/VirtualMeetingScheduler';
 import SessionManager from './components/SessionManager';
 import { 
   Presentation as PresIcon, User as UserIcon, Settings, Menu, Volume2, VolumeX, 
-  Sun, Moon, Calendar, LogOut, Search, Layout, Activity, ExternalLink, Shield, Zap, Key, Video, Smartphone, PieChart, HelpCircle, Plus 
+  Sun, Moon, Calendar, LogOut, Search, Layout, Activity, ExternalLink, Shield, Zap, Key, Video, Smartphone, PieChart, HelpCircle, Plus,
+  BarChart2, Lock, Sparkles, Play, Users
 } from 'lucide-react';
 import { playThemeToggleSound, toggleMuteAudio } from './utils/soundEffects';
 
@@ -799,6 +800,7 @@ export default function App() {
   const [aiPrompt, setAiPrompt] = useState('');
   const [isGeneratingAi, setIsGeneratingAi] = useState(false);
   const [aiProgressText, setAiProgressText] = useState('');
+  const [isGlobalRadialOpen, setIsGlobalRadialOpen] = useState(false);
 
   // Refresh user data from backend
   const refreshUserProfile = async (email) => {
@@ -2092,6 +2094,70 @@ export default function App() {
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Global Floating FAB Cute Radial Popup Menu */}
+      {user && view !== 'presenter' && view !== 'audience' && (
+        <div 
+          style={{
+            position: 'fixed',
+            bottom: '32px',
+            right: '32px',
+            zIndex: 99999
+          }}
+          className={`radial-menu-container ${isGlobalRadialOpen ? 'open' : ''}`}
+          onMouseEnter={() => setIsGlobalRadialOpen(true)}
+          onMouseLeave={() => setIsGlobalRadialOpen(false)}
+        >
+          <div className="radial-ring"></div>
+
+          {[
+            { label: 'Workshops', icon: <Calendar size={19} />, action: () => setView('sessions') },
+            { label: 'Present', icon: <Play size={19} />, action: () => handleNavigateToPresenter() },
+            { label: 'Audience', icon: <Users size={19} />, action: () => handleNavigateToAudience() },
+            { label: 'Analytics', icon: <BarChart2 size={19} />, action: () => setView('analytics') },
+            { label: 'Escape Room', icon: <Lock size={19} />, action: () => setView('escaperoom') },
+            { label: 'AI Generator', icon: <Sparkles size={19} />, action: () => handleTriggerContextualSlide('AI Quiz Generator', true) }
+          ].map((item, i) => {
+            const radius = 135;
+            const startAngle = -90;
+            const angleDeg = startAngle + (360 / 6) * i;
+            const angleRad = (angleDeg * Math.PI) / 180;
+            const x = Math.round(Math.cos(angleRad) * radius);
+            const y = Math.round(Math.sin(angleRad) * radius);
+
+            return (
+              <button 
+                key={item.label}
+                className="petal-item"
+                style={{
+                  transitionDelay: isGlobalRadialOpen ? `${i * 35}ms` : '0ms',
+                  transform: isGlobalRadialOpen ? `translate(${x}px, ${y}px) scale(1)` : 'translate(0px, 0px) scale(0.3)'
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  item.action();
+                  setIsGlobalRadialOpen(false);
+                }}
+                title={item.label}
+              >
+                {item.icon}
+                <span className="petal-label">{item.label}</span>
+              </button>
+            );
+          })}
+
+          <button 
+            className="radial-fab" 
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsGlobalRadialOpen(!isGlobalRadialOpen);
+            }}
+            title="Toggle Quick Action Radial Menu"
+          >
+            <Plus size={24} />
+          </button>
         </div>
       )}
     </div>
