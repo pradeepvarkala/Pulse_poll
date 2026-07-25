@@ -112,6 +112,7 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
   const [draggedSlideIndex, setDraggedSlideIndex] = useState(null);
   const [isRightSidebarCollapsed, setIsRightSidebarCollapsed] = useState(true);
   const [showSlideTypeModal, setShowSlideTypeModal] = useState(false);
+  const [recentlyDeletedSlide, setRecentlyDeletedSlide] = useState(null);
   const [openAccordions, setOpenAccordions] = useState({
     audio: false,
     image: false,
@@ -185,20 +186,6 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
   };
 
   const handleUploadSlideMedia = (e) => {
-    if (user?.tier === 'free') {
-      let unlocks = [];
-      try {
-        unlocks = typeof user.unlocked_modules === 'string' 
-          ? JSON.parse(user.unlocked_modules || '[]') 
-          : (user.unlocked_modules || []);
-      } catch(err) { unlocks = []; }
-      const isMediaUnlocked = unlocks.some(i => i.module === 'media_upload' && new Date(i.expiresAt) > new Date());
-      if (!isMediaUnlocked) {
-        onRequestUpgrade('media_upload');
-        return;
-      }
-    }
-
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -437,6 +424,9 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
       alert('Your presentation must have at least one slide.');
       return;
     }
+    const deletedIndex = slides.findIndex(s => s.id === slideId);
+    const deletedSlideObj = slides[deletedIndex];
+
     const filteredSlides = slides.filter(s => s.id !== slideId);
     const updatedPres = {
       ...presentation,
@@ -445,8 +435,26 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
     };
     savePresentation(updatedPres);
     if (activeSlideId === slideId) {
-      setActiveSlideId(filteredSlides[0].id);
+      setActiveSlideId(filteredSlides[Math.min(deletedIndex, filteredSlides.length - 1)].id);
     }
+
+    // Save recently deleted slide for Undo button banner
+    setRecentlyDeletedSlide({ slide: deletedSlideObj, index: deletedIndex });
+  };
+
+  const handleUndoSlideDelete = () => {
+    if (!recentlyDeletedSlide) return;
+    const { slide: restoredSlide, index: restoreIndex } = recentlyDeletedSlide;
+    const newSlides = [...slides];
+    const targetIdx = Math.min(restoreIndex, newSlides.length);
+    newSlides.splice(targetIdx, 0, restoredSlide);
+    savePresentation({
+      ...presentation,
+      slides: newSlides,
+      updatedAt: new Date().toLocaleDateString()
+    });
+    setActiveSlideId(restoredSlide.id);
+    setRecentlyDeletedSlide(null);
   };
 
   const handleReorderSlides = (fromIndex, toIndex) => {
@@ -464,11 +472,6 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
   const handleAiGenerate = async (e) => {
     e.preventDefault();
     if (!aiPromptText.trim()) return;
-
-    if (user?.tier === 'free') {
-      onRequestUpgrade('ai_generator');
-      return;
-    }
 
     setIsAiGenerating(true);
     const steps = [
@@ -799,12 +802,70 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
           </span>
         </div>
 
-        {/* Top Right Mini Circular Play Button */}
-        <button 
-          type="button"
-          className="btn btn-primary btn-icon" 
-          onClick={() => onPresent(presentation.id)}
-          title="Present Live ▶"
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* Floating Undo Slide Delete Banner */}
+          {recentlyDeletedSlide && (
+            <div 
+              className="animate-fade"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: 'rgba(239, 68, 68, 0.18)',
+                border: '1.5px solid rgba(239, 68, 68, 0.5)',
+                borderRadius: '20px',
+                padding: '2px 10px',
+                fontSize: '0.75rem',
+                color: '#ffffff',
+                fontWeight: 700,
+                boxShadow: '0 4px 14px rgba(239, 68, 68, 0.35)'
+              }}
+            >
+              <span>🗑️ Slide Deleted</span>
+              <button
+                type="button"
+                onClick={handleUndoSlideDelete}
+                style={{
+                  background: '#ef4444',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '2px 10px',
+                  fontWeight: 800,
+                  fontSize: '0.74rem',
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.08)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+              >
+                ↩️ Undo
+              </button>
+              <button
+                type="button"
+                onClick={() => setRecentlyDeletedSlide(null)}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'rgba(255,255,255,0.7)',
+                  cursor: 'pointer',
+                  fontSize: '0.8rem',
+                  padding: '0 2px'
+                }}
+                title="Dismiss"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
+          {/* Top Right Mini Circular Play Button */}
+          <button 
+            type="button"
+            className="btn btn-primary btn-icon" 
+            onClick={() => onPresent(presentation.id)}
+            title="Present Live ▶"
           style={{ 
             width: '28px', 
             height: '28px', 
@@ -826,6 +887,7 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
           <Play size={14} fill="#08211E" color="#08211E" style={{ marginLeft: '1px' }} />
         </button>
       </div>
+    </div>
 
       {/* Editor Workspace Panels */}
       <div 
