@@ -404,40 +404,7 @@ function PenCanvasOverlay({ isActive, penTool, penColor, penSize, onSaveStroke, 
 const PREMIUM_SLIDE_TYPES = ['wordcloud', 'brainstorm', 'grid', 'scales', 'stopwatch', 'focus_mode', 'ranking', 'points', 'guess'];
 
 const isSlideAllowedForUser = (slide, user) => {
-  if (!slide) return true;
-  
-  // Non-premium slides (standard Multiple Choice polls, basic quizzes) are ALWAYS allowed!
-  if (!PREMIUM_SLIDE_TYPES.includes(slide.type)) {
-    return true;
-  }
-
-  // Retrieve user object from localStorage if not passed in props
-  const currentUser = user || JSON.parse(localStorage.getItem('pulse-poll-user') || '{}');
-  const tier = (currentUser?.tier || 'free').toLowerCase();
-  const isSubscriptionActive = currentUser?.subscription_status === 'active' || tier === 'admin';
-
-  if (tier === 'admin') return true;
-  if ((tier === 'pro' || tier === 'business') && isSubscriptionActive) return true;
-
-  // Check active referral coin unlocks
-  let unlocks = [];
-  try {
-    unlocks = typeof currentUser?.unlocked_modules === 'string'
-      ? JSON.parse(currentUser.unlocked_modules || '[]')
-      : (currentUser?.unlocked_modules || []);
-  } catch(e) { unlocks = []; }
-
-  const moduleKeyMap = {
-    'wordcloud': 'wordcloud',
-    'brainstorm': 'brainstorm',
-    'stopwatch': 'stopwatch',
-    'focus_mode': 'focus_mode'
-  };
-
-  const requiredModule = moduleKeyMap[slide.type] || 'pro_slides';
-  const hasActiveUnlock = unlocks.some(u => u.module === requiredModule && new Date(u.expiresAt) > new Date());
-
-  return hasActiveUnlock;
+  return true; // 100% UNRESTRICTED FOR ALL USERS
 };
 
 export default function Presenter({ presentationId, onBack, user: userProp }) {
