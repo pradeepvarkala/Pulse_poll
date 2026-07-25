@@ -673,69 +673,54 @@ const SAMPLE_DECKS = {
     }
 
     // 2. Instant check for local storage presentations (0ms load time)
-    const saved = localStorage.getItem('pulse-poll-presentations');
-    if (saved) {
-      try {
-        const presentations = JSON.parse(saved);
-        const localFound = presentations.find(p => p.id === presentationId);
-        if (localFound) {
-          const parsedLocal = {
-            ...localFound,
-            slides: typeof localFound.slides === 'string' ? JSON.parse(localFound.slides) : (localFound.slides || [])
-          };
-          setPresentation(parsedLocal);
-          setSlides(parsedLocal.slides);
-          setTheme(parsedLocal.theme || 'corporate');
-          return;
+    if (presentationId) {
+      const saved = localStorage.getItem('pulse-poll-presentations');
+      if (saved) {
+        try {
+          const presentations = JSON.parse(saved);
+          const localFound = presentations.find(p => p.id === presentationId);
+          if (localFound) {
+            const parsedLocal = {
+              ...localFound,
+              slides: typeof localFound.slides === 'string' ? JSON.parse(localFound.slides) : (localFound.slides || [])
+            };
+            setPresentation(parsedLocal);
+            setSlides(parsedLocal.slides);
+            setTheme(parsedLocal.theme || 'corporate');
+            return;
+          }
+        } catch (e) {
+          console.error('Error parsing localStorage presentations:', e);
         }
-      } catch (e) {
-        console.error('Error parsing localStorage presentations:', e);
       }
     }
 
-    // 3. Async network fetch with 1.2s timeout fallback
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 1200);
+    // 3. Synchronous instant fallback so Presentation Room launches at 0ms!
+    const defaultDeck = SAMPLE_DECKS['sample-pres-1'];
+    setPresentation(defaultDeck);
+    setSlides(defaultDeck.slides);
+    setTheme(defaultDeck.theme || 'cyber-neon');
 
-    const fetchPresentation = async () => {
-      try {
-        const res = await fetch('/api/presentations', {
-          headers: { 'x-user-email': userEmail },
-          signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-        const data = await res.json();
-        const found = data.find(p => p.id === presentationId);
-        if (found && isMounted) {
-          const parsedFound = {
-            ...found,
-            slides: typeof found.slides === 'string' ? JSON.parse(found.slides) : (found.slides || [])
-          };
-          setPresentation(parsedFound);
-          setSlides(parsedFound.slides);
-          setTheme(parsedFound.theme || 'corporate');
-          return;
-        }
-      } catch (err) {
-        console.warn('Network fetch presentation timed out or failed, using fallback deck:', err);
-      }
+    // 4. Non-blocking background network sync if presentationId is provided
+    if (presentationId) {
+      fetch('/api/presentations', { headers: { 'x-user-email': userEmail } })
+        .then(res => res.json())
+        .then(data => {
+          const found = data.find(p => p.id === presentationId);
+          if (found && isMounted) {
+            const parsedFound = {
+              ...found,
+              slides: typeof found.slides === 'string' ? JSON.parse(found.slides) : (found.slides || [])
+            };
+            setPresentation(parsedFound);
+            setSlides(parsedFound.slides);
+            setTheme(parsedFound.theme || 'corporate');
+          }
+        })
+        .catch(() => {});
+    }
 
-      // 4. Default instant fallback deck so screen NEVER hangs on loading
-      if (isMounted) {
-        const defaultDeck = SAMPLE_DECKS['sample-pres-1'];
-        setPresentation(defaultDeck);
-        setSlides(defaultDeck.slides);
-        setTheme(defaultDeck.theme);
-      }
-    };
-
-    fetchPresentation();
-
-    return () => {
-      isMounted = false;
-      clearTimeout(timeoutId);
-      controller.abort();
-    };
+    return () => { isMounted = false; };
   }, [presentationId, userEmail]);
 
   useEffect(() => {

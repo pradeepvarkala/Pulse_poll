@@ -411,8 +411,10 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
       timeLimit: 15,
       timerAutoStart: false,
       options: ['poll', 'quiz', 'scales', 'ranking', 'points', 'grid', 'form'].includes(type) ? [
-        { id: Math.random().toString(36).substr(2, 9), text: '' },
-        { id: Math.random().toString(36).substr(2, 9), text: '' }
+        { id: Math.random().toString(36).substr(2, 9), text: 'Item 1' },
+        { id: Math.random().toString(36).substr(2, 9), text: 'Item 2' },
+        { id: Math.random().toString(36).substr(2, 9), text: 'Item 3' },
+        { id: Math.random().toString(36).substr(2, 9), text: 'Item 4' }
       ] : undefined
     };
     const updatedPres = {
@@ -729,30 +731,32 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
         >
           <Plus size={12} color="var(--primary)" />
         </button>
-        <button 
-          type="button"
-          className="btn btn-secondary btn-icon" 
-          style={{ 
-            width: '28px', 
-            height: '28px', 
-            borderRadius: '50%', 
-            background: 'rgba(239, 68, 68, 0.18)', 
-            border: '1px solid rgba(239, 68, 68, 0.4)', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            flexShrink: 0, 
-            cursor: 'pointer',
-            boxShadow: '0 2px 8px rgba(239, 68, 68, 0.25)',
-            transition: 'all 0.2s ease'
-          }}
-          onClick={() => handleDeleteOption(opt.id)}
-          title="Delete Option (-)"
-          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.15)'}
-          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-        >
-          <Minus size={14} color="#ef4444" strokeWidth={2.8} />
-        </button>
+        {(activeSlide.options || []).length > 2 && (
+          <button 
+            type="button"
+            className="btn btn-secondary btn-icon" 
+            style={{ 
+              width: '28px', 
+              height: '28px', 
+              borderRadius: '50%', 
+              background: 'rgba(239, 68, 68, 0.18)', 
+              border: '1px solid rgba(239, 68, 68, 0.4)', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              flexShrink: 0, 
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(239, 68, 68, 0.25)',
+              transition: 'all 0.2s ease'
+            }}
+            onClick={() => handleDeleteOption(opt.id)}
+            title="Delete Option (-)"
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.15)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          >
+            <Minus size={14} color="#ef4444" strokeWidth={2.8} />
+          </button>
+        )}
       </div>
     );
   };
