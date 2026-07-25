@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   ArrowLeft, Plus, Minus, Trash2, Play, BarChart3, Cloud, HelpCircle, 
   Trophy, Sliders, ArrowDownUp, Hash, Grid3X3, FileSpreadsheet, MapPin, AlignLeft, Timer, FileUp,
-  ChevronLeft, ChevronRight, ChevronDown, Sparkles, Settings, Music, Image as ImageIcon, FileText, Video
+  ChevronLeft, ChevronRight, ChevronDown, Sparkles, Settings, Music, Image as ImageIcon, FileText, Video, RotateCcw
 } from 'lucide-react';
 
 const AVAILABLE_THEMES = [
@@ -822,62 +822,6 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {/* Floating Undo Slide Delete Banner */}
-          {recentlyDeletedSlide && (
-            <div 
-              className="animate-fade"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                background: 'rgba(239, 68, 68, 0.18)',
-                border: '1.5px solid rgba(239, 68, 68, 0.5)',
-                borderRadius: '20px',
-                padding: '2px 10px',
-                fontSize: '0.75rem',
-                color: '#ffffff',
-                fontWeight: 700,
-                boxShadow: '0 4px 14px rgba(239, 68, 68, 0.35)'
-              }}
-            >
-              <span>🗑️ Slide Deleted</span>
-              <button
-                type="button"
-                onClick={handleUndoSlideDelete}
-                style={{
-                  background: '#ef4444',
-                  color: '#ffffff',
-                  border: 'none',
-                  borderRadius: '12px',
-                  padding: '2px 10px',
-                  fontWeight: 800,
-                  fontSize: '0.74rem',
-                  cursor: 'pointer',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.08)'}
-                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-              >
-                ↩️ Undo
-              </button>
-              <button
-                type="button"
-                onClick={() => setRecentlyDeletedSlide(null)}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: 'rgba(255,255,255,0.7)',
-                  cursor: 'pointer',
-                  fontSize: '0.8rem',
-                  padding: '0 2px'
-                }}
-                title="Dismiss"
-              >
-                ✕
-              </button>
-            </div>
-          )}
 
           {/* Top Right Mini Circular Play Button */}
           <button 
@@ -927,6 +871,35 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
             <span style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               Slides
             </span>
+
+            {/* Undo Slide Delete Circular Button Symbol */}
+            {recentlyDeletedSlide && (
+              <button 
+                type="button"
+                onClick={handleUndoSlideDelete}
+                title="Undo Slide Delete"
+                className="animate-fade"
+                style={{ 
+                  width: '36px', 
+                  height: '36px', 
+                  borderRadius: '50%', 
+                  background: 'rgba(239, 68, 68, 0.2)', 
+                  color: '#ef4444', 
+                  border: '1.5px solid #ef4444', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 10px rgba(239, 68, 68, 0.45)',
+                  marginBottom: '2px',
+                  transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.15)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+              >
+                <RotateCcw size={17} strokeWidth={2.8} />
+              </button>
+            )}
 
             {/* Quick Add Slide (+) Button & Animated Horizontal Capsule Tray */}
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
