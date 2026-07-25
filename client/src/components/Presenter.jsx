@@ -3,12 +3,43 @@ import io from 'socket.io-client';
 import { 
   ChevronLeft, ChevronRight, Lock, Unlock, Eye, EyeOff, RotateCcw, 
   Users, Trophy, Presentation as PresIcon, HelpCircle, ArrowLeft, CheckCircle2, QrCode, Edit3, MessageSquare, Shuffle, RefreshCw, Award, Sparkles,
-  BarChart3, PieChart, CircleDot, Activity, Flame, Volume2, VolumeX
+  BarChart3, PieChart, CircleDot, Activity, Flame, Volume2, VolumeX, Mic, MicOff
 } from 'lucide-react';
 import { solveGroupAllocation, GROUP_NAMING_THEMES, calculateInteractionCoverage } from '../utils/groupingAlgorithm';
 import { playClickSound, playHoverSound, playCorrectSound, playMultiplierSound, playSciFiBeep } from '../utils/soundEffects';
 
 const OPTION_COLORS = ['#4ecdc4', '#cbe86b', '#9adefa', '#ff6b6b', '#6b7c85', '#1e90ff', '#1dd1a1', '#ffb936', '#ffb8b8', '#8e44ad'];
+
+const speakFemaleVoice = (text, rate = 1.0, pitch = 1.15) => {
+  if (!('speechSynthesis' in window)) return;
+  try {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = rate;
+    utterance.pitch = pitch;
+
+    const voices = window.speechSynthesis.getVoices();
+    const femaleVoice = voices.find(v => 
+      v.lang.startsWith('en') && (
+        v.name.toLowerCase().includes('female') || 
+        v.name.includes('Zira') || 
+        v.name.includes('Google UK English Female') || 
+        v.name.includes('Samantha') || 
+        v.name.includes('Victoria') || 
+        v.name.includes('Karen') || 
+        v.name.includes('Moira') || 
+        v.name.includes('Fiona')
+      )
+    ) || voices.find(v => v.lang.startsWith('en'));
+
+    if (femaleVoice) {
+      utterance.voice = femaleVoice;
+    }
+    window.speechSynthesis.speak(utterance);
+  } catch (e) {
+    console.error('Speech synthesis error:', e);
+  }
+};
 
 const playSynthSound = (type, audioTheme = 'classic') => {
   try {
@@ -470,6 +501,10 @@ export default function Presenter({ presentationId, onBack, user: userProp }) {
   const [showEntranceOverlay, setShowEntranceOverlay] = useState(true);
   const [isSlidingLeft, setIsSlidingLeft] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
+
+  // Game Show Female Voiceover Countdown States
+  const [voiceoverEnabled, setVoiceoverEnabled] = useState(true);
+  const [countdownOverlayNumber, setCountdownOverlayNumber] = useState(null);
 
   const getTeamStandings = () => {
     if (!groupAllocations || groupAllocations.length === 0) return [];
@@ -943,11 +978,47 @@ const SAMPLE_DECKS = {
 
   const handleStartReceivingResponses = () => {
     playClickSound();
-    setVotingLocked(false);
-    socketRef.current.emit('toggle_lock', { roomCode, locked: false });
-    const targetSlide = slides[currentSlideIndex];
-    if (targetSlide && targetSlide.timeLimit > 0 && !quizRunning) {
-      startQuizTimer();
+
+    if (voiceoverEnabled) {
+      // 🎙️ Minute to Win It Game Show Female Voiceover Countdown Sequence
+      setCountdownOverlayNumber('3');
+      speakFemaleVoice("Your time will start in 3 seconds. 3...", 1.0, 1.15);
+      playSynthSound('gameshow');
+
+      setTimeout(() => {
+        setCountdownOverlayNumber('2');
+        speakFemaleVoice("2...", 1.0, 1.15);
+        playSynthSound('gameshow');
+      }, 1000);
+
+      setTimeout(() => {
+        setCountdownOverlayNumber('1');
+        speakFemaleVoice("1...", 1.0, 1.15);
+        playSynthSound('gameshow');
+      }, 2000);
+
+      setTimeout(() => {
+        setCountdownOverlayNumber('GO!');
+        speakFemaleVoice("Go!", 1.2, 1.25);
+        playSciFiBeep();
+      }, 3000);
+
+      setTimeout(() => {
+        setCountdownOverlayNumber(null);
+        setVotingLocked(false);
+        socketRef.current.emit('toggle_lock', { roomCode, locked: false });
+        const targetSlide = slides[currentSlideIndex];
+        if (targetSlide && targetSlide.timeLimit > 0 && !quizRunning) {
+          startQuizTimer();
+        }
+      }, 3800);
+    } else {
+      setVotingLocked(false);
+      socketRef.current.emit('toggle_lock', { roomCode, locked: false });
+      const targetSlide = slides[currentSlideIndex];
+      if (targetSlide && targetSlide.timeLimit > 0 && !quizRunning) {
+        startQuizTimer();
+      }
     }
   };
 
@@ -1794,6 +1865,29 @@ const SAMPLE_DECKS = {
                 {timerAudioEnabled ? <Volume2 size={13} /> : <VolumeX size={13} />}
                 <span>{timerAudioEnabled ? 'Audio On' : 'Muted'}</span>
               </button>
+
+              {/* Female Voiceover Announcement Toggle */}
+              <button 
+                type="button"
+                onClick={() => setVoiceoverEnabled(!voiceoverEnabled)}
+                title={voiceoverEnabled ? "Disable Female Voiceover Countdown" : "Enable Female Voiceover Countdown"}
+                style={{
+                  background: voiceoverEnabled ? 'rgba(16, 185, 129, 0.18)' : 'rgba(239, 68, 68, 0.18)',
+                  color: voiceoverEnabled ? '#34d399' : '#ef4444',
+                  border: `1px solid ${voiceoverEnabled ? '#34d399' : '#ef4444'}`,
+                  borderRadius: '20px',
+                  padding: '3px 10px',
+                  fontSize: '0.76rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                {voiceoverEnabled ? <Mic size={13} /> : <MicOff size={13} />}
+                <span>{voiceoverEnabled ? 'Voice On' : 'Voice Off'}</span>
+              </button>
             </div>
           )}
 
@@ -1820,6 +1914,60 @@ const SAMPLE_DECKS = {
         
         {/* Left Area: Slide Content Canvas */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'hidden', paddingRight: '6px', position: 'relative' }}>
+          
+          {/* 🎙️ MINUTE TO WIN IT GAME SHOW VOICE OVER & COUNTDOWN OVERLAY */}
+          {countdownOverlayNumber !== null && (
+            <div 
+              className="animate-fade"
+              style={{
+                position: 'fixed',
+                inset: 0,
+                zIndex: 999999,
+                background: 'rgba(3, 7, 18, 0.9)',
+                backdropFilter: 'blur(16px)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '20px',
+                pointerEvents: 'none'
+              }}
+            >
+              <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#06b6d4', letterSpacing: '3px', textTransform: 'uppercase' }}>
+                🎙️ MINUTE TO WIN IT - GET READY!
+              </div>
+
+              <div 
+                key={countdownOverlayNumber}
+                className="animate-scale-up"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '240px',
+                  height: '240px',
+                  borderRadius: '50%',
+                  background: 'radial-gradient(circle, rgba(6, 182, 212, 0.25) 0%, rgba(9, 14, 28, 0.95) 70%)',
+                  border: `4px solid ${countdownOverlayNumber === 'GO!' ? '#10b981' : '#06b6d4'}`,
+                  boxShadow: `0 0 80px ${countdownOverlayNumber === 'GO!' ? 'rgba(16, 185, 129, 0.8)' : 'rgba(6, 182, 212, 0.8)'}`
+                }}
+              >
+                <span style={{
+                  fontSize: countdownOverlayNumber === 'GO!' ? '5rem' : '7.5rem',
+                  fontWeight: 900,
+                  color: countdownOverlayNumber === 'GO!' ? '#34d399' : '#ffffff',
+                  fontFamily: 'Outfit, sans-serif',
+                  textShadow: `0 0 30px ${countdownOverlayNumber === 'GO!' ? 'rgba(52, 211, 153, 0.9)' : 'rgba(6, 182, 212, 0.9)'}`
+                }}>
+                  {countdownOverlayNumber}
+                </span>
+              </div>
+
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '1px' }}>
+                {countdownOverlayNumber === 'GO!' ? '🔥 START SUBMITTING NOW!' : 'YOUR TIME WILL START IN 3 SECONDS...'}
+              </div>
+            </div>
+          )}
           
           {/* FLOATING START RECEIVING RESPONSES BANNER */}
           {votingLocked && (
