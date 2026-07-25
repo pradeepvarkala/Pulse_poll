@@ -1837,7 +1837,13 @@ export default function App() {
           {view === 'presenter' && (
             <Presenter 
               presentationId={selectedPresentationId}
-              onBack={handleNavigateToDashboard}
+              onBack={() => {
+                if (selectedPresentationId) {
+                  setView('creator');
+                } else {
+                  handleNavigateToDashboard();
+                }
+              }}
               user={user}
             />
           )}

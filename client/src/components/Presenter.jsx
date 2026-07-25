@@ -963,6 +963,17 @@ const SAMPLE_DECKS = {
     }
   };
 
+  // Handle Esc key to close Presenter room and return to Creator
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (onBack) onBack();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onBack]);
+
   const toggleVotingLock = () => {
     const nextState = !votingLocked;
     setVotingLocked(nextState);
@@ -1562,8 +1573,28 @@ const SAMPLE_DECKS = {
       {/* Header controls & instructions */}
       <div className="presenter-header animate-fade">
         <div className="presenter-branding">
-          <button className="btn btn-secondary" onClick={onBack} style={{ gap: '6px' }}>
-            <ArrowLeft size={16} /> Exit
+          <button 
+            type="button"
+            className="btn btn-secondary" 
+            onClick={onBack} 
+            title="Exit Presenter Mode & Return to Presentation Creator (Esc)"
+            style={{ 
+              gap: '6px', 
+              background: 'rgba(239, 68, 68, 0.18)', 
+              color: '#ffffff', 
+              border: '1.5px solid rgba(239, 68, 68, 0.45)', 
+              fontWeight: 800,
+              fontSize: '0.82rem',
+              padding: '6px 14px',
+              borderRadius: '12px',
+              boxShadow: '0 2px 10px rgba(239, 68, 68, 0.25)',
+              cursor: 'pointer',
+              transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.06)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          >
+            <ArrowLeft size={16} strokeWidth={2.8} /> Exit (Esc)
           </button>
           <select 
             value={theme} 
