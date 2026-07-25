@@ -732,11 +732,26 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
         <button 
           type="button"
           className="btn btn-secondary btn-icon" 
-          style={{ width: '28px', height: '28px', border: 'none', background: 'transparent', flexShrink: 0 }}
+          style={{ 
+            width: '28px', 
+            height: '28px', 
+            borderRadius: '50%', 
+            background: 'rgba(239, 68, 68, 0.18)', 
+            border: '1px solid rgba(239, 68, 68, 0.4)', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            flexShrink: 0, 
+            cursor: 'pointer',
+            boxShadow: '0 2px 8px rgba(239, 68, 68, 0.25)',
+            transition: 'all 0.2s ease'
+          }}
           onClick={() => handleDeleteOption(opt.id)}
-          title="Delete Option"
+          title="Delete Option (-)"
+          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.15)'}
+          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
         >
-          <Trash2 size={12} color="var(--accent-red)" />
+          <Minus size={14} color="#ef4444" strokeWidth={2.8} />
         </button>
       </div>
     );
@@ -828,31 +843,87 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
               Slides
             </span>
 
-            {/* Quick Add Slide (+) Button */}
-            <button 
-              type="button"
-              className="btn btn-secondary btn-icon" 
-              onClick={() => setShowSlideTypeModal(true)} 
-              title="Add New Slide (+)"
-              style={{ 
-                width: '42px', 
-                height: '42px', 
-                borderRadius: '50%', 
-                background: 'var(--accent)', 
-                color: '#08211E', 
-                border: 'none', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                cursor: 'pointer',
-                boxShadow: '0 4px 12px rgba(6, 182, 212, 0.4)',
-                transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.15)'}
-              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-            >
-              <Plus size={22} strokeWidth={2.8} />
-            </button>
+            {/* Quick Add Slide (+) Button & Animated Horizontal Capsule Tray */}
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <button 
+                type="button"
+                className="btn btn-secondary btn-icon" 
+                onClick={() => setShowSlideTypeModal(!showSlideTypeModal)} 
+                title="Add New Slide (+)"
+                style={{ 
+                  width: '42px', 
+                  height: '42px', 
+                  borderRadius: '50%', 
+                  background: 'var(--accent)', 
+                  color: '#08211E', 
+                  border: 'none', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(6, 182, 212, 0.4)',
+                  transition: 'all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                  transform: showSlideTypeModal ? 'rotate(45deg)' : 'none'
+                }}
+              >
+                <Plus size={22} strokeWidth={2.8} />
+              </button>
+
+              {/* Animated Horizontal Expanding Capsule Tray popping out to the right */}
+              {showSlideTypeModal && (
+                <div 
+                  className="animate-fade"
+                  style={{
+                    position: 'fixed',
+                    top: '46px',
+                    left: '72px',
+                    width: 'max-content',
+                    maxWidth: '580px',
+                    background: 'rgba(9, 13, 22, 0.96)',
+                    backdropFilter: 'blur(16px)',
+                    border: '1.5px solid rgba(6, 182, 212, 0.5)',
+                    borderRadius: '20px',
+                    padding: '12px 14px',
+                    boxShadow: '0 20px 50px rgba(6, 182, 212, 0.45)',
+                    zIndex: 999999,
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '8px'
+                  }}
+                >
+                  {SLIDE_TYPE_ITEMS.map((item) => {
+                    const IconComp = item.icon;
+                    return (
+                      <button
+                        key={item.type}
+                        type="button"
+                        onClick={() => handleAddSlideWithType(item.type)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          background: 'var(--surface-2)',
+                          border: `1.5px solid ${item.color}66`,
+                          borderRadius: '20px',
+                          padding: '6px 14px',
+                          color: 'var(--text-primary)',
+                          fontWeight: 800,
+                          fontSize: '0.78rem',
+                          cursor: 'pointer',
+                          whiteSpace: 'nowrap',
+                          boxShadow: `0 3px 10px ${item.color}22`,
+                          transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                        }}
+                        className="hover-scale"
+                      >
+                        <IconComp size={15} color={item.color} />
+                        <span>{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
             {/* Import PPTX/PDF Circular Button */}
             <label 
@@ -940,22 +1011,24 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
                   {isPpt ? <FileUp size={20} color="#3b82f6" /> : <IconComp size={20} color={iconColor} />}
 
                   {/* Minus (-) Remove Slide Button */}
-                  <button 
-                    type="button"
-                    style={{ 
-                      position: 'absolute', top: '-6px', right: '-6px', 
-                      width: '20px', height: '20px', borderRadius: '50%',
-                      background: '#ef4444', color: '#ffffff',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      border: '1.5px solid var(--surface)', cursor: 'pointer',
-                      boxShadow: '0 2px 6px rgba(239, 68, 68, 0.4)',
-                      zIndex: 10
-                    }}
-                    onClick={(e) => handleDeleteSlide(slide.id, e)}
-                    title={`Remove / Delete Slide ${index + 1}`}
-                  >
-                    <Minus size={12} strokeWidth={3} />
-                  </button>
+                  {slides.length > 1 && (
+                    <button 
+                      type="button"
+                      style={{ 
+                        position: 'absolute', top: '-5px', right: '-5px', 
+                        width: '20px', height: '20px', borderRadius: '50%',
+                        background: '#ef4444', color: '#ffffff',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        border: '1.5px solid #0f172a', cursor: 'pointer',
+                        boxShadow: '0 2px 8px rgba(239, 68, 68, 0.6)',
+                        zIndex: 30
+                      }}
+                      onClick={(e) => handleDeleteSlide(slide.id, e)}
+                      title={`Delete Slide ${index + 1}`}
+                    >
+                      <Minus size={13} strokeWidth={3} />
+                    </button>
+                  )}
                 </div>
               );
             })}
@@ -2083,78 +2156,6 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
         </div>
       )}
 
-      {/* True Global Full-Viewport Slide Type Selection Popup Modal */}
-      {showSlideTypeModal && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, width: '100vw', height: '100vh',
-          backgroundColor: 'rgba(5, 9, 18, 0.90)', backdropFilter: 'blur(12px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000,
-          padding: '24px'
-        }}>
-          <div className="glass-card animate-fade" style={{
-            width: '100%', maxWidth: '780px', padding: '28px 32px', textAlign: 'left',
-            border: '1.5px solid rgba(6, 182, 212, 0.5)', background: '#090d16',
-            boxShadow: '0 25px 60px rgba(6, 182, 212, 0.4)',
-            maxHeight: '88vh', overflowY: 'auto', borderRadius: '24px'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-              <div>
-                <h3 style={{ fontSize: '1.35rem', fontWeight: 900, margin: 0, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  ✨ Select Slide Type
-                </h3>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Choose an interactive module capsule to add a new slide to your presentation</span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowSlideTypeModal(false)}
-                title="Close (Esc)"
-                style={{
-                  background: 'rgba(255,255,255,0.1)', border: 'none', color: 'var(--text-primary)',
-                  width: '36px', height: '36px', borderRadius: '50%', display: 'flex',
-                  alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontWeight: 800, fontSize: '1.1rem'
-                }}
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Sleek Horizontal Capsule Pills Line Structure Expanding Left to Right */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', width: '100%', justifyContent: 'flex-start' }}>
-              {SLIDE_TYPE_ITEMS.map((item) => {
-                const IconComp = item.icon;
-                return (
-                  <button
-                    key={item.type}
-                    type="button"
-                    onClick={() => handleAddSlideWithType(item.type)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      background: 'var(--surface-2)',
-                      border: `1.5px solid ${item.color}55`,
-                      borderRadius: '24px',
-                      padding: '9px 18px',
-                      color: 'var(--text-primary)',
-                      fontWeight: 800,
-                      fontSize: '0.84rem',
-                      cursor: 'pointer',
-                      boxShadow: `0 4px 14px ${item.color}22`,
-                      transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
-                    }}
-                    className="hover-scale"
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <IconComp size={16} color={item.color} />
-                    </div>
-                    <span>{item.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
