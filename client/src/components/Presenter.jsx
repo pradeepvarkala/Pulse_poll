@@ -1022,16 +1022,20 @@ const SAMPLE_DECKS = {
     }
   };
 
-  // Handle Esc key to close Presenter room and return to Creator
+  // Handle Esc key to close QR modal or close Presenter room and return to Creator
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
-        if (onBack) onBack();
+        if (showQrModal) {
+          setShowQrModal(false);
+        } else if (onBack) {
+          onBack();
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onBack]);
+  }, [showQrModal, onBack]);
 
   const toggleVotingLock = () => {
     const nextState = !votingLocked;
@@ -1741,47 +1745,158 @@ const SAMPLE_DECKS = {
           </button>
         </div>
 
-        {/* Floating QR Modal on-demand */}
+        {/* Full On-Demand 2-Box QR Modal */}
         {showQrModal && (
           <div 
             className="animate-fade"
             style={{
               position: 'fixed',
-              top: '65px',
-              left: '120px',
-              zIndex: 9999,
-              background: 'rgba(9, 14, 28, 0.96)',
-              backdropFilter: 'blur(16px)',
-              border: '1.5px solid rgba(6, 182, 212, 0.4)',
-              borderRadius: '20px',
-              padding: '20px',
+              inset: 0,
+              zIndex: 99999,
+              background: 'rgba(3, 7, 18, 0.95)',
+              backdropFilter: 'blur(20px)',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '12px',
-              boxShadow: '0 15px 40px rgba(0,0,0,0.6)'
+              justifyContent: 'center',
+              padding: '24px',
+              gap: '24px',
+              overflowY: 'auto'
             }}
           >
-            <div style={{ padding: '10px', background: '#ffffff', borderRadius: '14px' }}>
-              <img 
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(joinUrl)}`} 
-                alt="Join QR Code" 
-                style={{ width: '150px', height: '150px', display: 'block' }} 
-              />
+            {/* Top Close Button & Esc Instruction */}
+            <div style={{ width: '100%', maxWidth: '900px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ fontSize: '0.9rem', fontWeight: 900, color: '#06b6d4', letterSpacing: '2px', textTransform: 'uppercase' }}>
+                ✨ JOIN SESSION - SCAN OR ENTER ROOM CODE
+              </div>
+              <button 
+                type="button"
+                onClick={() => setShowQrModal(false)}
+                style={{
+                  background: 'rgba(239, 68, 68, 0.2)',
+                  color: '#ffffff',
+                  border: '1.5px solid rgba(239, 68, 68, 0.5)',
+                  borderRadius: '16px',
+                  padding: '8px 20px',
+                  fontSize: '0.9rem',
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 4px 15px rgba(239, 68, 68, 0.3)'
+                }}
+              >
+                <span>Close ✕ (Esc)</span>
+              </button>
             </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: 600 }}>{window.location.host.toUpperCase()}/JOIN</div>
-              <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#06b6d4', letterSpacing: '2px', fontFamily: 'monospace', marginTop: '2px' }}>
-                CODE: {roomCode.slice(0,3)} {roomCode.slice(3)}
+
+            {/* TWO EQUAL-HEIGHT SIDE-BY-SIDE CARDS */}
+            <div 
+              style={{
+                display: 'flex',
+                alignItems: 'stretch',
+                justifyContent: 'center',
+                gap: '28px',
+                maxWidth: '96vw',
+                flexWrap: 'wrap'
+              }}
+            >
+              {/* BOX 1: MASSIVE HIGH-RES QR CODE CARD */}
+              <div 
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(9, 14, 28, 0.98))',
+                  border: '2px solid rgba(6, 182, 212, 0.5)',
+                  borderRadius: '28px',
+                  padding: '32px 40px',
+                  boxShadow: '0 20px 60px rgba(6, 182, 212, 0.35), 0 0 80px rgba(6, 182, 212, 0.2)',
+                  boxSizing: 'border-box'
+                }}
+              >
+                <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#94a3b8', letterSpacing: '1px', marginBottom: '14px' }}>
+                  📱 SCAN WITH PHONE CAMERA
+                </div>
+                <div style={{
+                  padding: '16px',
+                  background: '#ffffff',
+                  borderRadius: '22px',
+                  boxShadow: '0 12px 35px rgba(0,0,0,0.6)'
+                }}>
+                  <img 
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${encodeURIComponent(joinUrl)}`} 
+                    alt="Giant Join QR Code" 
+                    style={{ width: 'clamp(180px, 30vh, 260px)', height: 'clamp(180px, 30vh, 260px)', display: 'block' }} 
+                  />
+                </div>
+              </div>
+
+              {/* BOX 2: JOINING LINK & ROOM CODE CARD */}
+              <div 
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '22px',
+                  background: 'linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(9, 14, 28, 0.98))',
+                  border: '2px solid rgba(59, 130, 246, 0.5)',
+                  borderRadius: '28px',
+                  padding: '32px 44px',
+                  minWidth: '320px',
+                  boxShadow: '0 20px 60px rgba(59, 130, 246, 0.3)',
+                  boxSizing: 'border-box'
+                }}
+              >
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: 700, letterSpacing: '1px' }}>1. GO TO WEBSITE:</div>
+                  <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#ffffff', letterSpacing: '1px', marginTop: '4px' }}>
+                    {window.location.host.toUpperCase()}/JOIN
+                  </div>
+                </div>
+
+                <div style={{
+                  width: '100%',
+                  height: '1px',
+                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)'
+                }} />
+
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: 700, letterSpacing: '1px' }}>2. ENTER ROOM CODE:</div>
+                  <div style={{
+                    fontSize: 'clamp(2rem, 4.5vw, 3rem)',
+                    fontWeight: 900,
+                    color: '#06b6d4',
+                    letterSpacing: '6px',
+                    fontFamily: 'monospace',
+                    textShadow: '0 0 20px rgba(6, 182, 212, 0.7)',
+                    marginTop: '4px'
+                  }}>
+                    {roomCode.slice(0,3)} {roomCode.slice(3)}
+                  </div>
+                </div>
+
+                {/* Connected Participants Badge */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  fontSize: '0.9rem',
+                  color: '#34d399',
+                  fontWeight: 800,
+                  background: 'rgba(52, 211, 153, 0.12)',
+                  padding: '8px 18px',
+                  borderRadius: '20px',
+                  border: '1px solid rgba(52, 211, 153, 0.3)'
+                }}>
+                  <Users size={18} color="#34d399" />
+                  <span>{participantsCount} Connected Live</span>
+                </div>
               </div>
             </div>
-            <button 
-              type="button"
-              onClick={() => setShowQrModal(false)} 
-              style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '0.8rem' }}
-            >
-              Close ✕
-            </button>
           </div>
         )}
 
@@ -2046,7 +2161,7 @@ const SAMPLE_DECKS = {
               <div 
                 style={{
                   display: 'flex',
-                  alignItems: 'center',
+                  alignItems: 'stretch',
                   justifyContent: 'center',
                   gap: '28px',
                   maxWidth: '96vw',
@@ -2061,11 +2176,13 @@ const SAMPLE_DECKS = {
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
+                    justifyContent: 'center',
                     background: 'linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(9, 14, 28, 0.98))',
                     border: '2px solid rgba(6, 182, 212, 0.5)',
                     borderRadius: '28px',
-                    padding: '24px 32px',
-                    boxShadow: '0 20px 60px rgba(6, 182, 212, 0.35), 0 0 80px rgba(6, 182, 212, 0.2)'
+                    padding: '32px 40px',
+                    boxShadow: '0 20px 60px rgba(6, 182, 212, 0.35), 0 0 80px rgba(6, 182, 212, 0.2)',
+                    boxSizing: 'border-box'
                   }}
                 >
                   <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#94a3b8', letterSpacing: '1px', marginBottom: '14px' }}>
@@ -2092,13 +2209,14 @@ const SAMPLE_DECKS = {
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '20px',
+                    gap: '22px',
                     background: 'linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(9, 14, 28, 0.98))',
                     border: '2px solid rgba(59, 130, 246, 0.5)',
                     borderRadius: '28px',
-                    padding: '32px 40px',
-                    minWidth: '300px',
-                    boxShadow: '0 20px 60px rgba(59, 130, 246, 0.3)'
+                    padding: '32px 44px',
+                    minWidth: '320px',
+                    boxShadow: '0 20px 60px rgba(59, 130, 246, 0.3)',
+                    boxSizing: 'border-box'
                   }}
                 >
                   <div style={{ textAlign: 'center' }}>
