@@ -459,6 +459,7 @@ export default function Presenter({ presentationId, onBack, user: userProp }) {
   const [timerAudioEnabled, setTimerAudioEnabled] = useState(true);
   const [showEntranceOverlay, setShowEntranceOverlay] = useState(true);
   const [isSlidingLeft, setIsSlidingLeft] = useState(false);
+  const [showQrModal, setShowQrModal] = useState(false);
 
   const getTeamStandings = () => {
     if (!groupAllocations || groupAllocations.length === 0) return [];
@@ -1596,19 +1597,87 @@ const SAMPLE_DECKS = {
             <option value="forest-sage">Forest Sage</option>
             <option value="corporate">Corporate</option>
           </select>
+
+          {/* Faded QR Code Icon Button on Left Side */}
+          <button
+            type="button"
+            onClick={() => setShowQrModal(!showQrModal)}
+            title="Toggle QR Code & Join Info"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: 'rgba(255, 255, 255, 0.06)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              borderRadius: '12px',
+              padding: '6px 12px',
+              color: 'var(--text-muted)',
+              cursor: 'pointer',
+              opacity: 0.85,
+              fontSize: '0.8rem',
+              fontWeight: 700,
+              transition: 'all 0.2s ease',
+              marginLeft: '10px'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = '1';
+              e.currentTarget.style.borderColor = '#06b6d4';
+              e.currentTarget.style.color = '#06b6d4';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = '0.85';
+              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+              e.currentTarget.style.color = 'var(--text-muted)';
+            }}
+          >
+            <QrCode size={16} />
+            <span>QR Code</span>
+          </button>
         </div>
 
-        <div className="join-instruction-card" style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(15, 23, 42, 0.85)', padding: '6px 14px', borderRadius: '14px', border: '1px solid var(--border-glass)' }}>
-          <img src={qrCodeUrl} alt="Join QR Code" className="qr-code-img" style={{ width: '32px', height: '32px', borderRadius: '6px' }} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'nowrap' }}>
-            <span className="join-text" style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-              SCAN OR JOIN AT: <strong style={{ color: '#ffffff', letterSpacing: '0.02em' }}>{window.location.host.toUpperCase()}/JOIN</strong>
-            </span>
-            <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#38bdf8', background: 'rgba(56, 189, 248, 0.15)', padding: '3px 10px', borderRadius: '8px', border: '1px solid rgba(56, 189, 248, 0.3)', letterSpacing: '0.05em' }}>
-              CODE: {roomCode.slice(0,3)} {roomCode.slice(3)}
-            </span>
+        {/* Floating QR Modal on-demand */}
+        {showQrModal && (
+          <div 
+            className="animate-fade"
+            style={{
+              position: 'fixed',
+              top: '65px',
+              left: '120px',
+              zIndex: 9999,
+              background: 'rgba(9, 14, 28, 0.96)',
+              backdropFilter: 'blur(16px)',
+              border: '1.5px solid rgba(6, 182, 212, 0.4)',
+              borderRadius: '20px',
+              padding: '20px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '12px',
+              boxShadow: '0 15px 40px rgba(0,0,0,0.6)'
+            }}
+          >
+            <div style={{ padding: '10px', background: '#ffffff', borderRadius: '14px' }}>
+              <img 
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(joinUrl)}`} 
+                alt="Join QR Code" 
+                style={{ width: '150px', height: '150px', display: 'block' }} 
+              />
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: 600 }}>{window.location.host.toUpperCase()}/JOIN</div>
+              <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#06b6d4', letterSpacing: '2px', fontFamily: 'monospace', marginTop: '2px' }}>
+                CODE: {roomCode.slice(0,3)} {roomCode.slice(3)}
+              </div>
+            </div>
+            <button 
+              type="button"
+              onClick={() => setShowQrModal(false)} 
+              style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '0.8rem' }}
+            >
+              Close ✕
+            </button>
           </div>
-        </div>
+        )}
 
         {/* Live Real-time Metrics & Timer Badge */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -1687,7 +1756,9 @@ const SAMPLE_DECKS = {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '24px',
+                padding: '16px',
+                gap: '16px',
+                overflowY: 'auto',
                 opacity: isSlidingLeft ? 0 : 1,
                 transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
                 pointerEvents: isSlidingLeft ? 'none' : 'auto'
@@ -1701,29 +1772,31 @@ const SAMPLE_DECKS = {
                   alignItems: 'center',
                   background: 'linear-gradient(145deg, rgba(15, 23, 42, 0.95), rgba(9, 14, 28, 0.98))',
                   border: '2px solid rgba(6, 182, 212, 0.5)',
-                  borderRadius: '28px',
-                  padding: '36px 48px',
+                  borderRadius: '24px',
+                  padding: '24px 32px',
+                  maxWidth: '92vw',
+                  maxHeight: '82vh',
                   boxShadow: '0 20px 60px rgba(6, 182, 212, 0.35), 0 0 100px rgba(6, 182, 212, 0.25)',
                   transform: isSlidingLeft ? 'translate(-40vw, -40vh) scale(0.15)' : 'translate(0, 0) scale(1)',
                   transition: 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
                 }}
               >
-                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#06b6d4', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '14px' }}>
+                <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#06b6d4', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '10px' }}>
                   ✨ SCAN OR ENTER CODE TO JOIN LIVE SESSION
                 </div>
 
                 {/* Giant QR Code Image */}
                 <div style={{
-                  padding: '16px',
+                  padding: '12px',
                   background: '#ffffff',
-                  borderRadius: '20px',
+                  borderRadius: '18px',
                   boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-                  marginBottom: '20px'
+                  marginBottom: '14px'
                 }}>
                   <img 
                     src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(joinUrl)}`} 
                     alt="Giant Join QR Code" 
-                    style={{ width: '220px', height: '220px', display: 'block' }} 
+                    style={{ width: 'clamp(130px, 22vh, 190px)', height: 'clamp(130px, 22vh, 190px)', display: 'block' }} 
                   />
                 </div>
 
@@ -1732,18 +1805,18 @@ const SAMPLE_DECKS = {
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  gap: '8px',
+                  gap: '4px',
                   background: 'rgba(255, 255, 255, 0.04)',
                   border: '1.5px solid rgba(255, 255, 255, 0.1)',
-                  padding: '14px 28px',
-                  borderRadius: '16px',
+                  padding: '10px 24px',
+                  borderRadius: '14px',
                   width: '100%'
                 }}>
-                  <div style={{ fontSize: '1rem', color: '#94a3b8', fontWeight: 600 }}>
-                    JOIN AT: <strong style={{ color: '#ffffff', fontSize: '1.15rem', letterSpacing: '1px' }}>{window.location.host.toUpperCase()}/JOIN</strong>
+                  <div style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 600 }}>
+                    JOIN AT: <strong style={{ color: '#ffffff', fontSize: '1rem', letterSpacing: '1px' }}>{window.location.host.toUpperCase()}/JOIN</strong>
                   </div>
                   <div style={{
-                    fontSize: '2.2rem',
+                    fontSize: 'clamp(1.5rem, 4vw, 2.1rem)',
                     fontWeight: 900,
                     color: '#06b6d4',
                     letterSpacing: '4px',
@@ -1755,8 +1828,8 @@ const SAMPLE_DECKS = {
                 </div>
 
                 {/* Participants connected live counter */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.92rem', color: '#34d399', fontWeight: 800, marginTop: '14px' }}>
-                  <Users size={18} color="#34d399" />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: '#34d399', fontWeight: 800, marginTop: '10px' }}>
+                  <Users size={16} color="#34d399" />
                   <span>{participantsCount} Participant{participantsCount === 1 ? '' : 's'} Connected Live</span>
                 </div>
               </div>
@@ -1778,64 +1851,66 @@ const SAMPLE_DECKS = {
                   background: 'linear-gradient(135deg, #06b6d4, #3b82f6)',
                   color: '#ffffff',
                   border: 'none',
-                  borderRadius: '24px',
-                  padding: '16px 42px',
-                  fontSize: '1.35rem',
+                  borderRadius: '20px',
+                  padding: '12px 36px',
+                  fontSize: '1.2rem',
                   fontWeight: 900,
                   cursor: 'pointer',
                   boxShadow: '0 8px 30px rgba(6, 182, 212, 0.6), inset 0 1px 0 rgba(255,255,255,0.4)',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '12px',
+                  gap: '10px',
                   letterSpacing: '1px',
+                  flexShrink: 0,
                   transition: 'all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.06)'}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
                 onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
               >
                 <span>Start Presentation</span>
-                <span style={{ fontSize: '1.5rem', letterSpacing: '2px', color: '#ffb700' }}>▶▶▶</span>
+                <span style={{ fontSize: '1.3rem', letterSpacing: '2px', color: '#ffb700' }}>▶▶▶</span>
               </button>
             </div>
           )}
 
-          {/* BIG ANIMATED CIRCULAR COUNTDOWN CLOCK GAUGE OVERLAY */}
+          {/* BIG ANIMATED CIRCULAR COUNTDOWN CLOCK GAUGE OVERLAY (PROMINENT ON LEFT MARGIN) */}
           {quizRunning && quizTimer > 0 && (
             <div 
               className="animate-fade"
               style={{
-                position: 'absolute',
-                top: '10px',
-                right: '20px',
-                zIndex: 90,
+                position: 'fixed',
+                left: '30px',
+                top: '52%',
+                transform: 'translateY(-50%)',
+                zIndex: 100,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 pointerEvents: 'none'
               }}
             >
-              <div style={{ position: 'relative', width: '110px', height: '110px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {/* Outer SVG Circular Progress Bar */}
-                <svg width="110" height="110" style={{ transform: 'rotate(-90deg)' }}>
+              <div style={{ position: 'relative', width: '175px', height: '175px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {/* Outer SVG Circular Progress Bar (1/4 total presentation height) */}
+                <svg width="175" height="175" style={{ transform: 'rotate(-90deg)' }}>
                   <circle 
-                    cx="55" cy="55" r="46" 
+                    cx="87.5" cy="87.5" r="74" 
                     stroke="rgba(255, 255, 255, 0.1)" 
-                    strokeWidth="7" 
+                    strokeWidth="9" 
                     fill="transparent" 
                   />
                   <circle 
-                    cx="55" cy="55" r="46" 
+                    cx="87.5" cy="87.5" r="74" 
                     stroke={quizTimer <= 5 ? '#ef4444' : '#06b6d4'} 
-                    strokeWidth="7" 
+                    strokeWidth="9" 
                     fill="transparent" 
-                    strokeDasharray="289.03"
-                    strokeDashoffset={(289.03 * (1 - (quizTimer / (activeSlide?.timeLimit || 15)))).toFixed(1)}
+                    strokeDasharray="464.96"
+                    strokeDashoffset={(464.96 * (1 - (quizTimer / (activeSlide?.timeLimit || 15)))).toFixed(1)}
                     strokeLinecap="round"
                     style={{ transition: 'stroke-dashoffset 1s linear, stroke 0.3s ease' }}
                   />
                 </svg>
 
-                {/* Center Digital Countdown Display with Pulse Effect */}
+                {/* Center Digital Countdown Display with Scale Pulse Effect */}
                 <div 
                   key={quizTimer}
                   className={quizTimer <= 5 ? "timer-warning-pulse" : "animate-scale-up"}
@@ -1845,19 +1920,19 @@ const SAMPLE_DECKS = {
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    background: 'rgba(9, 13, 22, 0.92)',
+                    background: 'rgba(9, 13, 22, 0.94)',
                     borderRadius: '50%',
-                    width: '80px',
-                    height: '80px',
-                    border: `2px solid ${quizTimer <= 5 ? '#ef4444' : '#06b6d4'}`,
-                    boxShadow: `0 0 25px ${quizTimer <= 5 ? 'rgba(239, 68, 68, 0.6)' : 'rgba(6, 182, 212, 0.5)'}`
+                    width: '130px',
+                    height: '130px',
+                    border: `2.5px solid ${quizTimer <= 5 ? '#ef4444' : '#06b6d4'}`,
+                    boxShadow: `0 0 35px ${quizTimer <= 5 ? 'rgba(239, 68, 68, 0.65)' : 'rgba(6, 182, 212, 0.55)'}`
                   }}
                 >
-                  <span style={{ fontSize: '1.8rem', fontWeight: 900, color: '#ffffff', fontFamily: 'Outfit, sans-serif', lineHeight: 1 }}>
+                  <span style={{ fontSize: '3.1rem', fontWeight: 900, color: '#ffffff', fontFamily: 'Outfit, sans-serif', lineHeight: 1 }}>
                     {quizTimer}
                   </span>
-                  <span style={{ fontSize: '0.58rem', fontWeight: 800, color: quizTimer <= 5 ? '#ef4444' : '#06b6d4', letterSpacing: '1px', marginTop: '1px' }}>
-                    SEC
+                  <span style={{ fontSize: '0.72rem', fontWeight: 800, color: quizTimer <= 5 ? '#ef4444' : '#06b6d4', letterSpacing: '1.5px', marginTop: '2px' }}>
+                    SECONDS
                   </span>
                 </div>
               </div>
