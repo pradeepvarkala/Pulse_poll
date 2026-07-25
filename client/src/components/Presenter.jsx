@@ -3,7 +3,7 @@ import io from 'socket.io-client';
 import { 
   ChevronLeft, ChevronRight, Lock, Unlock, Eye, EyeOff, RotateCcw, 
   Users, Trophy, Presentation as PresIcon, HelpCircle, ArrowLeft, CheckCircle2, QrCode, Edit3, MessageSquare, Shuffle, RefreshCw, Award, Sparkles,
-  BarChart3, PieChart, CircleDot, Activity, Flame
+  BarChart3, PieChart, CircleDot, Activity, Flame, Volume2, VolumeX
 } from 'lucide-react';
 import { solveGroupAllocation, GROUP_NAMING_THEMES, calculateInteractionCoverage } from '../utils/groupingAlgorithm';
 import { playClickSound, playHoverSound, playCorrectSound, playMultiplierSound, playSciFiBeep } from '../utils/soundEffects';
@@ -455,6 +455,11 @@ export default function Presenter({ presentationId, onBack, user: userProp }) {
   const [leaderboardViewMode, setLeaderboardViewMode] = useState('individual'); // 'individual' or 'team'
   const [showFinaleModal, setShowFinaleModal] = useState(false);
 
+  // Timer Audio & Giant QR Entrance States
+  const [timerAudioEnabled, setTimerAudioEnabled] = useState(true);
+  const [showEntranceOverlay, setShowEntranceOverlay] = useState(true);
+  const [isSlidingLeft, setIsSlidingLeft] = useState(false);
+
   const getTeamStandings = () => {
     if (!groupAllocations || groupAllocations.length === 0) return [];
     
@@ -696,6 +701,15 @@ const SAMPLE_DECKS = {
         clearInterval(musicIntervalRef.current);
         musicIntervalRef.current = null;
       }
+      musicOscillatorsRef.current.forEach(osc => {
+        try { osc.stop(); } catch(e) {}
+      });
+      musicOscillatorsRef.current = [];
+      return;
+    }
+
+    if (!timerAudioEnabled) {
+      if (musicIntervalRef.current) clearInterval(musicIntervalRef.current);
       musicOscillatorsRef.current.forEach(osc => {
         try { osc.stop(); } catch(e) {}
       });
@@ -1607,6 +1621,27 @@ const SAMPLE_DECKS = {
               >
                 ⏱️ {quizTimer}s
               </span>
+              <button 
+                type="button"
+                onClick={() => setTimerAudioEnabled(!timerAudioEnabled)}
+                title={timerAudioEnabled ? "Mute Countdown Ticking Audio" : "Enable Countdown Ticking Audio"}
+                style={{
+                  background: timerAudioEnabled ? 'rgba(6, 182, 212, 0.18)' : 'rgba(239, 68, 68, 0.18)',
+                  color: timerAudioEnabled ? '#06b6d4' : '#ef4444',
+                  border: `1px solid ${timerAudioEnabled ? '#06b6d4' : '#ef4444'}`,
+                  borderRadius: '20px',
+                  padding: '3px 10px',
+                  fontSize: '0.76rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                {timerAudioEnabled ? <Volume2 size={13} /> : <VolumeX size={13} />}
+                <span>{timerAudioEnabled ? 'Audio On' : 'Muted'}</span>
+              </button>
               {!quizRunning && (
                 <button className="btn btn-primary" style={{ padding: '3px 10px', fontSize: '0.78rem', borderRadius: '12px', background: 'var(--accent)', color: '#08211E', fontWeight: 700, border: 'none' }} onClick={startQuizTimer}>
                   Start Timer
@@ -1637,7 +1672,197 @@ const SAMPLE_DECKS = {
       <div className="presenter-body" style={{ display: 'flex', gap: '20px', padding: '12px 30px', height: 'calc(100vh - 75px)', overflow: 'hidden' }}>
         
         {/* Left Area: Slide Content Canvas */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'hidden', paddingRight: '6px' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'hidden', paddingRight: '6px', position: 'relative' }}>
+          
+          {/* GIANT QR CODE ENTRANCE OVERLAY FOR PRESENTATION LAUNCH */}
+          {showEntranceOverlay && (
+            <div 
+              style={{
+                position: 'fixed',
+                inset: 0,
+                zIndex: 99999,
+                background: 'rgba(3, 7, 18, 0.94)',
+                backdropFilter: 'blur(20px)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '24px',
+                opacity: isSlidingLeft ? 0 : 1,
+                transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
+                pointerEvents: isSlidingLeft ? 'none' : 'auto'
+              }}
+            >
+              {/* Centered High-Res QR Card */}
+              <div 
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  background: 'linear-gradient(145deg, rgba(15, 23, 42, 0.95), rgba(9, 14, 28, 0.98))',
+                  border: '2px solid rgba(6, 182, 212, 0.5)',
+                  borderRadius: '28px',
+                  padding: '36px 48px',
+                  boxShadow: '0 20px 60px rgba(6, 182, 212, 0.35), 0 0 100px rgba(6, 182, 212, 0.25)',
+                  transform: isSlidingLeft ? 'translate(-40vw, -40vh) scale(0.15)' : 'translate(0, 0) scale(1)',
+                  transition: 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
+                }}
+              >
+                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#06b6d4', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '14px' }}>
+                  ✨ SCAN OR ENTER CODE TO JOIN LIVE SESSION
+                </div>
+
+                {/* Giant QR Code Image */}
+                <div style={{
+                  padding: '16px',
+                  background: '#ffffff',
+                  borderRadius: '20px',
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+                  marginBottom: '20px'
+                }}>
+                  <img 
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(joinUrl)}`} 
+                    alt="Giant Join QR Code" 
+                    style={{ width: '220px', height: '220px', display: 'block' }} 
+                  />
+                </div>
+
+                {/* Join URL & Room Code Box */}
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '8px',
+                  background: 'rgba(255, 255, 255, 0.04)',
+                  border: '1.5px solid rgba(255, 255, 255, 0.1)',
+                  padding: '14px 28px',
+                  borderRadius: '16px',
+                  width: '100%'
+                }}>
+                  <div style={{ fontSize: '1rem', color: '#94a3b8', fontWeight: 600 }}>
+                    JOIN AT: <strong style={{ color: '#ffffff', fontSize: '1.15rem', letterSpacing: '1px' }}>{window.location.host.toUpperCase()}/JOIN</strong>
+                  </div>
+                  <div style={{
+                    fontSize: '2.2rem',
+                    fontWeight: 900,
+                    color: '#06b6d4',
+                    letterSpacing: '4px',
+                    fontFamily: 'monospace',
+                    textShadow: '0 0 15px rgba(6, 182, 212, 0.6)'
+                  }}>
+                    CODE: {roomCode.slice(0,3)} {roomCode.slice(3)}
+                  </div>
+                </div>
+
+                {/* Participants connected live counter */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.92rem', color: '#34d399', fontWeight: 800, marginTop: '14px' }}>
+                  <Users size={18} color="#34d399" />
+                  <span>{participantsCount} Participant{participantsCount === 1 ? '' : 's'} Connected Live</span>
+                </div>
+              </div>
+
+              {/* Large Start Presentation Button >>> */}
+              <button 
+                type="button"
+                onClick={() => {
+                  playClickSound();
+                  setIsSlidingLeft(true);
+                  setTimeout(() => {
+                    setShowEntranceOverlay(false);
+                    if (activeSlide && activeSlide.timeLimit > 0) {
+                      startQuizTimer();
+                    }
+                  }, 750);
+                }}
+                style={{
+                  background: 'linear-gradient(135deg, #06b6d4, #3b82f6)',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '24px',
+                  padding: '16px 42px',
+                  fontSize: '1.35rem',
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                  boxShadow: '0 8px 30px rgba(6, 182, 212, 0.6), inset 0 1px 0 rgba(255,255,255,0.4)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  letterSpacing: '1px',
+                  transition: 'all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.06)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+              >
+                <span>Start Presentation</span>
+                <span style={{ fontSize: '1.5rem', letterSpacing: '2px', color: '#ffb700' }}>▶▶▶</span>
+              </button>
+            </div>
+          )}
+
+          {/* BIG ANIMATED CIRCULAR COUNTDOWN CLOCK GAUGE OVERLAY */}
+          {quizRunning && quizTimer > 0 && (
+            <div 
+              className="animate-fade"
+              style={{
+                position: 'absolute',
+                top: '10px',
+                right: '20px',
+                zIndex: 90,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                pointerEvents: 'none'
+              }}
+            >
+              <div style={{ position: 'relative', width: '110px', height: '110px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {/* Outer SVG Circular Progress Bar */}
+                <svg width="110" height="110" style={{ transform: 'rotate(-90deg)' }}>
+                  <circle 
+                    cx="55" cy="55" r="46" 
+                    stroke="rgba(255, 255, 255, 0.1)" 
+                    strokeWidth="7" 
+                    fill="transparent" 
+                  />
+                  <circle 
+                    cx="55" cy="55" r="46" 
+                    stroke={quizTimer <= 5 ? '#ef4444' : '#06b6d4'} 
+                    strokeWidth="7" 
+                    fill="transparent" 
+                    strokeDasharray="289.03"
+                    strokeDashoffset={(289.03 * (1 - (quizTimer / (activeSlide?.timeLimit || 15)))).toFixed(1)}
+                    strokeLinecap="round"
+                    style={{ transition: 'stroke-dashoffset 1s linear, stroke 0.3s ease' }}
+                  />
+                </svg>
+
+                {/* Center Digital Countdown Display with Pulse Effect */}
+                <div 
+                  key={quizTimer}
+                  className={quizTimer <= 5 ? "timer-warning-pulse" : "animate-scale-up"}
+                  style={{
+                    position: 'absolute',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'rgba(9, 13, 22, 0.92)',
+                    borderRadius: '50%',
+                    width: '80px',
+                    height: '80px',
+                    border: `2px solid ${quizTimer <= 5 ? '#ef4444' : '#06b6d4'}`,
+                    boxShadow: `0 0 25px ${quizTimer <= 5 ? 'rgba(239, 68, 68, 0.6)' : 'rgba(6, 182, 212, 0.5)'}`
+                  }}
+                >
+                  <span style={{ fontSize: '1.8rem', fontWeight: 900, color: '#ffffff', fontFamily: 'Outfit, sans-serif', lineHeight: 1 }}>
+                    {quizTimer}
+                  </span>
+                  <span style={{ fontSize: '0.58rem', fontWeight: 800, color: quizTimer <= 5 ? '#ef4444' : '#06b6d4', letterSpacing: '1px', marginTop: '1px' }}>
+                    SEC
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
           {confettiActive && (
           <div className="confetti-overlay">
             {Array.from({ length: 60 }).map((_, i) => {
