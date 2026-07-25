@@ -1838,7 +1838,7 @@ export default function App() {
             <Presenter 
               presentationId={selectedPresentationId}
               onBack={() => {
-                const targetId = selectedPresentationId || userPresentations[0]?.id || 'pres-sample-default';
+                const targetId = selectedPresentationId || 'sample-pres-1';
                 setSelectedPresentationId(targetId);
                 setView('creator');
               }}
