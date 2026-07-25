@@ -1838,11 +1838,9 @@ export default function App() {
             <Presenter 
               presentationId={selectedPresentationId}
               onBack={() => {
-                if (selectedPresentationId) {
-                  setView('creator');
-                } else {
-                  handleNavigateToDashboard();
-                }
+                const targetId = selectedPresentationId || userPresentations[0]?.id || 'pres-sample-default';
+                setSelectedPresentationId(targetId);
+                setView('creator');
               }}
               user={user}
             />
