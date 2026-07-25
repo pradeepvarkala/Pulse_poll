@@ -901,7 +901,6 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
 
             {!hasVoted && (
               <fieldset disabled={votingLocked} style={{ border: 'none', padding: 0, margin: 0, width: '100%', opacity: votingLocked ? 0.65 : 1, transition: 'opacity 0.3s ease' }}>
-              <>
                 {/* 1. Multiple Choice */}
                 {slide?.type === 'poll' && (
                   <div style={{
@@ -1274,7 +1273,6 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
                     </button>
                   </form>
                 )}
-              </>
               </fieldset>
             )}
 

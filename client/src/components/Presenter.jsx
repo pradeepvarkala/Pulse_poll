@@ -319,8 +319,18 @@ function PenCanvasOverlay({ isActive, penTool, penColor, penSize, onSaveStroke, 
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    let clientX = 0;
+    let clientY = 0;
+    if (e.touches && e.touches.length > 0) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else if (e.changedTouches && e.changedTouches.length > 0) {
+      clientX = e.changedTouches[0].clientX;
+      clientY = e.changedTouches[0].clientY;
+    } else {
+      clientX = e.clientX || 0;
+      clientY = e.clientY || 0;
+    }
     return {
       x: clientX - rect.left,
       y: clientY - rect.top
@@ -1594,6 +1604,35 @@ const SAMPLE_DECKS = {
             <option value="corporate">Corporate</option>
           </select>
 
+          {/* Quick Light / Dark Mode Toggle Button */}
+          <button
+            type="button"
+            onClick={() => {
+              const lightThemes = ['light-luxe', 'classic-slate', 'ocean', 'sunset'];
+              const isCurrentLight = lightThemes.includes(theme);
+              const nextTheme = isCurrentLight ? 'cyber-neon' : 'light-luxe';
+              handleThemeChange(nextTheme);
+            }}
+            title="Switch Between Light and Dark Background Themes"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+              background: ['light-luxe', 'classic-slate', 'ocean', 'sunset'].includes(theme) ? '#fbbf24' : 'rgba(255, 255, 255, 0.08)',
+              color: ['light-luxe', 'classic-slate', 'ocean', 'sunset'].includes(theme) ? '#0f172a' : '#f8fafc',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: '12px',
+              padding: '6px 12px',
+              fontSize: '0.8rem',
+              fontWeight: 800,
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              marginLeft: '4px'
+            }}
+          >
+            {['light-luxe', 'classic-slate', 'ocean', 'sunset'].includes(theme) ? '☀️ Light Mode' : '🌙 Dark Mode'}
+          </button>
+
           {/* Faded QR Code Icon Button on Left Side */}
           <button
             type="button"
@@ -1837,87 +1876,127 @@ const SAMPLE_DECKS = {
                 position: 'fixed',
                 inset: 0,
                 zIndex: 99999,
-                background: 'rgba(3, 7, 18, 0.94)',
+                background: 'rgba(3, 7, 18, 0.95)',
                 backdropFilter: 'blur(20px)',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: '16px',
-                gap: '16px',
+                padding: '24px',
+                gap: '24px',
                 overflowY: 'auto',
                 opacity: isSlidingLeft ? 0 : 1,
                 transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
                 pointerEvents: isSlidingLeft ? 'none' : 'auto'
               }}
             >
-              {/* Centered High-Res QR Card */}
+              <div style={{ fontSize: '0.9rem', fontWeight: 900, color: '#06b6d4', letterSpacing: '2px', textTransform: 'uppercase' }}>
+                ✨ SCAN QR CODE OR ENTER ROOM CODE TO JOIN LIVE SESSION
+              </div>
+
+              {/* TWO SEPARATE SIDE-BY-SIDE CARDS FOR MAXIMUM QR VISIBILITY */}
               <div 
                 style={{
                   display: 'flex',
-                  flexDirection: 'column',
                   alignItems: 'center',
-                  background: 'linear-gradient(145deg, rgba(15, 23, 42, 0.95), rgba(9, 14, 28, 0.98))',
-                  border: '2px solid rgba(6, 182, 212, 0.5)',
-                  borderRadius: '24px',
-                  padding: '24px 32px',
-                  maxWidth: '92vw',
-                  maxHeight: '82vh',
-                  boxShadow: '0 20px 60px rgba(6, 182, 212, 0.35), 0 0 100px rgba(6, 182, 212, 0.25)',
+                  justifyContent: 'center',
+                  gap: '28px',
+                  maxWidth: '96vw',
+                  flexWrap: 'wrap',
                   transform: isSlidingLeft ? 'translate(-40vw, -40vh) scale(0.15)' : 'translate(0, 0) scale(1)',
                   transition: 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
                 }}
               >
-                <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#06b6d4', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '10px' }}>
-                  ✨ SCAN OR ENTER CODE TO JOIN LIVE SESSION
-                </div>
-
-                {/* Giant QR Code Image */}
-                <div style={{
-                  padding: '12px',
-                  background: '#ffffff',
-                  borderRadius: '18px',
-                  boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-                  marginBottom: '14px'
-                }}>
-                  <img 
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(joinUrl)}`} 
-                    alt="Giant Join QR Code" 
-                    style={{ width: 'clamp(130px, 22vh, 190px)', height: 'clamp(130px, 22vh, 190px)', display: 'block' }} 
-                  />
-                </div>
-
-                {/* Join URL & Room Code Box */}
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: '4px',
-                  background: 'rgba(255, 255, 255, 0.04)',
-                  border: '1.5px solid rgba(255, 255, 255, 0.1)',
-                  padding: '10px 24px',
-                  borderRadius: '14px',
-                  width: '100%'
-                }}>
-                  <div style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 600 }}>
-                    JOIN AT: <strong style={{ color: '#ffffff', fontSize: '1rem', letterSpacing: '1px' }}>{window.location.host.toUpperCase()}/JOIN</strong>
+                {/* BOX 1: MASSIVE HIGH-RES QR CODE CARD */}
+                <div 
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    background: 'linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(9, 14, 28, 0.98))',
+                    border: '2px solid rgba(6, 182, 212, 0.5)',
+                    borderRadius: '28px',
+                    padding: '24px 32px',
+                    boxShadow: '0 20px 60px rgba(6, 182, 212, 0.35), 0 0 80px rgba(6, 182, 212, 0.2)'
+                  }}
+                >
+                  <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#94a3b8', letterSpacing: '1px', marginBottom: '14px' }}>
+                    📱 SCAN WITH PHONE CAMERA
                   </div>
                   <div style={{
-                    fontSize: 'clamp(1.5rem, 4vw, 2.1rem)',
-                    fontWeight: 900,
-                    color: '#06b6d4',
-                    letterSpacing: '4px',
-                    fontFamily: 'monospace',
-                    textShadow: '0 0 15px rgba(6, 182, 212, 0.6)'
+                    padding: '16px',
+                    background: '#ffffff',
+                    borderRadius: '22px',
+                    boxShadow: '0 12px 35px rgba(0,0,0,0.6)'
                   }}>
-                    CODE: {roomCode.slice(0,3)} {roomCode.slice(3)}
+                    <img 
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${encodeURIComponent(joinUrl)}`} 
+                      alt="Giant Join QR Code" 
+                      style={{ width: 'clamp(180px, 30vh, 260px)', height: 'clamp(180px, 30vh, 260px)', display: 'block' }} 
+                    />
                   </div>
                 </div>
 
-                {/* Participants connected live counter */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: '#34d399', fontWeight: 800, marginTop: '10px' }}>
-                  <Users size={16} color="#34d399" />
-                  <span>{participantsCount} Participant{participantsCount === 1 ? '' : 's'} Connected Live</span>
+                {/* BOX 2: JOINING LINK & ROOM CODE CARD */}
+                <div 
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '20px',
+                    background: 'linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(9, 14, 28, 0.98))',
+                    border: '2px solid rgba(59, 130, 246, 0.5)',
+                    borderRadius: '28px',
+                    padding: '32px 40px',
+                    minWidth: '300px',
+                    boxShadow: '0 20px 60px rgba(59, 130, 246, 0.3)'
+                  }}
+                >
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: 700, letterSpacing: '1px' }}>1. GO TO WEBSITE:</div>
+                    <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#ffffff', letterSpacing: '1px', marginTop: '4px' }}>
+                      {window.location.host.toUpperCase()}/JOIN
+                    </div>
+                  </div>
+
+                  <div style={{
+                    width: '100%',
+                    height: '1px',
+                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)'
+                  }} />
+
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: 700, letterSpacing: '1px' }}>2. ENTER ROOM CODE:</div>
+                    <div style={{
+                      fontSize: 'clamp(2rem, 4.5vw, 3rem)',
+                      fontWeight: 900,
+                      color: '#06b6d4',
+                      letterSpacing: '6px',
+                      fontFamily: 'monospace',
+                      textShadow: '0 0 20px rgba(6, 182, 212, 0.7)',
+                      marginTop: '4px'
+                    }}>
+                      {roomCode.slice(0,3)} {roomCode.slice(3)}
+                    </div>
+                  </div>
+
+                  {/* Connected Participants Badge */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    fontSize: '0.9rem',
+                    color: '#34d399',
+                    fontWeight: 800,
+                    background: 'rgba(52, 211, 153, 0.12)',
+                    padding: '8px 18px',
+                    borderRadius: '20px',
+                    border: '1px solid rgba(52, 211, 153, 0.3)'
+                  }}>
+                    <Users size={18} color="#34d399" />
+                    <span>{participantsCount} Connected Live</span>
+                  </div>
                 </div>
               </div>
 
@@ -1938,15 +2017,15 @@ const SAMPLE_DECKS = {
                   background: 'linear-gradient(135deg, #06b6d4, #3b82f6)',
                   color: '#ffffff',
                   border: 'none',
-                  borderRadius: '20px',
-                  padding: '12px 36px',
-                  fontSize: '1.2rem',
+                  borderRadius: '24px',
+                  padding: '16px 48px',
+                  fontSize: '1.35rem',
                   fontWeight: 900,
                   cursor: 'pointer',
                   boxShadow: '0 8px 30px rgba(6, 182, 212, 0.6), inset 0 1px 0 rgba(255,255,255,0.4)',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '10px',
+                  gap: '12px',
                   letterSpacing: '1px',
                   flexShrink: 0,
                   transition: 'all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)'
@@ -1955,7 +2034,7 @@ const SAMPLE_DECKS = {
                 onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
               >
                 <span>Start Presentation</span>
-                <span style={{ fontSize: '1.3rem', letterSpacing: '2px', color: '#ffb700' }}>▶▶▶</span>
+                <span style={{ fontSize: '1.5rem', letterSpacing: '2px', color: '#ffb700' }}>▶▶▶</span>
               </button>
             </div>
           )}
