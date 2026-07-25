@@ -866,8 +866,8 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
             ) : (
               <>
                 {votingLocked && slide?.type !== 'qa' && (
-                  <div style={{ padding: '10px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid var(--accent-red)', borderRadius: '8px', color: 'var(--accent-red)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '0.85rem', marginBottom: '15px' }}>
-                    <Lock size={14} /> Voting has been locked by presenter.
+                  <div style={{ padding: '12px 16px', background: 'rgba(245, 158, 11, 0.15)', border: '1.5px solid #f59e0b', borderRadius: '12px', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '0.88rem', fontWeight: 800, marginBottom: '15px' }}>
+                    <Lock size={16} /> ⏸️ Presenter has not started receiving responses yet. Inputs will activate shortly!
                   </div>
                 )}
 
@@ -899,7 +899,8 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
               </>
             )}
 
-            {!hasVoted && !votingLocked && (
+            {!hasVoted && (
+              <fieldset disabled={votingLocked} style={{ border: 'none', padding: 0, margin: 0, width: '100%', opacity: votingLocked ? 0.65 : 1, transition: 'opacity 0.3s ease' }}>
               <>
                 {/* 1. Multiple Choice */}
                 {slide?.type === 'poll' && (
@@ -1274,6 +1275,7 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
                   </form>
                 )}
               </>
+              </fieldset>
             )}
 
             {/* 6. Q&A (persistent form + updates) */}

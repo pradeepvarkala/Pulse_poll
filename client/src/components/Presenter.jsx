@@ -814,16 +814,9 @@ const SAMPLE_DECKS = {
       const initialSlide = hostedSlides[idx];
       setQuizTimer(initialSlide && initialSlide.timeLimit ? initialSlide.timeLimit : 15);
       
-      if (initialSlide && initialSlide.timeLimit > 0 && initialSlide.timerAutoStart === false) {
-        setVotingLocked(true);
-      } else {
-        setVotingLocked(false);
-        if (initialSlide && initialSlide.timeLimit > 0 && (initialSlide.timerAutoStart === true || initialSlide.timerAutoStart === undefined)) {
-          setTimeout(() => {
-            startQuizTimer();
-          }, 600);
-        }
-      }
+      // Lock responses by default for every presentation slide until presenter clicks "Start Receiving Responses"
+      setVotingLocked(true);
+      socket.emit('toggle_lock', { roomCode, locked: true });
     });
 
     socket.on('participant_joined', ({ count, nickname, gender, socketId }) => {
@@ -932,16 +925,19 @@ const SAMPLE_DECKS = {
       const timerVal = targetSlide && targetSlide.timeLimit ? targetSlide.timeLimit : 15;
       setQuizTimer(timerVal);
 
-      if (targetSlide && targetSlide.timeLimit > 0 && targetSlide.timerAutoStart === false) {
-        setVotingLocked(true);
-      } else {
-        setVotingLocked(false);
-        if (targetSlide && targetSlide.timeLimit > 0 && (targetSlide.timerAutoStart === true || targetSlide.timerAutoStart === undefined)) {
-          setTimeout(() => {
-            startQuizTimer();
-          }, 400);
-        }
-      }
+      // Lock responses by default for every presentation slide until presenter clicks "Start Receiving Responses"
+      setVotingLocked(true);
+      socketRef.current.emit('toggle_lock', { roomCode, locked: true });
+    }
+  };
+
+  const handleStartReceivingResponses = () => {
+    playClickSound();
+    setVotingLocked(false);
+    socketRef.current.emit('toggle_lock', { roomCode, locked: false });
+    const targetSlide = slides[currentSlideIndex];
+    if (targetSlide && targetSlide.timeLimit > 0 && !quizRunning) {
+      startQuizTimer();
     }
   };
 
@@ -1679,8 +1675,56 @@ const SAMPLE_DECKS = {
           </div>
         )}
 
-        {/* Live Real-time Metrics & Timer Badge */}
+        {/* Live Real-time Metrics & Start Receiving Responses Control */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          
+          {/* Prominent Start / Lock Receiving Responses Button */}
+          {votingLocked ? (
+            <button 
+              type="button"
+              className="animate-scale-up"
+              onClick={handleStartReceivingResponses}
+              style={{
+                background: 'linear-gradient(135deg, #10b981, #059669)',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '20px',
+                padding: '6px 18px',
+                fontSize: '0.85rem',
+                fontWeight: 900,
+                cursor: 'pointer',
+                boxShadow: '0 4px 15px rgba(16, 185, 129, 0.45)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                letterSpacing: '0.5px'
+              }}
+            >
+              <span>▶ Start Receiving Responses</span>
+            </button>
+          ) : (
+            <button 
+              type="button"
+              onClick={toggleVotingLock}
+              style={{
+                background: 'rgba(239, 68, 68, 0.18)',
+                color: '#ef4444',
+                border: '1px solid #ef4444',
+                borderRadius: '20px',
+                padding: '5px 14px',
+                fontSize: '0.8rem',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              <Lock size={14} />
+              <span>Lock Responses</span>
+            </button>
+          )}
+
           {/* Universal Time Limit display moved to Top Header Bar */}
           {quizTimer > 0 && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(15, 23, 42, 0.85)', padding: '5px 14px', borderRadius: '30px', border: '1px solid var(--border-glass)' }}>
@@ -1711,11 +1755,6 @@ const SAMPLE_DECKS = {
                 {timerAudioEnabled ? <Volume2 size={13} /> : <VolumeX size={13} />}
                 <span>{timerAudioEnabled ? 'Audio On' : 'Muted'}</span>
               </button>
-              {!quizRunning && (
-                <button className="btn btn-primary" style={{ padding: '3px 10px', fontSize: '0.78rem', borderRadius: '12px', background: 'var(--accent)', color: '#08211E', fontWeight: 700, border: 'none' }} onClick={startQuizTimer}>
-                  Start Timer
-                </button>
-              )}
             </div>
           )}
 
@@ -1742,6 +1781,54 @@ const SAMPLE_DECKS = {
         
         {/* Left Area: Slide Content Canvas */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'hidden', paddingRight: '6px', position: 'relative' }}>
+          
+          {/* FLOATING START RECEIVING RESPONSES BANNER */}
+          {votingLocked && (
+            <div 
+              className="animate-fade"
+              style={{
+                width: '100%',
+                maxWidth: '750px',
+                margin: '0 auto 12px auto',
+                background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.18), rgba(6, 182, 212, 0.18))',
+                border: '1.5px solid rgba(16, 185, 129, 0.45)',
+                borderRadius: '16px',
+                padding: '10px 20px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '16px',
+                boxShadow: '0 8px 25px rgba(0,0,0,0.3)',
+                zIndex: 80
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '1.3rem' }}>⏸️</span>
+                <div>
+                  <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#ffffff' }}>Responses Are Currently Locked</div>
+                  <div style={{ fontSize: '0.76rem', color: '#94a3b8' }}>Participants are viewing the slide questions. Click to enable inputs.</div>
+                </div>
+              </div>
+              <button 
+                type="button"
+                onClick={handleStartReceivingResponses}
+                style={{
+                  background: 'linear-gradient(135deg, #10b981, #059669)',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '8px 18px',
+                  fontSize: '0.85rem',
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 15px rgba(16, 185, 129, 0.4)',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                ▶ Start Receiving
+              </button>
+            </div>
+          )}
           
           {/* GIANT QR CODE ENTRANCE OVERLAY FOR PRESENTATION LAUNCH */}
           {showEntranceOverlay && (
