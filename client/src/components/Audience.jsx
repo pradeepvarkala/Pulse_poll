@@ -882,7 +882,14 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
                     <button 
                       type="button"
                       className="btn btn-secondary" 
-                      onClick={() => setHasVoted(false)} 
+                      onClick={() => {
+                        setHasVoted(false);
+                        const count = slide?.maxEntries || slide?.maxWords || 3;
+                        setWordCloudInputs(Array(count).fill(''));
+                        setBrainstormInputs(['', '']);
+                        setOpenEndedText('');
+                        setGuessValue('');
+                      }} 
                       style={{ marginTop: '16px', padding: '8px 16px', fontSize: '0.85rem' }}
                     >
                       Submit Another Response
@@ -944,15 +951,15 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
                 {/* 2. Word Cloud */}
                 {slide?.type === 'wordcloud' && (
                   <form onSubmit={handleWordCloudSubmit} className="word-cloud-inputs" style={{ width: '100%' }}>
-                    {wordCloudInputs.map((val, idx) => (
+                    {Array.from({ length: slide?.maxEntries || slide?.maxWords || 3 }).map((_, idx) => (
                       <input 
                         key={idx}
                         type="text" 
-                        maxLength="15"
-                        placeholder={`Word ${idx + 1}`}
+                        maxLength="20"
+                        placeholder={`Word #${idx + 1}`}
                         className="input-text"
                         style={{ textAlign: 'center' }}
-                        value={val}
+                        value={wordCloudInputs[idx] || ''}
                         onChange={(e) => {
                           const updated = [...wordCloudInputs];
                           updated[idx] = e.target.value;

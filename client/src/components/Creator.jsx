@@ -1372,36 +1372,79 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
               )}
 
               {activeSlide.type === 'wordcloud' && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
-                  {(activeSlide.responses && (Array.isArray(activeSlide.responses) ? activeSlide.responses.length > 0 : Object.keys(activeSlide.responses).length > 0)) ? (
-                    (() => {
-                      let entries = [];
-                      if (Array.isArray(activeSlide.responses)) {
-                        const freq = {};
-                        activeSlide.responses.forEach(w => { if (typeof w === 'string' && w.trim()) freq[w.trim()] = (freq[w.trim()] || 0) + 1; });
-                        entries = Object.entries(freq).map(([text, count]) => ({ text, weight: count }));
-                      } else if (typeof activeSlide.responses === 'object') {
-                        entries = Object.entries(activeSlide.responses).map(([text, count]) => ({ text, weight: Number(count) || 1 }));
-                      }
-                      const palette = ['#38bdf8', '#f43f5e', '#10b981', '#fbbf24', '#a855f7', '#ec4899', '#06b6d4', '#f97316'];
-                      return entries.map((item, idx) => (
-                        <span key={idx} style={{
-                          fontSize: `${Math.min(2.8, 1.2 + item.weight * 0.4)}rem`,
-                          color: palette[idx % palette.length],
-                          fontWeight: 700,
-                          padding: '4px 10px',
-                          textShadow: '0 2px 10px rgba(0,0,0,0.3)',
-                          transition: 'all 0.3s ease'
-                        }}>
-                          {item.text}
-                        </span>
-                      ));
-                    })()
-                  ) : (
-                    <div style={{ color: 'var(--text-muted)', fontSize: '0.88rem', fontStyle: 'italic' }}>
-                      ☁️ Live Word Cloud — Audience submitted words will appear here in real-time in vibrant colors!
-                    </div>
-                  )}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', gap: '14px' }}>
+                  {/* On-Screen Word Limit Settings Provision */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    background: 'rgba(6, 182, 212, 0.12)',
+                    border: '1.5px solid rgba(6, 182, 212, 0.4)',
+                    padding: '6px 16px',
+                    borderRadius: '20px',
+                    fontSize: '0.82rem',
+                    color: 'var(--text-primary)',
+                    fontWeight: 700,
+                    boxShadow: '0 4px 14px rgba(6, 182, 212, 0.2)'
+                  }}>
+                    <span>💬 Entries per participant:</span>
+                    <select
+                      value={activeSlide.maxEntries || activeSlide.maxWords || 3}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value) || 1;
+                        handleUpdateActiveSlide({ maxEntries: val, maxWords: val });
+                      }}
+                      style={{
+                        background: 'rgba(9, 13, 22, 0.9)',
+                        color: 'var(--primary)',
+                        border: '1px solid rgba(6, 182, 212, 0.5)',
+                        borderRadius: '10px',
+                        padding: '4px 10px',
+                        fontWeight: 800,
+                        fontSize: '0.82rem',
+                        cursor: 'pointer',
+                        outline: 'none'
+                      }}
+                    >
+                      <option value={1}>1 Word (Single Word)</option>
+                      <option value={2}>2 Words</option>
+                      <option value={3}>3 Words (Standard)</option>
+                      <option value={4}>4 Words</option>
+                      <option value={5}>5 Words (Max 5)</option>
+                    </select>
+                  </div>
+
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', justifyContent: 'center', alignItems: 'center', padding: '16px' }}>
+                    {(activeSlide.responses && (Array.isArray(activeSlide.responses) ? activeSlide.responses.length > 0 : Object.keys(activeSlide.responses).length > 0)) ? (
+                      (() => {
+                        let entries = [];
+                        if (Array.isArray(activeSlide.responses)) {
+                          const freq = {};
+                          activeSlide.responses.forEach(w => { if (typeof w === 'string' && w.trim()) freq[w.trim()] = (freq[w.trim()] || 0) + 1; });
+                          entries = Object.entries(freq).map(([text, count]) => ({ text, weight: count }));
+                        } else if (typeof activeSlide.responses === 'object') {
+                          entries = Object.entries(activeSlide.responses).map(([text, count]) => ({ text, weight: Number(count) || 1 }));
+                        }
+                        const palette = ['#38bdf8', '#f43f5e', '#10b981', '#fbbf24', '#a855f7', '#ec4899', '#06b6d4', '#f97316'];
+                        return entries.map((item, idx) => (
+                          <span key={idx} style={{
+                            fontSize: `${Math.min(2.8, 1.2 + item.weight * 0.4)}rem`,
+                            color: palette[idx % palette.length],
+                            fontWeight: 700,
+                            padding: '4px 10px',
+                            textShadow: '0 2px 10px rgba(0,0,0,0.3)',
+                            transition: 'all 0.3s ease'
+                          }}>
+                            {item.text}
+                          </span>
+                        ));
+                      })()
+                    ) : (
+                      <div style={{ color: 'var(--text-muted)', fontSize: '0.88rem', fontStyle: 'italic' }}>
+                        ☁️ Live Word Cloud — Audience submitted words will appear here in real-time in vibrant colors!
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
