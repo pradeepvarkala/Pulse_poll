@@ -370,11 +370,15 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
     return <div style={{ padding: '2rem' }}>Loading Presentation...</div>;
   }
 
-  const slides = presentation.slides;
-  const activeSlide = slides.find(s => s.id === activeSlideId) || slides[0];
+  const slides = presentation?.slides || [];
+  let activeSlide = slides.find(s => s.id === activeSlideId);
+  if (!activeSlide && slides.length > 0) {
+    activeSlide = slides[0];
+  }
 
   const handleUpdateActiveSlide = (updatedFields) => {
-    const updatedSlides = slides.map(s => s.id === activeSlideId ? { ...s, ...updatedFields } : s);
+    if (!activeSlide) return;
+    const updatedSlides = slides.map(s => s.id === activeSlide.id ? { ...s, ...updatedFields } : s);
     savePresentation({
       ...presentation,
       slides: updatedSlides,
@@ -404,12 +408,13 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
         { id: Math.random().toString(36).substr(2, 9), text: 'Item 4' }
       ] : undefined
     };
-    const updatedPres = {
+
+    const newSlides = [...slides, newSlide];
+    savePresentation({
       ...presentation,
-      slides: [...slides, newSlide],
+      slides: newSlides,
       updatedAt: new Date().toLocaleDateString()
-    };
-    savePresentation(updatedPres);
+    });
     setActiveSlideId(newSlide.id);
     setShowSlideTypeModal(false);
   };
@@ -428,14 +433,16 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
     const deletedSlideObj = slides[deletedIndex];
 
     const filteredSlides = slides.filter(s => s.id !== slideId);
+    const nextActiveSlide = filteredSlides[Math.min(deletedIndex, filteredSlides.length - 1)];
+
     const updatedPres = {
       ...presentation,
       slides: filteredSlides,
       updatedAt: new Date().toLocaleDateString()
     };
     savePresentation(updatedPres);
-    if (activeSlideId === slideId) {
-      setActiveSlideId(filteredSlides[Math.min(deletedIndex, filteredSlides.length - 1)].id);
+    if (nextActiveSlide) {
+      setActiveSlideId(nextActiveSlide.id);
     }
 
     // Save recently deleted slide for Undo button banner
@@ -775,6 +782,18 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
       default: return 'Options';
     }
   };
+
+  if (!activeSlide) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', gap: '15px', color: 'var(--text-primary)' }}>
+        <h2>No Slide Selected</h2>
+        <p>Your presentation deck currently has no active slides.</p>
+        <button className="btn btn-primary" onClick={() => handleAddSlideWithType('poll')}>
+          + Add New Slide
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
