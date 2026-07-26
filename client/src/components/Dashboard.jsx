@@ -27,6 +27,7 @@ export default function Dashboard({
     return saved ? JSON.parse(saved) : DEFAULT_FOLDERS;
   });
   const [selectedFolderId, setSelectedFolderId] = useState('all'); // 'all', 'unorganized', or folder ID
+  const [activeOpenedFolderId, setActiveOpenedFolderId] = useState(null); // null = Root directory, or folder ID when opened inside
   const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
   const [newFolderColor, setNewFolderColor] = useState('#06b6d4');
@@ -364,165 +365,389 @@ export default function Dashboard({
               </div>
             </div>
 
-            {/* 📁 Presentation Folder Filter Chips Bar */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '20px' }}>
-              <button 
-                type="button"
-                className={`folder-chip-pill ${selectedFolderId === 'all' ? 'active' : ''}`}
-                onClick={() => setSelectedFolderId('all')}
-              >
-                <Folder size={14} /> 📁 All Decks ({presentations.length})
-              </button>
-
-              <button 
-                type="button"
-                className={`folder-chip-pill ${selectedFolderId === 'unorganized' ? 'active' : ''}`}
-                onClick={() => setSelectedFolderId('unorganized')}
-              >
-                <Layers size={14} /> Unorganized ({presentations.filter(p => !p.folderId).length})
-              </button>
-
-              {folders.map(f => {
-                const count = presentations.filter(p => p.folderId === f.id).length;
-                return (
-                  <button 
-                    key={f.id}
-                    type="button"
-                    className={`folder-chip-pill ${selectedFolderId === f.id ? 'active' : ''}`}
-                    onClick={() => setSelectedFolderId(f.id)}
-                    style={{ borderColor: selectedFolderId === f.id ? f.color : 'var(--border)' }}
-                  >
-                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: f.color }}></span>
-                    📁 {f.name} ({count})
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Presentation Decks Grid */}
-            <div className="dashboard-grid">
-              {filteredPresentations.map((pres) => {
-                const themeBg = 
-                  pres.theme === 'corporate' ? '/assets/corporate_thumb.jpg' :
-                  pres.theme === 'cyber-neon' || pres.theme === 'future-minds' ? '/assets/cyber_thumb.jpg' :
-                  pres.theme === 'cosmic-nebula' ? '/assets/cosmic_thumb.jpg' :
-                  pres.theme === 'playroom-magic' || pres.theme === 'playroom' ? '/assets/playroom_thumb.jpg' :
-                  '/assets/corporate_thumb.jpg';
-
-                const assignedFolder = folders.find(f => f.id === pres.folderId);
+            {/* WINDOWS EXPLORER FOLDER SYSTEM: IF INSIDE OPENED FOLDER VIEW */}
+            {activeOpenedFolderId !== null ? (
+              (() => {
+                const activeFolder = folders.find(f => f.id === activeOpenedFolderId);
+                const activeFolderDecks = presentations.filter(p => p.folderId === activeOpenedFolderId);
 
                 return (
-                  <div 
-                    key={pres.id} 
-                    className="glass-card presentation-card card-lift"
-                    onClick={() => onViewCreator(pres.id)}
-                    style={{ overflow: 'hidden', padding: 0, borderRadius: '16px', background: 'var(--surface)', border: '1px solid var(--border)' }}
-                  >
-                    {/* Generated Artwork Theme Banner */}
-                    <div style={{
-                      height: '110px',
-                      backgroundImage: `linear-gradient(rgba(11, 15, 25, 0.25), rgba(11, 15, 25, 0.85)), url(${themeBg})`,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                      padding: '12px 16px',
-                      display: 'flex',
-                      alignItems: 'flex-end',
-                      justifyContent: 'space-between'
-                    }}>
-                      <span style={{
-                        background: 'rgba(15, 23, 42, 0.85)',
-                        color: '#ffffff',
-                        padding: '3px 10px',
-                        borderRadius: '20px',
-                        fontSize: '0.72rem',
-                        fontWeight: 800,
-                        backdropFilter: 'blur(4px)',
-                        border: '1px solid rgba(255,255,255,0.1)'
-                      }}>
-                        🎨 {pres.theme || 'corporate'}
-                      </span>
-
-                      {/* Folder Reassign Dropdown */}
-                      <div onClick={(e) => e.stopPropagation()}>
-                        <select 
-                          value={pres.folderId || ''}
-                          onChange={(e) => handleAssignPresentationFolder(pres.id, e.target.value)}
-                          style={{
-                            fontSize: '0.72rem', fontWeight: 700, padding: '3px 8px', borderRadius: '12px',
-                            background: assignedFolder ? assignedFolder.color : 'rgba(15,23,42,0.85)',
-                            color: '#ffffff', border: 'none', cursor: 'pointer'
-                          }}
-                          title="Assign presentation deck to folder"
+                  <div>
+                    {/* Folder Breadcrumb & Navigation Header */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', background: 'var(--surface)', padding: '14px 20px', borderRadius: '16px', border: '1px solid var(--border)', flexWrap: 'wrap', gap: '12px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                        <button 
+                          type="button"
+                          className="btn btn-secondary" 
+                          onClick={() => setActiveOpenedFolderId(null)}
+                          style={{ padding: '6px 14px', fontSize: '0.82rem', fontWeight: 700, gap: '6px' }}
                         >
-                          <option value="">📁 Move to Folder...</option>
-                          {folders.map(f => (
-                            <option key={f.id} value={f.id}>📁 {f.name}</option>
-                          ))}
-                          <option value="">🚫 Unorganized</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div style={{ padding: '18px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                        <div className="logo-icon" style={{ width: '28px', height: '28px', flexShrink: 0 }}>
-                          <PresentationIcon size={14} color="white" />
+                          ← Back to All Folders
+                        </button>
+                        <span style={{ color: 'var(--text-muted)' }}>/</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', fontWeight: 800, color: activeFolder?.color || 'var(--accent)' }}>
+                          📁 {activeFolder?.name || 'Folder Directory'}
                         </div>
-                        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{pres.title}</h3>
-                      </div>
-
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
-                          {(pres.slides || []).length} {(pres.slides || []).length === 1 ? 'slide' : 'slides'}
+                        <span style={{ fontSize: '0.78rem', background: 'var(--accent-soft)', color: 'var(--accent)', padding: '3px 10px', borderRadius: '12px', fontWeight: 800 }}>
+                          {activeFolderDecks.length} Saved {activeFolderDecks.length === 1 ? 'Deck' : 'Decks'}
                         </span>
-                        {assignedFolder && (
-                          <span style={{ fontSize: '0.72rem', background: 'var(--surface-2)', color: assignedFolder.color, padding: '2px 8px', borderRadius: '8px', fontWeight: 700, border: '1px solid var(--border)' }}>
-                            📁 {assignedFolder.name}
-                          </span>
-                        )}
                       </div>
 
-                      <div className="card-meta" style={{ padding: 0, marginTop: 0 }}>
-                        <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Updated {pres.updatedAt}</span>
-                        <div style={{ display: 'flex', gap: '8px' }} onClick={(e) => e.stopPropagation()}>
-                          <button 
-                            className="btn btn-secondary btn-icon" 
-                            style={{ width: '32px', height: '32px' }}
-                            onClick={() => onViewCreator(pres.id)}
-                            title="Edit Deck"
-                          >
-                            <Edit3 size={14} />
-                          </button>
-                          <button 
-                            className="btn btn-primary btn-icon" 
-                            style={{ width: '32px', height: '32px', background: 'var(--accent)', border: 'none' }}
-                            onClick={() => onViewPresenter(pres.id)}
-                            title="Present Live"
-                          >
-                            <Play size={14} fill="#08211E" color="#08211E" />
-                          </button>
-                          <button 
-                            className="btn btn-secondary btn-icon" 
-                            style={{ width: '32px', height: '32px', color: 'var(--accent-red)' }}
-                            onClick={(e) => handleDelete(pres.id, e)}
-                            title="Delete Deck"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      </div>
+                      <button 
+                        type="button"
+                        className="btn btn-primary" 
+                        onClick={() => {
+                          setNewTargetFolderId(activeOpenedFolderId);
+                          setIsCreateModalOpen(true);
+                        }}
+                        style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 700, fontSize: '0.85rem', border: 'none', padding: '8px 16px', display: 'flex', gap: '6px', alignItems: 'center' }}
+                      >
+                        <Plus size={16} /> ➕ New Presentation in {activeFolder?.name}
+                      </button>
                     </div>
+
+                    {/* Presentation Cards inside this Opened Folder */}
+                    {activeFolderDecks.length > 0 ? (
+                      <div className="dashboard-grid">
+                        {activeFolderDecks.map((pres) => {
+                          const themeBg = 
+                            pres.theme === 'corporate' ? '/assets/corporate_thumb.jpg' :
+                            pres.theme === 'cyber-neon' || pres.theme === 'future-minds' ? '/assets/cyber_thumb.jpg' :
+                            pres.theme === 'cosmic-nebula' ? '/assets/cosmic_thumb.jpg' :
+                            pres.theme === 'playroom-magic' || pres.theme === 'playroom' ? '/assets/playroom_thumb.jpg' :
+                            '/assets/corporate_thumb.jpg';
+
+                          return (
+                            <div 
+                              key={pres.id} 
+                              className="glass-card presentation-card card-lift"
+                              onClick={() => onViewCreator(pres.id)}
+                              style={{ overflow: 'hidden', padding: 0, borderRadius: '16px', background: 'var(--surface)', border: '1px solid var(--border)' }}
+                            >
+                              <div style={{
+                                height: '110px',
+                                backgroundImage: `linear-gradient(rgba(11, 15, 25, 0.25), rgba(11, 15, 25, 0.85)), url(${themeBg})`,
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center',
+                                padding: '12px 16px',
+                                display: 'flex',
+                                alignItems: 'flex-end',
+                                justifyContent: 'space-between'
+                              }}>
+                                <span style={{
+                                  background: 'rgba(15, 23, 42, 0.85)',
+                                  color: '#ffffff',
+                                  padding: '3px 10px',
+                                  borderRadius: '20px',
+                                  fontSize: '0.72rem',
+                                  fontWeight: 800,
+                                  backdropFilter: 'blur(4px)',
+                                  border: '1px solid rgba(255,255,255,0.1)'
+                                }}>
+                                  🎨 {pres.theme || 'corporate'}
+                                </span>
+
+                                <div onClick={(e) => e.stopPropagation()}>
+                                  <select 
+                                    value={pres.folderId || ''}
+                                    onChange={(e) => handleAssignPresentationFolder(pres.id, e.target.value)}
+                                    style={{
+                                      fontSize: '0.72rem', fontWeight: 700, padding: '3px 8px', borderRadius: '12px',
+                                      background: activeFolder ? activeFolder.color : 'rgba(15,23,42,0.85)',
+                                      color: '#ffffff', border: 'none', cursor: 'pointer'
+                                    }}
+                                    title="Move presentation deck to another folder"
+                                  >
+                                    <option value={activeOpenedFolderId}>📁 Saved in {activeFolder?.name}</option>
+                                    {folders.filter(f => f.id !== activeOpenedFolderId).map(f => (
+                                      <option key={f.id} value={f.id}>📁 Move to {f.name}</option>
+                                    ))}
+                                    <option value="">🚫 Move to Unorganized</option>
+                                  </select>
+                                </div>
+                              </div>
+
+                              <div style={{ padding: '18px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                                  <div className="logo-icon" style={{ width: '28px', height: '28px', flexShrink: 0 }}>
+                                    <PresentationIcon size={14} color="white" />
+                                  </div>
+                                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{pres.title}</h3>
+                                </div>
+
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+                                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+                                    {(pres.slides || []).length} {(pres.slides || []).length === 1 ? 'slide' : 'slides'}
+                                  </span>
+                                  <span style={{ fontSize: '0.72rem', background: 'var(--surface-2)', color: activeFolder?.color, padding: '2px 8px', borderRadius: '8px', fontWeight: 700, border: '1px solid var(--border)' }}>
+                                    📁 {activeFolder?.name}
+                                  </span>
+                                </div>
+
+                                <div className="card-meta" style={{ padding: 0, marginTop: 0 }}>
+                                  <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Updated {pres.updatedAt}</span>
+                                  <div style={{ display: 'flex', gap: '8px' }} onClick={(e) => e.stopPropagation()}>
+                                    <button 
+                                      className="btn btn-secondary btn-icon" 
+                                      style={{ width: '32px', height: '32px' }}
+                                      onClick={() => onViewCreator(pres.id)}
+                                      title="Edit Deck"
+                                    >
+                                      <Edit3 size={14} />
+                                    </button>
+                                    <button 
+                                      className="btn btn-primary btn-icon" 
+                                      style={{ width: '32px', height: '32px', background: 'var(--accent)', border: 'none' }}
+                                      onClick={() => onViewPresenter(pres.id)}
+                                      title="Present Live"
+                                    >
+                                      <Play size={14} fill="#08211E" color="#08211E" />
+                                    </button>
+                                    <button 
+                                      className="btn btn-secondary btn-icon" 
+                                      style={{ width: '32px', height: '32px', color: 'var(--accent-red)' }}
+                                      onClick={(e) => handleDelete(pres.id, e)}
+                                      title="Delete Deck"
+                                    >
+                                      <Trash2 size={14} />
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div style={{ textAlign: 'center', padding: '3.5rem', color: 'var(--text-secondary)', background: 'var(--surface)', borderRadius: '16px', border: '1px solid var(--border)' }}>
+                        <Folder size={42} color={activeFolder?.color || 'var(--accent)'} style={{ marginBottom: '12px', opacity: 0.8 }} />
+                        <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '6px' }}>
+                          Folder "{activeFolder?.name}" is currently empty
+                        </div>
+                        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '16px' }}>
+                          Click the button below to create your first presentation deck inside this folder!
+                        </p>
+                        <button 
+                          type="button"
+                          className="btn btn-primary"
+                          onClick={() => {
+                            setNewTargetFolderId(activeOpenedFolderId);
+                            setIsCreateModalOpen(true);
+                          }}
+                          style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 700, border: 'none', padding: '8px 20px' }}
+                        >
+                          ➕ Create Presentation Deck inside {activeFolder?.name}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 );
-              })}
-            </div>
+              })()
+            ) : (
+              /* ROOT DIRECTORY VIEW: WINDOWS EXPLORER FOLDER CARDS GRID */
+              <>
+                <div style={{ marginBottom: '28px' }}>
+                  <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    📁 Presentation Folders Directory
+                    <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                      (Click any folder card to open up and view presentations inside)
+                    </span>
+                  </div>
 
-            {filteredPresentations.length === 0 && (
-              <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)', background: 'var(--surface)', borderRadius: '16px', border: '1px solid var(--border)', marginBottom: '30px' }}>
-                <PresentationIcon size={36} style={{ marginBottom: '10px', opacity: 0.4 }} />
-                <div style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>No presentations in this folder</div>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Click "+ New Presentation" above to create a deck for this folder!</p>
-              </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '16px' }}>
+                    {folders.map(f => {
+                      const count = presentations.filter(p => p.folderId === f.id).length;
+                      return (
+                        <div 
+                          key={f.id}
+                          className="glass-card card-lift"
+                          onClick={() => setActiveOpenedFolderId(f.id)}
+                          style={{
+                            padding: '18px', borderRadius: '16px', background: 'var(--surface)', border: `1px solid ${f.color}40`,
+                            cursor: 'pointer', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '130px',
+                            boxShadow: `0 8px 24px -10px ${f.color}25`
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: `${f.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem' }}>
+                              📁
+                            </div>
+                            <span style={{ fontSize: '0.75rem', background: `${f.color}20`, color: f.color, padding: '3px 10px', borderRadius: '12px', fontWeight: 800 }}>
+                              {count} {count === 1 ? 'Deck' : 'Decks'}
+                            </span>
+                          </div>
+
+                          <div style={{ marginTop: '12px' }}>
+                            <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '4px' }}>
+                              {f.name}
+                            </div>
+                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              Click to Open Folder 📂 ➔
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {/* ➕ Create New Folder Card */}
+                    <div 
+                      className="glass-card card-lift"
+                      onClick={() => setIsFolderModalOpen(true)}
+                      style={{
+                        padding: '18px', borderRadius: '16px', background: 'rgba(255,255,255,0.02)', border: '1.5px dashed var(--border)',
+                        cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '130px',
+                        color: 'var(--text-muted)', textAlign: 'center'
+                      }}
+                    >
+                      <FolderPlus size={28} color="var(--accent)" style={{ marginBottom: '6px' }} />
+                      <div style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--text-primary)' }}>➕ Create New Folder</div>
+                      <div style={{ fontSize: '0.75rem' }}>Organize decks into folders</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* All & Unorganized Presentations Section */}
+                <div style={{ marginTop: '20px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
+                    <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      📋 All Recent Decks
+                    </div>
+
+                    {/* Filter Pills */}
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <button 
+                        type="button"
+                        className={`folder-chip-pill ${selectedFolderId === 'all' ? 'active' : ''}`}
+                        onClick={() => setSelectedFolderId('all')}
+                      >
+                        📁 All Decks ({presentations.length})
+                      </button>
+                      <button 
+                        type="button"
+                        className={`folder-chip-pill ${selectedFolderId === 'unorganized' ? 'active' : ''}`}
+                        onClick={() => setSelectedFolderId('unorganized')}
+                      >
+                        Layers Unorganized ({presentations.filter(p => !p.folderId).length})
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="dashboard-grid">
+                    {filteredPresentations.map((pres) => {
+                      const themeBg = 
+                        pres.theme === 'corporate' ? '/assets/corporate_thumb.jpg' :
+                        pres.theme === 'cyber-neon' || pres.theme === 'future-minds' ? '/assets/cyber_thumb.jpg' :
+                        pres.theme === 'cosmic-nebula' ? '/assets/cosmic_thumb.jpg' :
+                        pres.theme === 'playroom-magic' || pres.theme === 'playroom' ? '/assets/playroom_thumb.jpg' :
+                        '/assets/corporate_thumb.jpg';
+
+                      const assignedFolder = folders.find(f => f.id === pres.folderId);
+
+                      return (
+                        <div 
+                          key={pres.id} 
+                          className="glass-card presentation-card card-lift"
+                          onClick={() => onViewCreator(pres.id)}
+                          style={{ overflow: 'hidden', padding: 0, borderRadius: '16px', background: 'var(--surface)', border: '1px solid var(--border)' }}
+                        >
+                          <div style={{
+                            height: '110px',
+                            backgroundImage: `linear-gradient(rgba(11, 15, 25, 0.25), rgba(11, 15, 25, 0.85)), url(${themeBg})`,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                            padding: '12px 16px',
+                            display: 'flex',
+                            alignItems: 'flex-end',
+                            justifyContent: 'space-between'
+                          }}>
+                            <span style={{
+                              background: 'rgba(15, 23, 42, 0.85)',
+                              color: '#ffffff',
+                              padding: '3px 10px',
+                              borderRadius: '20px',
+                              fontSize: '0.72rem',
+                              fontWeight: 800,
+                              backdropFilter: 'blur(4px)',
+                              border: '1px solid rgba(255,255,255,0.1)'
+                            }}>
+                              🎨 {pres.theme || 'corporate'}
+                            </span>
+
+                            <div onClick={(e) => e.stopPropagation()}>
+                              <select 
+                                value={pres.folderId || ''}
+                                onChange={(e) => handleAssignPresentationFolder(pres.id, e.target.value)}
+                                style={{
+                                  fontSize: '0.72rem', fontWeight: 700, padding: '3px 8px', borderRadius: '12px',
+                                  background: assignedFolder ? assignedFolder.color : 'rgba(15,23,42,0.85)',
+                                  color: '#ffffff', border: 'none', cursor: 'pointer'
+                                }}
+                                title="Move presentation deck to folder"
+                              >
+                                <option value="">📁 Move to Folder...</option>
+                                {folders.map(f => (
+                                  <option key={f.id} value={f.id}>📁 {f.name}</option>
+                                ))}
+                                <option value="">🚫 Unorganized</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          <div style={{ padding: '18px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                              <div className="logo-icon" style={{ width: '28px', height: '28px', flexShrink: 0 }}>
+                                <PresentationIcon size={14} color="white" />
+                              </div>
+                              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{pres.title}</h3>
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+                              <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+                                {(pres.slides || []).length} {(pres.slides || []).length === 1 ? 'slide' : 'slides'}
+                              </span>
+                              {assignedFolder && (
+                                <span style={{ fontSize: '0.72rem', background: 'var(--surface-2)', color: assignedFolder.color, padding: '2px 8px', borderRadius: '8px', fontWeight: 700, border: '1px solid var(--border)' }}>
+                                  📁 {assignedFolder.name}
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="card-meta" style={{ padding: 0, marginTop: 0 }}>
+                              <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Updated {pres.updatedAt}</span>
+                              <div style={{ display: 'flex', gap: '8px' }} onClick={(e) => e.stopPropagation()}>
+                                <button 
+                                  className="btn btn-secondary btn-icon" 
+                                  style={{ width: '32px', height: '32px' }}
+                                  onClick={() => onViewCreator(pres.id)}
+                                  title="Edit Deck"
+                                >
+                                  <Edit3 size={14} />
+                                </button>
+                                <button 
+                                  className="btn btn-primary btn-icon" 
+                                  style={{ width: '32px', height: '32px', background: 'var(--accent)', border: 'none' }}
+                                  onClick={() => onViewPresenter(pres.id)}
+                                  title="Present Live"
+                                >
+                                  <Play size={14} fill="#08211E" color="#08211E" />
+                                </button>
+                                <button 
+                                  className="btn btn-secondary btn-icon" 
+                                  style={{ width: '32px', height: '32px', color: 'var(--accent-red)' }}
+                                  onClick={(e) => handleDelete(pres.id, e)}
+                                  title="Delete Deck"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
             )}
             {/* Site Capabilities & What You Can Do on PulsePoll */}
             <div style={{ marginTop: '30px' }}>
