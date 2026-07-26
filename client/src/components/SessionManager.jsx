@@ -265,6 +265,48 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
     });
   };
 
+  // 🤖 Virtual Bot Simulator Helper for Single Developer Testing
+  const handleAddVirtualSimulatorBots = (count = 10) => {
+    const SAMPLE_NAMES = [
+      { name: 'Ananya Verma', designation: 'Senior Product Manager', gender: 'F', avatar: '🚀' },
+      { name: 'Vikram Singh', designation: 'Lead Software Engineer', gender: 'M', avatar: '🦁' },
+      { name: 'Priya Patel', designation: 'UX Strategy Facilitator', gender: 'F', avatar: '🎨' },
+      { name: 'Rahul Sharma', designation: 'Operations Director', gender: 'M', avatar: '⚡' },
+      { name: 'Deepa Nair', designation: 'Head of Talent Development', gender: 'F', avatar: '⭐' },
+      { name: 'David Miller', designation: 'Enterprise Architect', gender: 'M', avatar: '🦅' },
+      { name: 'Sara Khan', designation: 'Innovation Consultant', gender: 'F', avatar: '🔥' },
+      { name: 'Alex Rivers', designation: 'Executive Coach', gender: 'M', avatar: '👑' },
+      { name: 'Meera Krishnan', designation: 'Program Lead', gender: 'F', avatar: '🌸' },
+      { name: 'Arjun Das', designation: 'VP Technology', gender: 'M', avatar: '🐯' },
+      { name: 'Sneha Roy', designation: 'Agile Facilitator', gender: 'F', avatar: '🎮' },
+      { name: 'Karan Malhotra', designation: 'Strategy Analyst', gender: 'M', avatar: '🎯' }
+    ];
+
+    const currentRoster = [...(activeSession?.roster || [])];
+    const newBots = [];
+    const startIndex = currentRoster.length;
+
+    for (let i = 0; i < count; i++) {
+      const template = SAMPLE_NAMES[(startIndex + i) % SAMPLE_NAMES.length];
+      newBots.push({
+        id: `bot-${Math.random().toString(36).substr(2, 8)}`,
+        name: `${template.name} ${startIndex + i > 11 ? startIndex + i + 1 : ''}`.trim(),
+        designation: template.designation,
+        gender: template.gender,
+        avatar: template.avatar,
+        indCode: `BOT-${101 + startIndex + i}`,
+        isSimulatedBot: true
+      });
+    }
+
+    const updatedRoster = [...currentRoster, ...newBots];
+    updateActiveSession({ roster: updatedRoster });
+  };
+
+  const handleClearVirtualBots = () => {
+    updateActiveSession({ roster: [], groups: [] });
+  };
+
   const handleUpdateSectionRowField = (dayIdx, secIdx, field, val) => {
     updateActiveSession(prev => {
       const daysCopy = [...(prev.days || [])];
@@ -976,12 +1018,45 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
 
             {/* Right Box: Real-Time Tabular Live Roster */}
             <div className="glass-card" style={{ padding: '20px', borderRadius: '16px', background: 'var(--surface)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
                 <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   📋 Real-Time Registration Roster
                   <span style={{ fontSize: '0.78rem', background: 'var(--accent-soft)', color: 'var(--accent)', padding: '2px 10px', borderRadius: '12px', fontWeight: 700 }}>
                     {(activeSession.roster || []).length} Registered
                   </span>
+                </div>
+
+                {/* Developer Simulation Bar for Single Device Testing */}
+                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                  <button 
+                    type="button" 
+                    className="btn btn-secondary" 
+                    onClick={() => handleAddVirtualSimulatorBots(5)}
+                    style={{ padding: '4px 8px', fontSize: '0.75rem', fontWeight: 700, display: 'flex', gap: '4px', alignItems: 'center', background: 'rgba(6,182,212,0.15)', color: '#06b6d4', border: '1px solid rgba(6,182,212,0.3)' }}
+                    title="Simulate 5 Virtual Participants for testing"
+                  >
+                    🤖 +5 Bots
+                  </button>
+                  <button 
+                    type="button" 
+                    className="btn btn-secondary" 
+                    onClick={() => handleAddVirtualSimulatorBots(10)}
+                    style={{ padding: '4px 8px', fontSize: '0.75rem', fontWeight: 700, display: 'flex', gap: '4px', alignItems: 'center', background: 'rgba(6,182,212,0.15)', color: '#06b6d4', border: '1px solid rgba(6,182,212,0.3)' }}
+                    title="Simulate 10 Virtual Participants for testing"
+                  >
+                    🤖 +10 Bots
+                  </button>
+                  {(activeSession.roster || []).length > 0 && (
+                    <button 
+                      type="button" 
+                      className="btn btn-secondary btn-icon" 
+                      onClick={handleClearVirtualBots}
+                      style={{ padding: '4px 8px' }}
+                      title="Clear Roster"
+                    >
+                      <Trash2 size={13} color="var(--danger)" />
+                    </button>
+                  )}
                 </div>
               </div>
 
