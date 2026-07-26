@@ -785,7 +785,14 @@ io.on('connection', (socket) => {
     }
 
     socket.join(roomCode);
-    room.participants[socket.id] = { nickname: nickname || 'Anonymous', gender: gender || 'M' };
+    const participantKey = socket.id;
+    room.participants[participantKey] = {
+      socketId: socket.id,
+      nickname: nickname || 'Anonymous',
+      gender: gender || 'M',
+      disconnected: false,
+      lastSeen: Date.now()
+    };
 
     const currentSlide = room.slides[room.currentSlideIndex];
     callback({
@@ -807,6 +814,75 @@ io.on('connection', (socket) => {
     });
 
     console.log(`Participant Joined: ${nickname || 'Anonymous'} (${gender || 'M'}) in ${roomCode}`);
+  });
+
+  // 2.5 Rejoin Room (Mobile App Switch & Phone Call Resilience)
+  socket.on('rejoin_room', ({ roomCode, participantId, nickname, gender }, callback) => {
+    const room = rooms[roomCode];
+    if (!room) {
+      return callback && callback({ success: false, message: 'Room no longer active.' });
+    }
+
+    socket.join(roomCode);
+
+    const key = participantId || socket.id;
+    room.participants[key] = {
+      socketId: socket.id,
+      nickname: nickname || (room.participants[key] ? room.participants[key].nickname : 'Anonymous'),
+      gender: gender || (room.participants[key] ? room.participants[key].gender : 'M'),
+      disconnected: false,
+      lastSeen: Date.now()
+    };
+
+    const currentSlide = room.slides[room.currentSlideIndex];
+    let hasVoted = false;
+    if (currentSlide && currentSlide.type === 'quiz') {
+      hasVoted = (currentSlide.responses || []).some(r => r.socketId === socket.id || r.nickname === nickname);
+    }
+
+    if (callback) {
+      callback({
+        success: true,
+        currentSlideIndex: room.currentSlideIndex,
+        slide: currentSlide,
+        votingLocked: room.votingLocked,
+        answersVisible: room.answersVisible,
+        leaderboardVisible: room.leaderboardVisible,
+        leaderboard: room.leaderboard,
+        theme: room.theme,
+        hasVoted
+      });
+    }
+
+    console.log(`[Mobile Rejoin] Participant ${nickname} (${key}) reconnected seamlessly in ${roomCode}`);
+  });
+
+  // 2.6 Sync Audience State (iOS App Switch & Background Sync)
+  socket.on('sync_audience_state', ({ roomCode, participantId, nickname }, callback) => {
+    const room = rooms[roomCode];
+    if (!room) {
+      return callback && callback({ success: false, message: 'Room not found.' });
+    }
+
+    const currentSlide = room.slides[room.currentSlideIndex];
+    let hasVoted = false;
+    if (currentSlide && currentSlide.type === 'quiz') {
+      hasVoted = (currentSlide.responses || []).some(r => r.socketId === socket.id || r.nickname === nickname);
+    }
+
+    if (callback) {
+      callback({
+        success: true,
+        currentSlideIndex: room.currentSlideIndex,
+        slide: currentSlide,
+        votingLocked: room.votingLocked,
+        answersVisible: room.answersVisible,
+        leaderboardVisible: room.leaderboardVisible,
+        leaderboard: room.leaderboard,
+        theme: room.theme,
+        hasVoted
+      });
+    }
   });
 
   // Focus Mode (Anti-Cheat) notification
@@ -1099,13 +1175,14 @@ io.on('connection', (socket) => {
       if (rooms[code].presenterSocketId === socket.id) {
         socket.to(code).emit('room_closed', { message: 'Presenter disconnected.' });
         delete rooms[code];
-      } else if (rooms[code].participants[socket.id]) {
-        const nickname = rooms[code].participants[socket.id];
-        delete rooms[code].participants[socket.id];
-        io.to(rooms[code].presenterSocketId).emit('participant_left', {
-          count: Object.keys(rooms[code].participants).length,
-          nickname
-        });
+      } else {
+        // Soft disconnect for mobile audience members so their score & session stay 100% active on phone calls / app switches
+        for (const pKey in rooms[code].participants) {
+          if (rooms[code].participants[pKey].socketId === socket.id) {
+            rooms[code].participants[pKey].disconnected = true;
+            rooms[code].participants[pKey].lastSeen = Date.now();
+          }
+        }
       }
     }
   });

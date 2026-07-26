@@ -125,6 +125,7 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
   }, []);
 
   // Track window blur and visibility changes for Focus Mode (Anti-Cheat)
+  // Track window blur and visibility changes for Focus Mode (Anti-Cheat)
   useEffect(() => {
     if (!isJoined || !slide || !slide.focusMode || isLockedOut) return;
 
@@ -166,6 +167,43 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
     };
   }, [isJoined, slide, isLockedOut, roomCode, nickname]);
 
+  // Seamless Mobile Session Sync & iOS App Switch / Phone Call Recovery Effect
+  useEffect(() => {
+    const handleVisibilitySync = () => {
+      if (!document.hidden && isJoined && socketRef.current) {
+        const participantId = localStorage.getItem('pulsepoll_participant_id') || ('usr_' + Math.random().toString(36).substr(2, 9));
+        if (socketRef.current.disconnected) {
+          socketRef.current.connect();
+        }
+        socketRef.current.emit('sync_audience_state', {
+          roomCode: roomCode.trim(),
+          participantId,
+          nickname: nickname.trim()
+        }, (res) => {
+          if (res && res.success) {
+            setSlide(res.slide);
+            setSlideIndex(res.currentSlideIndex);
+            setVotingLocked(res.votingLocked);
+            setLeaderboardVisible(res.leaderboardVisible);
+            setLeaderboard(res.leaderboard);
+            setTheme(res.theme || 'neon');
+            if (res.hasVoted) setHasVoted(true);
+          }
+        });
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilitySync);
+    window.addEventListener('focus', handleVisibilitySync);
+    window.addEventListener('online', handleVisibilitySync);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilitySync);
+      window.removeEventListener('focus', handleVisibilitySync);
+      window.removeEventListener('online', handleVisibilitySync);
+    };
+  }, [isJoined, roomCode, nickname]);
+
   const handleRoomCodeChange = (val) => {
     // Strip all spaces, dashes, or non-digits immediately
     const cleaned = val.replace(/\D/g, '');
@@ -181,10 +219,41 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
 
     setErrorMsg('');
 
-    const socket = io();
+    const participantId = localStorage.getItem('pulsepoll_participant_id') || ('usr_' + Math.random().toString(36).substr(2, 9));
+    localStorage.setItem('pulsepoll_participant_id', participantId);
+
+    const socket = io({
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 500,
+      reconnectionDelayMax: 3000,
+      timeout: 20000
+    });
     socketRef.current = socket;
 
-    socket.emit('join_room', { roomCode: roomCode.trim(), nickname: nickname.trim(), gender }, (response) => {
+    socket.on('connect', () => {
+      if (isJoined && roomCode) {
+        socket.emit('rejoin_room', {
+          roomCode: roomCode.trim(),
+          participantId,
+          nickname: nickname.trim(),
+          gender
+        }, (res) => {
+          if (res && res.success) {
+            setSlide(res.slide);
+            setSlideIndex(res.currentSlideIndex);
+            setVotingLocked(res.votingLocked);
+            setLeaderboardVisible(res.leaderboardVisible);
+            setLeaderboard(res.leaderboard);
+            setTheme(res.theme || 'neon');
+            if (res.hasVoted) setHasVoted(true);
+          }
+        });
+      }
+    });
+
+    socket.emit('join_room', { roomCode: roomCode.trim(), nickname: nickname.trim(), gender, participantId }, (response) => {
       if (response.success) {
         setSlide(response.slide);
         setSlideIndex(response.currentSlideIndex);
