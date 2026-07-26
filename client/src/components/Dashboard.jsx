@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Play, Edit3, Trash2, Users, Presentation as PresentationIcon, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
+import { Plus, Play, Edit3, Trash2, Users, Presentation as PresentationIcon, ChevronLeft, ChevronRight, Menu, Folder, FolderPlus, Tag, Layers, Calendar } from 'lucide-react';
+
+const DEFAULT_FOLDERS = [
+  { id: 'folder-leadership', name: 'Executive Leadership & Strategy', color: '#06b6d4' },
+  { id: 'folder-stem', name: 'K-12 STEM Education', color: '#10b981' },
+  { id: 'folder-highered', name: 'University Lectures', color: '#8b5cf6' }
+];
 
 export default function Dashboard({ 
   user, onViewCreator, onViewPresenter, onJoinAudience, onOpenAiGenerator, 
@@ -9,9 +15,21 @@ export default function Dashboard({
   const [presentations, setPresentations] = useState([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newTitle, setNewTitle] = useState('');
+  const [newTargetFolderId, setNewTargetFolderId] = useState('');
+  const [newTheme, setNewTheme] = useState('corporate');
   const [dashboardTab, setDashboardTab] = useState('presentations');
   const [referralData, setReferralData] = useState({ coins: 0, referralCode: '', referredBy: null, unlockedModules: [], referrals: [] });
   const [internalIsCollapsed, setInternalIsCollapsed] = useState(true);
+
+  // Folder System States
+  const [folders, setFolders] = useState(() => {
+    const saved = localStorage.getItem('pulse-poll-folders');
+    return saved ? JSON.parse(saved) : DEFAULT_FOLDERS;
+  });
+  const [selectedFolderId, setSelectedFolderId] = useState('all'); // 'all', 'unorganized', or folder ID
+  const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
+  const [newFolderName, setNewFolderName] = useState('');
+  const [newFolderColor, setNewFolderColor] = useState('#06b6d4');
 
   const isCollapsed = propIsCollapsed !== undefined ? propIsCollapsed : internalIsCollapsed;
   const toggleSidebar = onToggleSidebar || (() => setInternalIsCollapsed(!internalIsCollapsed));
@@ -96,6 +114,47 @@ export default function Dashboard({
     }
   };
 
+  const handleCreateFolder = (e) => {
+    e.preventDefault();
+    if (!newFolderName.trim()) return;
+
+    const newFolder = {
+      id: `folder-${Math.random().toString(36).substr(2, 7)}`,
+      name: newFolderName.trim(),
+      color: newFolderColor
+    };
+
+    const updated = [...folders, newFolder];
+    setFolders(updated);
+    localStorage.setItem('pulse-poll-folders', JSON.stringify(updated));
+    setNewFolderName('');
+    setIsFolderModalOpen(false);
+  };
+
+  const handleAssignPresentationFolder = (presId, folderId) => {
+    const updated = presentations.map(p => {
+      if (p.id === presId) {
+        return { ...p, folderId: folderId || null };
+      }
+      return p;
+    });
+
+    setPresentations(updated);
+    localStorage.setItem('pulse-poll-presentations', JSON.stringify(updated));
+
+    const targetPres = updated.find(p => p.id === presId);
+    if (targetPres) {
+      fetch(`/api/presentations`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-email': userEmail
+        },
+        body: JSON.stringify(targetPres)
+      }).catch(err => console.error(err));
+    }
+  };
+
   const handleCreatePresentation = async (e) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
@@ -103,16 +162,17 @@ export default function Dashboard({
     const newPres = {
       id: Math.random().toString(36).substr(2, 9),
       title: newTitle.trim(),
+      folderId: newTargetFolderId || null,
       updatedAt: new Date().toLocaleDateString(),
-      theme: localStorage.getItem('pulse-poll-default-theme') || 'corporate',
+      theme: newTheme || 'corporate',
       slides: [
         {
           id: Math.random().toString(36).substr(2, 9),
           type: 'poll',
-          question: '',
+          question: `Key Poll Question for ${newTitle.trim()}:`,
           options: [
-            { id: 'opt-1', text: '' },
-            { id: 'opt-2', text: '' }
+            { id: 'opt-1', text: 'Option A' },
+            { id: 'opt-2', text: 'Option B' }
           ]
         }
       ]
@@ -225,51 +285,123 @@ export default function Dashboard({
     return '🌱 Free Account';
   };
 
+  const filteredPresentations = presentations.filter(p => {
+    if (selectedFolderId === 'all') return true;
+    if (selectedFolderId === 'unorganized') return !p.folderId;
+    return p.folderId === selectedFolderId;
+  });
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', minHeight: 'calc(100vh - 120px)', width: '100%' }} className="animate-fade">
+      
+      {/* 📊 Top Dual Navigation Tab Switcher */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+        <div className="top-dual-tab-bar">
+          <button 
+            type="button"
+            className={`top-dual-tab-button ${dashboardTab === 'presentations' ? 'active' : ''}`}
+            onClick={() => setDashboardTab('presentations')}
+          >
+            <PresentationIcon size={16} /> 📊 Presentations ({presentations.length})
+          </button>
+          <button 
+            type="button"
+            className={`top-dual-tab-button ${dashboardTab === 'workshops' ? 'active' : ''}`}
+            onClick={onViewSessions}
+          >
+            <Calendar size={16} /> 🗓️ Multi-Day Workshops
+          </button>
+        </div>
+
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button 
+            type="button"
+            className="btn btn-secondary" 
+            onClick={() => setIsFolderModalOpen(true)}
+            style={{ fontWeight: 600, fontSize: '0.85rem', display: 'flex', gap: '6px', alignItems: 'center' }}
+          >
+            <FolderPlus size={16} color="var(--accent)" /> ➕ New Folder
+          </button>
+          <button 
+            type="button"
+            className="btn btn-primary" 
+            onClick={() => setIsCreateModalOpen(true)} 
+            style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 700, fontSize: '0.85rem', border: 'none', display: 'flex', gap: '6px', alignItems: 'center' }}
+          >
+            <Plus size={16} /> New Presentation
+          </button>
+        </div>
+      </div>
+
       {/* Main Content Dashboard */}
       <div style={{ width: '100%' }}>
-        {dashboardTab === 'presentations' ? (
+        {dashboardTab === 'presentations' && (
           <>
-            {/* Tier Custom Differentiated Dashboard Header */}
+            {/* Tier Custom Differentiated Dashboard Banner */}
             <div style={getBannerStyle()}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                  <h1 style={{ fontSize: '1.6rem', fontWeight: 700, margin: 0 }}>Welcome back, {user?.name || 'Presenter'}</h1>
+                  <h1 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>Welcome back, {user?.name || 'Presenter'}</h1>
                   <span style={getBadgeStyle()}>{getBadgeText()}</span>
                 </div>
-                <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.9rem', lineHeight: 1.5 }}>
+                <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.88rem', lineHeight: 1.5 }}>
                   {user?.tier === 'admin' 
-                    ? 'You have complete administrative root permissions. Manage presentations, system settings, and core databases.' 
-                    : 'Create interactive slides, collect live audience feedback, and run timed tests.'}
+                    ? 'You have complete administrative root permissions. Manage presentations, folders, system settings, and databases.' 
+                    : 'Create interactive presentation decks, organize into folders, and collect real-time audience feedback.'}
                 </p>
               </div>
               <div style={{ display: 'flex', gap: '12px' }}>
                 {onOpenAiGenerator && (
                   <button 
                     className="btn btn-primary" 
-                    style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', border: 'none' }}
+                    style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', border: 'none', padding: '8px 16px', fontSize: '0.85rem' }}
                     onClick={onOpenAiGenerator}
                   >
                     <span>🤖 PulseAI Quiz Generator</span>
                     <span>⚡</span>
                   </button>
                 )}
-                <button 
-                  className="btn btn-secondary" 
-                  onClick={onViewSessions} 
-                  style={{ fontWeight: 700, border: '1px solid var(--border)', color: 'var(--text-primary)', gap: '6px' }}
-                >
-                  <span>📅 Multi-Day Workshops</span>
-                </button>
-                <button className="btn btn-secondary" onClick={() => setIsCreateModalOpen(true)} style={{ fontWeight: 700 }}>
-                  <Plus size={16} /> New Presentation
-                </button>
               </div>
             </div>
 
+            {/* 📁 Presentation Folder Filter Chips Bar */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '20px' }}>
+              <button 
+                type="button"
+                className={`folder-chip-pill ${selectedFolderId === 'all' ? 'active' : ''}`}
+                onClick={() => setSelectedFolderId('all')}
+              >
+                <Folder size={14} /> 📁 All Decks ({presentations.length})
+              </button>
+
+              <button 
+                type="button"
+                className={`folder-chip-pill ${selectedFolderId === 'unorganized' ? 'active' : ''}`}
+                onClick={() => setSelectedFolderId('unorganized')}
+              >
+                <Layers size={14} /> Unorganized ({presentations.filter(p => !p.folderId).length})
+              </button>
+
+              {folders.map(f => {
+                const count = presentations.filter(p => p.folderId === f.id).length;
+                return (
+                  <button 
+                    key={f.id}
+                    type="button"
+                    className={`folder-chip-pill ${selectedFolderId === f.id ? 'active' : ''}`}
+                    onClick={() => setSelectedFolderId(f.id)}
+                    style={{ borderColor: selectedFolderId === f.id ? f.color : 'var(--border)' }}
+                  >
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: f.color }}></span>
+                    📁 {f.name} ({count})
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Presentation Decks Grid */}
             <div className="dashboard-grid">
-              {presentations.map((pres) => {
+              {filteredPresentations.map((pres) => {
                 const themeBg = 
                   pres.theme === 'corporate' ? '/assets/corporate_thumb.jpg' :
                   pres.theme === 'cyber-neon' || pres.theme === 'future-minds' ? '/assets/cyber_thumb.jpg' :
@@ -277,12 +409,14 @@ export default function Dashboard({
                   pres.theme === 'playroom-magic' || pres.theme === 'playroom' ? '/assets/playroom_thumb.jpg' :
                   '/assets/corporate_thumb.jpg';
 
+                const assignedFolder = folders.find(f => f.id === pres.folderId);
+
                 return (
                   <div 
                     key={pres.id} 
-                    className="glass-card presentation-card"
+                    className="glass-card presentation-card card-lift"
                     onClick={() => onViewCreator(pres.id)}
-                    style={{ overflow: 'hidden', padding: 0 }}
+                    style={{ overflow: 'hidden', padding: 0, borderRadius: '16px', background: 'var(--surface)', border: '1px solid var(--border)' }}
                   >
                     {/* Generated Artwork Theme Banner */}
                     <div style={{
@@ -296,54 +430,82 @@ export default function Dashboard({
                       justifyContent: 'space-between'
                     }}>
                       <span style={{
-                        background: 'rgba(6, 182, 212, 0.85)',
+                        background: 'rgba(15, 23, 42, 0.85)',
                         color: '#ffffff',
                         padding: '3px 10px',
                         borderRadius: '20px',
                         fontSize: '0.72rem',
                         fontWeight: 800,
                         backdropFilter: 'blur(4px)',
-                        boxShadow: '0 2px 6px rgba(0,0,0,0.3)'
+                        border: '1px solid rgba(255,255,255,0.1)'
                       }}>
-                        🎨 {pres.theme || 'cyber-neon'} Theme
+                        🎨 {pres.theme || 'corporate'}
                       </span>
+
+                      {/* Folder Reassign Dropdown */}
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <select 
+                          value={pres.folderId || ''}
+                          onChange={(e) => handleAssignPresentationFolder(pres.id, e.target.value)}
+                          style={{
+                            fontSize: '0.72rem', fontWeight: 700, padding: '3px 8px', borderRadius: '12px',
+                            background: assignedFolder ? assignedFolder.color : 'rgba(15,23,42,0.85)',
+                            color: '#ffffff', border: 'none', cursor: 'pointer'
+                          }}
+                          title="Assign presentation deck to folder"
+                        >
+                          <option value="">📁 Move to Folder...</option>
+                          {folders.map(f => (
+                            <option key={f.id} value={f.id}>📁 {f.name}</option>
+                          ))}
+                          <option value="">🚫 Unorganized</option>
+                        </select>
+                      </div>
                     </div>
 
                     <div style={{ padding: '18px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
                         <div className="logo-icon" style={{ width: '28px', height: '28px', flexShrink: 0 }}>
                           <PresentationIcon size={14} color="white" />
                         </div>
-                        <h3 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>{pres.title}</h3>
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{pres.title}</h3>
                       </div>
-                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 16px 0' }}>
-                        {pres.slides.length} {pres.slides.length === 1 ? 'slide' : 'slides'} • {pres.category || 'Interactive Deck'}
-                      </p>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+                          {(pres.slides || []).length} {(pres.slides || []).length === 1 ? 'slide' : 'slides'}
+                        </span>
+                        {assignedFolder && (
+                          <span style={{ fontSize: '0.72rem', background: 'var(--surface-2)', color: assignedFolder.color, padding: '2px 8px', borderRadius: '8px', fontWeight: 700, border: '1px solid var(--border)' }}>
+                            📁 {assignedFolder.name}
+                          </span>
+                        )}
+                      </div>
 
                       <div className="card-meta" style={{ padding: 0, marginTop: 0 }}>
-                        <span style={{ fontSize: '0.75rem' }}>Updated {pres.updatedAt}</span>
+                        <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Updated {pres.updatedAt}</span>
                         <div style={{ display: 'flex', gap: '8px' }} onClick={(e) => e.stopPropagation()}>
                           <button 
                             className="btn btn-secondary btn-icon" 
                             style={{ width: '32px', height: '32px' }}
                             onClick={() => onViewCreator(pres.id)}
-                            title="Edit"
+                            title="Edit Deck"
                           >
                             <Edit3 size={14} />
                           </button>
                           <button 
                             className="btn btn-primary btn-icon" 
-                            style={{ width: '32px', height: '32px' }}
+                            style={{ width: '32px', height: '32px', background: 'var(--accent)', border: 'none' }}
                             onClick={() => onViewPresenter(pres.id)}
                             title="Present Live"
                           >
-                            <Play size={14} />
+                            <Play size={14} fill="#08211E" color="#08211E" />
                           </button>
                           <button 
                             className="btn btn-secondary btn-icon" 
                             style={{ width: '32px', height: '32px', color: 'var(--accent-red)' }}
                             onClick={(e) => handleDelete(pres.id, e)}
-                            title="Delete"
+                            title="Delete Deck"
                           >
                             <Trash2 size={14} />
                           </button>
@@ -355,14 +517,13 @@ export default function Dashboard({
               })}
             </div>
 
-            {presentations.length === 0 && (
-              <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.01)', borderRadius: '16px', border: '1px solid var(--border-glass)', marginBottom: '30px' }}>
-                <PresentationIcon size={36} style={{ marginBottom: '10px', opacity: 0.5 }} />
-                <h3 style={{ margin: '0 0 6px 0', fontSize: '1.1rem' }}>No custom presentations created yet</h3>
-                <p style={{ margin: 0, fontSize: '0.85rem' }}>Build a deck from scratch above, explore 60+ prebuilt templates in the navigation submenus, or click any capability below to launch!</p>
+            {filteredPresentations.length === 0 && (
+              <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)', background: 'var(--surface)', borderRadius: '16px', border: '1px solid var(--border)', marginBottom: '30px' }}>
+                <PresentationIcon size={36} style={{ marginBottom: '10px', opacity: 0.4 }} />
+                <div style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>No presentations in this folder</div>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Click "+ New Presentation" above to create a deck for this folder!</p>
               </div>
             )}
-
             {/* Site Capabilities & What You Can Do on PulsePoll */}
             <div style={{ marginTop: '30px' }}>
               <div style={{ marginBottom: '20px' }}>
@@ -455,7 +616,9 @@ export default function Dashboard({
               </div>
             </div>
           </>
-        ) : (
+        )}
+
+        {dashboardTab === 'referrals' && (
           /* REFERRAL & COIN GAMIFICATION TAB MATCHING USER DESIGN TEMPLATE */
           <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
             <section className="hero">
@@ -624,28 +787,69 @@ export default function Dashboard({
         )}
       </div>
 
+      {/* MODAL 1: TOPIC-BASED NEW PRESENTATION CREATOR WIZARD */}
       {isCreateModalOpen && (
         <div style={{
           position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-          backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+          backgroundColor: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(5px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000
         }}>
-          <div className="glass-card animate-fade" style={{ padding: '2rem', width: '90%', maxWidth: '450px' }}>
-            <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Create New Presentation</h3>
-            <form onSubmit={handleCreatePresentation}>
-              <div className="settings-group" style={{ marginBottom: '1.5rem' }}>
-                <label>Presentation Title</label>
+          <div className="glass-card animate-fade" style={{ padding: '24px', width: '90%', maxWidth: '480px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px' }}>
+            <h3 style={{ fontSize: '1.3rem', fontWeight: 800, marginBottom: '4px', color: 'var(--text-primary)' }}>✨ Create New Presentation</h3>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '18px' }}>Enter a topic title, assign to a folder, and choose a design theme:</p>
+            
+            <form onSubmit={handleCreatePresentation} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
+                  Presentation Topic / Title
+                </label>
                 <input 
                   type="text" 
                   className="input-text" 
-                  placeholder="e.g., Q3 Planning Session" 
+                  placeholder="e.g., Executive Strategy & AI Innovation 2026" 
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                   autoFocus
                   required
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.9rem' }}
                 />
               </div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
+                  Assign to Folder
+                </label>
+                <select 
+                  value={newTargetFolderId}
+                  onChange={(e) => setNewTargetFolderId(e.target.value)}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.88rem' }}
+                >
+                  <option value="">📁 Unorganized (No Folder)</option>
+                  {folders.map(f => (
+                    <option key={f.id} value={f.id}>📁 {f.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
+                  Presentation Theme Style
+                </label>
+                <select 
+                  value={newTheme}
+                  onChange={(e) => setNewTheme(e.target.value)}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.88rem' }}
+                >
+                  <option value="corporate">💼 Corporate Slate (Clean Professional)</option>
+                  <option value="cyber-neon">⚡ Cyber Neon (High-Tech Arcade)</option>
+                  <option value="classic-slate">🏛️ Classic Slate (Higher Ed)</option>
+                  <option value="playroom">🎨 Playroom Magic (Vibrant K-12)</option>
+                  <option value="forest-sage">🌿 Forest Sage (Academic Research)</option>
+                  <option value="light-luxe">✨ Light Luxe (Clean White)</option>
+                </select>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '10px' }}>
                 <button 
                   type="button" 
                   className="btn btn-secondary" 
@@ -653,11 +857,79 @@ export default function Dashboard({
                     setIsCreateModalOpen(false);
                     setNewTitle('');
                   }}
+                  style={{ padding: '8px 16px' }}
                 >
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary">
-                  Create
+                <button type="submit" className="btn btn-primary" style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 700, border: 'none', padding: '8px 20px' }}>
+                  Create Deck
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: NEW FOLDER CREATOR MODAL */}
+      {isFolderModalOpen && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+          backgroundColor: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(5px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000
+        }}>
+          <div className="glass-card animate-fade" style={{ padding: '24px', width: '90%', maxWidth: '440px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '4px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <FolderPlus color="var(--accent)" size={20} /> Create New Folder
+            </h3>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '16px' }}>Group your presentations into organized folders:</p>
+            
+            <form onSubmit={handleCreateFolder} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
+                  Folder Name
+                </label>
+                <input 
+                  type="text" 
+                  className="input-text" 
+                  placeholder="e.g. Q3 Executive Strategy Decks" 
+                  value={newFolderName}
+                  onChange={(e) => setNewFolderName(e.target.value)}
+                  autoFocus
+                  required
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.9rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
+                  Folder Accent Color
+                </label>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  {['#06b6d4', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899', '#3b82f6'].map(col => (
+                    <button 
+                      key={col}
+                      type="button"
+                      onClick={() => setNewFolderColor(col)}
+                      style={{
+                        width: '32px', height: '32px', borderRadius: '50%', background: col,
+                        border: newFolderColor === col ? '3px solid white' : 'none', cursor: 'pointer'
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '10px' }}>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  onClick={() => setIsFolderModalOpen(false)}
+                  style={{ padding: '8px 16px' }}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary" style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 700, border: 'none', padding: '8px 20px' }}>
+                  Create Folder
                 </button>
               </div>
             </form>
