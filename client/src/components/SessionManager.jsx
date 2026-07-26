@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Calendar, Plus, Trash2, Play, Users, Lock, Unlock, Shuffle, 
+  Calendar, Plus, Trash2, Play, Users, Lock, Unlock, Shuffle, QrCode,
   ChevronRight, Award, Sparkles, CheckCircle2, Copy, Eye, ArrowLeft, Layers, 
   Clock, Edit3, Link as LinkIcon, FileText, Check, X, ExternalLink, HelpCircle, FileUp, Settings, Printer, Download, Gamepad2, MessageSquare
 } from 'lucide-react';
