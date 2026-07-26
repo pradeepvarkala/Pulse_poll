@@ -80,6 +80,7 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
 
   // Intelligent Grouping & Team Assignment State
   const [gender, setGender] = useState('M'); // 'M' or 'F'
+  const [designation, setDesignation] = useState('Participant');
   const [avatar, setAvatar] = useState('🚀');
   const [assignedTeamCard, setAssignedTeamCard] = useState(null);
 
@@ -689,16 +690,34 @@ export default function Audience({ defaultRoomCode = '', onBackToMenu }) {
 
           <form onSubmit={handleJoinWithNickname} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
             <div className="settings-group">
+              <label style={{ fontSize: '0.8rem', fontWeight: 800, textAlign: 'center', display: 'block', color: 'var(--text-secondary)' }}>
+                Full Name / Nickname
+              </label>
               <input 
                 type="text" 
                 className="input-text" 
-                maxLength="15"
-                style={{ textAlign: 'center', fontSize: '1.2rem', fontWeight: 600 }}
-                placeholder="e.g. SpeedRacer"
+                maxLength="25"
+                style={{ textAlign: 'center', fontSize: '1.1rem', fontWeight: 600 }}
+                placeholder="e.g. Alex Rivers"
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
                 required
                 autoFocus
+              />
+            </div>
+
+            <div className="settings-group">
+              <label style={{ fontSize: '0.8rem', fontWeight: 800, textAlign: 'center', display: 'block', color: 'var(--text-secondary)' }}>
+                Designation / Position
+              </label>
+              <input 
+                type="text" 
+                className="input-text" 
+                maxLength="30"
+                style={{ textAlign: 'center', fontSize: '1.0rem', fontWeight: 500 }}
+                placeholder="e.g. Senior Manager / Facilitator"
+                value={designation}
+                onChange={(e) => setDesignation(e.target.value)}
               />
             </div>
 

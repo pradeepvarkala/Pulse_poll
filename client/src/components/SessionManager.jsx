@@ -232,6 +232,39 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
     setEditingSessionId(null);
   };
 
+  // Live Registration & Grouping States
+  const [targetGroupCount, setTargetGroupCount] = useState(4);
+  const [selectedGroupTheme, setSelectedGroupTheme] = useState('indian_rivers');
+
+  // Group real workshop registered participants using CSP algorithm
+  const handleGroupWorkshopParticipants = () => {
+    const roster = activeSession?.roster || [];
+    if (roster.length === 0) {
+      alert("No real participants registered yet! Please scan the Workshop QR Code first to register participants.");
+      return;
+    }
+
+    const { groups } = solveGroupAllocation({
+      participants: roster,
+      groupCount: parseInt(targetGroupCount, 10) || 4,
+      themeKey: selectedGroupTheme
+    });
+
+    updateActiveSession({ groups, groupCount: targetGroupCount, groupThemeKey: selectedGroupTheme });
+  };
+
+  const handleUpdateTeamName = (groupIndex, newName) => {
+    updateActiveSession(prev => {
+      const updatedGroups = (prev.groups || []).map((g, idx) => {
+        if (idx === groupIndex) {
+          return { ...g, name: newName };
+        }
+        return g;
+      });
+      return { ...prev, groups: updatedGroups };
+    });
+  };
+
   const handleUpdateSectionRowField = (dayIdx, secIdx, field, val) => {
     updateActiveSession(prev => {
       const daysCopy = [...(prev.days || [])];
@@ -662,18 +695,6 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
                   </button>
 
                   <button 
-                    className="btn btn-primary"
-                    onClick={() => {
-                      setActiveSessionId(sess.id);
-                      const firstDeckId = sess.days?.[0]?.sections?.[0]?.presentationId || 'sample-pres-1';
-                      onLaunchPresenter(firstDeckId);
-                    }}
-                    style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 600, fontSize: '0.82rem', border: 'none' }}
-                  >
-                    <Play size={14} /> Present Live
-                  </button>
-
-                  <button 
                     className="btn btn-secondary btn-icon"
                     onClick={() => handleDeleteWorkshop(sess.id)}
                     title="Delete Workshop"
@@ -879,6 +900,18 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
                               >
                                 <Eye size={13} color="var(--accent)" />
                               </button>
+                              <button 
+                                type="button"
+                                className="btn btn-primary"
+                                onClick={() => {
+                                  const targetDeck = sec.presentationId || 'sample-pres-1';
+                                  onLaunchPresenter(targetDeck);
+                                }}
+                                title="Play & Launch Intended Presentation Deck Directly"
+                                style={{ padding: '4px 10px', fontSize: '0.75rem', fontWeight: 800, background: 'var(--accent)', color: '#08211E', border: 'none', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0, marginLeft: '4px' }}
+                              >
+                                <Play size={12} fill="#08211E" /> Play
+                              </button>
                             </div>
                           </td>
 
@@ -912,47 +945,196 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
       )}
 
       {/* TAB 3: QR REGISTRATION & TEAMS LOBBY */}
-      {activeTab === 'teams' && activeSession && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', alignItems: 'start' }}>
-          <div className="glass-card" style={{ padding: '24px', borderRadius: '12px', background: 'var(--surface)', border: '1px solid var(--border)', textAlign: 'center' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-              📲 Session Join QR Code
-            </h3>
-            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '16px' }}>
-              Participants scan once to join workshop programs:
-            </p>
-            <div style={{ background: 'white', padding: '12px', borderRadius: '12px', display: 'inline-block', marginBottom: '16px' }}>
-              <img 
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(joinUrl)}`} 
-                alt="Session Join QR"
-                style={{ width: '160px', height: '160px', display: 'block' }}
-              />
+      {(activeTab === 'lobby' || activeTab === 'teams') && activeSession && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          
+          {/* Top Row: Upfront Registration QR Code & Live Registration Tabular Roster */}
+          <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '20px', alignItems: 'stretch' }}>
+            
+            {/* Left Box: Pre-Generated Upfront QR Code */}
+            <div className="glass-card" style={{ padding: '20px', borderRadius: '16px', background: 'var(--surface)', border: '1px solid var(--border)', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <QrCode size={18} color="var(--accent)" /> Upfront Registration QR
+              </div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '12px' }}>
+                Participants scan once to register Name, Designation & Gender:
+              </div>
+              <div style={{ background: 'white', padding: '10px', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.2)', marginBottom: '12px' }}>
+                <img 
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(joinUrl)}`} 
+                  alt="Session Join QR"
+                  style={{ width: '150px', height: '150px', display: 'block' }}
+                />
+              </div>
+              <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <CheckCircle2 size={14} color="#10b981" /> 🟢 Registration Open & Ready
+              </div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px', wordBreak: 'break-all' }}>
+                Link: <strong>{joinUrl}</strong>
+              </div>
             </div>
-            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-              Registration: {activeSession.registrationLocked ? <span style={{ color: 'var(--danger)' }}>🔒 Locked</span> : <span style={{ color: '#10b981' }}>🟢 Open</span>}
+
+            {/* Right Box: Real-Time Tabular Live Roster */}
+            <div className="glass-card" style={{ padding: '20px', borderRadius: '16px', background: 'var(--surface)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  📋 Real-Time Registration Roster
+                  <span style={{ fontSize: '0.78rem', background: 'var(--accent-soft)', color: 'var(--accent)', padding: '2px 10px', borderRadius: '12px', fontWeight: 700 }}>
+                    {(activeSession.roster || []).length} Registered
+                  </span>
+                </div>
+              </div>
+
+              {/* Tabular Registration List Table */}
+              <div style={{ overflowX: 'auto', flex: 1, maxHeight: '280px', overflowY: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
+                  <thead>
+                    <tr style={{ background: 'var(--surface-2)', borderBottom: '1px solid var(--border-soft)', color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      <th style={{ padding: '8px 10px', width: '35px' }}>#</th>
+                      <th style={{ padding: '8px 10px' }}>Participant Name</th>
+                      <th style={{ padding: '8px 10px' }}>Designation / Position</th>
+                      <th style={{ padding: '8px 10px', width: '90px' }}>Gender</th>
+                      <th style={{ padding: '8px 10px', width: '110px' }}>Reg Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(activeSession.roster || []).length > 0 ? (
+                      (activeSession.roster || []).map((p, idx) => (
+                        <tr key={p.id || idx} style={{ borderBottom: '1px solid var(--border-soft)' }}>
+                          <td style={{ padding: '8px 10px', fontWeight: 700, color: 'var(--text-muted)' }}>{idx + 1}</td>
+                          <td style={{ padding: '8px 10px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                            {p.avatar || '🚀'} {p.name}
+                          </td>
+                          <td style={{ padding: '8px 10px', color: 'var(--text-secondary)' }}>
+                            {p.designation || 'Participant'}
+                          </td>
+                          <td style={{ padding: '8px 10px' }}>
+                            <span style={{ fontSize: '0.78rem', background: (p.gender || 'M').toUpperCase() === 'F' ? 'rgba(236, 72, 153, 0.15)' : 'rgba(6, 182, 212, 0.15)', color: (p.gender || 'M').toUpperCase() === 'F' ? '#ec4899' : '#06b6d4', padding: '2px 8px', borderRadius: '8px', fontWeight: 700 }}>
+                              {(p.gender || 'M').toUpperCase() === 'F' ? '👩 Female' : '👨 Male'}
+                            </span>
+                          </td>
+                          <td style={{ padding: '8px 10px', color: '#10b981', fontWeight: 600, fontSize: '0.78rem' }}>
+                            ✓ Live Ready
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="5" style={{ padding: '30px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                          ✨ No live registrants yet. Have participants scan the QR Code on the left to register their Name, Designation & Gender in real time!
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
+
           </div>
 
-          <div className="glass-card" style={{ padding: '24px', borderRadius: '12px', background: 'var(--surface)', border: '1px solid var(--border)' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '16px' }}>
-              📋 Roster ({(activeSession.roster || []).length} Joined)
-            </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '350px', overflowY: 'auto' }}>
-              {(activeSession.roster || []).length > 0 ? (
-                (activeSession.roster || []).map((p) => (
-                  <div key={p.id} style={{ padding: '8px 12px', background: 'var(--surface-2)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>{p.avatar || '🚀'} {p.name}</span>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{p.indCode}</span>
+          {/* Bottom Box: Intelligent Grouping & Editable Team Cards */}
+          <div className="glass-card" style={{ padding: '24px', borderRadius: '16px', background: 'var(--surface)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            
+            {/* Grouping Toolbar Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', borderBottom: '1px solid var(--border-soft)', paddingBottom: '14px' }}>
+              <div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Users size={20} color="var(--accent)" /> Intelligent Team Grouping & Editable Team Names
+                </div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                  Constraint Satisfaction Programming (CSP) balances gender ratios & equal team sizes.
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)' }}>Groups:</span>
+                  <input 
+                    type="range"
+                    min="1"
+                    max="10"
+                    value={targetGroupCount}
+                    onChange={(e) => setTargetGroupCount(e.target.value)}
+                    style={{ width: '90px' }}
+                  />
+                  <span style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--accent)' }}>{targetGroupCount}</span>
+                </div>
+
+                <select 
+                  value={selectedGroupTheme}
+                  onChange={(e) => setSelectedGroupTheme(e.target.value)}
+                  style={{ padding: '6px 10px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600 }}
+                >
+                  <option value="indian_rivers">🌊 Indian Rivers (Ganga, Yamuna...)</option>
+                  <option value="greek_alphabets">🏛️ Greek Alphabets (Alpha, Beta...)</option>
+                  <option value="constellations">✨ Cosmic Constellations (Orion...)</option>
+                  <option value="numeric">🔢 Numeric Teams (Team 1, Team 2...)</option>
+                </select>
+
+                <button 
+                  className="btn btn-primary"
+                  onClick={handleGroupWorkshopParticipants}
+                  style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 700, fontSize: '0.85rem', border: 'none', padding: '8px 16px', display: 'flex', gap: '6px', alignItems: 'center' }}
+                >
+                  <Shuffle size={16} /> 🔀 Group Participants (CSP)
+                </button>
+              </div>
+            </div>
+
+            {/* Display Allocated Team Cards with Editable Team Names */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
+              {(activeSession.groups || []).length > 0 ? (
+                (activeSession.groups || []).map((grp, idx) => (
+                  <div 
+                    key={grp.id || idx}
+                    style={{
+                      padding: '16px', borderRadius: '12px', background: 'var(--surface-2)',
+                      border: '1.5px solid var(--border-glass)', display: 'flex', flexDirection: 'column', gap: '10px'
+                    }}
+                  >
+                    {/* Inline Editable Team Name Input */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <input 
+                        type="text"
+                        value={grp.name || `Team ${idx + 1}`}
+                        onChange={(e) => handleUpdateTeamName(idx, e.target.value)}
+                        style={{
+                          fontSize: '1.05rem', fontWeight: 800, color: 'var(--accent)',
+                          background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border)',
+                          borderRadius: '6px', padding: '4px 8px', width: '100%'
+                        }}
+                        title="Click to edit team name!"
+                      />
+                      <span style={{ fontSize: '0.72rem', background: 'var(--accent-soft)', color: 'var(--accent)', padding: '2px 6px', borderRadius: '6px', fontWeight: 700, flexShrink: 0 }}>
+                        {grp.code || `TEAM-${idx+1}`}
+                      </span>
+                    </div>
+
+                    {/* Team Members List */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      {(grp.members || []).map((m, mIdx) => (
+                        <div key={mIdx} style={{ padding: '6px 10px', background: 'var(--surface)', borderRadius: '6px', fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontWeight: 500 }}>{(m.gender || 'M').toUpperCase() === 'F' ? '👩' : '👨'} {m.name}</span>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{m.designation || 'Participant'}</span>
+                        </div>
+                      ))}
+                      {(grp.members || []).length === 0 && (
+                        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', italic: 'true' }}>
+                          No members allocated yet.
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ))
               ) : (
-                <div style={{ padding: '24px 16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem', background: 'var(--surface-2)', borderRadius: '8px', border: '1px dashed var(--border-soft)' }}>
-                  ✨ No participants registered yet.<br />
-                  Scan the QR Code on the left to join live!
+                <div style={{ gridColumn: '1 / -1', padding: '24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem', background: 'var(--surface-2)', borderRadius: '12px', border: '1px dashed var(--border-soft)' }}>
+                  ✨ Click <strong>"🔀 Group Participants (CSP)"</strong> above to generate balanced teams with editable names!
                 </div>
               )}
             </div>
+
           </div>
+
         </div>
       )}
 
