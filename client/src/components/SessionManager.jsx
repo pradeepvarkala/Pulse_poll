@@ -769,7 +769,33 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
                               </div>
                             </div>
 
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexShrink: 0 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+                              {/* PLAY BUTTON IN MINIMIZED VIEW */}
+                              <button 
+                                type="button"
+                                className="btn btn-primary btn-icon"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (sec.presentationId) {
+                                    onLaunchPresenter(sec.presentationId);
+                                  } else {
+                                    alert('No slide deck linked to this session row yet. Click to expand and link or create a presentation deck!');
+                                  }
+                                }}
+                                title={sec.presentationId ? "Present Linked Deck Live ▶" : "Expand to link slide deck"}
+                                style={{ 
+                                  width: '32px', height: '32px', borderRadius: '50%', padding: 0,
+                                  background: 'var(--accent)', color: '#08211E', border: 'none',
+                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                  boxShadow: '0 2px 8px rgba(6, 182, 212, 0.4)', cursor: 'pointer',
+                                  transition: 'transform 0.2s ease'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                              >
+                                <Play size={13} fill="#08211E" color="#08211E" style={{ marginLeft: '2px' }} />
+                              </button>
+
                               <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--accent)', background: 'var(--surface-2)', padding: '5px 12px', borderRadius: '8px', border: '1px solid var(--border)' }}>
                                 🕒 {sec.startTime || '09:00 AM'} - {sec.endTime || '10:00 AM'} ({sec.duration || formatDurationHoursMins(durationMins)})
                               </div>
@@ -850,15 +876,18 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
                               />
                               <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-muted)' }}>h</span>
 
-                              {/* Minutes Input */}
+                              {/* Minutes Input (With 0-59 Looping Logic) */}
                               <input 
                                 type="number" 
-                                min="0" max="59" step="5"
+                                min="-5" max="60" step="5"
                                 value={currentMins}
                                 onChange={(e) => {
                                   const hours = currentHours;
-                                  const mins = Math.max(0, Math.min(59, parseInt(e.target.value, 10) || 0));
-                                  const total = (hours * 60) + mins;
+                                  let val = parseInt(e.target.value, 10);
+                                  if (isNaN(val)) val = 0;
+                                  if (val >= 60) val = 0; // Loop 60 -> 0!
+                                  if (val < 0) val = 55;  // Loop < 0 -> 55!
+                                  const total = (hours * 60) + val;
                                   handleUpdateSectionRowField(dayIdx, secIdx, 'durationMinutes', Math.max(5, total));
                                 }}
                                 style={{ width: '50px', padding: '4px 6px', borderRadius: '6px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.85rem', fontWeight: 800, textAlign: 'center' }}
