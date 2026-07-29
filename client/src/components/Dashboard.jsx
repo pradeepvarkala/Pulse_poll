@@ -367,76 +367,92 @@ export default function Dashboard({
   });
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', minHeight: 'calc(100vh - 120px)', width: '100%' }} className="animate-fade">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '28px', minHeight: 'calc(100vh - 120px)', width: '100%' }} className="animate-fade">
       
-      {/* 1. TOP OF PAGE: WELCOME BANNER */}
-      <div style={getBannerStyle()}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-            <h1 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>Welcome back, {user?.name || 'Presenter'}</h1>
-            <span style={getBadgeStyle()}>{getBadgeText()}</span>
-          </div>
-          <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.88rem', lineHeight: 1.5 }}>
-            {user?.tier === 'admin' 
-              ? 'You have complete administrative root permissions. Manage presentations, folders, system settings, and databases.' 
-              : 'Create interactive presentation decks, organize into folders, and collect real-time audience feedback.'}
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          {onOpenAiGenerator && (
-            <button 
-              className="btn btn-primary" 
-              style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', border: 'none', padding: '8px 16px', fontSize: '0.85rem' }}
-              onClick={onOpenAiGenerator}
-            >
-              <span>🤖 PulseAI Quiz Generator</span>
-              <span>⚡</span>
-            </button>
-          )}
-        </div>
-      </div>
+      {/* 1. MENTIMETER UNBOXED HERO HEADING */}
+      <div style={{ marginTop: '10px' }}>
+        <h1 className="menti-hero-title">
+          Welcome {user?.name || 'Pradeep S Varkala'}!
+        </h1>
 
-      {/* 2. DUAL NAVIGATION TABS & ACTION BAR */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-        <div className="top-dual-tab-bar">
+        {/* MENTIMETER QUICK ACTION PILLS ROW */}
+        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '32px' }}>
           <button 
-            type="button"
-            className={`top-dual-tab-button ${dashboardTab === 'presentations' ? 'active' : ''}`}
-            onClick={() => setDashboardTab('presentations')}
+            type="button" 
+            className="menti-pill-btn menti-pill-btn-primary"
+            onClick={() => {
+              setNewTargetFolderId(activeOpenedFolderId || '');
+              setIsCreateModalOpen(true);
+            }}
           >
-            <PresentationIcon size={16} /> 📊 Presentations ({presentations.length})
+            <Plus size={16} /> New presentation
           </button>
+
           <button 
-            type="button"
-            className={`top-dual-tab-button ${dashboardTab === 'workshops' ? 'active' : ''}`}
+            type="button" 
+            className="menti-pill-btn"
             onClick={onViewSessions}
           >
-            <Calendar size={16} /> 🗓️ Multi-Day Workshops
+            <Calendar size={16} color="var(--accent)" /> Multi-Day Workshops
+          </button>
+
+          {onOpenAiGenerator && (
+            <button 
+              type="button" 
+              className="menti-pill-btn"
+              onClick={onOpenAiGenerator}
+            >
+              <span>⚡</span> Import / PulseAI Generator
+            </button>
+          )}
+
+          <button 
+            type="button" 
+            className="menti-pill-btn"
+            onClick={() => setIsFolderModalOpen(true)}
+            style={{ marginLeft: 'auto' }}
+          >
+            <FolderPlus size={16} color="var(--accent)" /> + New Folder
           </button>
         </div>
 
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button 
-            type="button"
-            className="btn btn-secondary" 
-            onClick={() => setIsFolderModalOpen(true)}
-            style={{ fontWeight: 600, fontSize: '0.85rem', display: 'flex', gap: '6px', alignItems: 'center' }}
-          >
-            <FolderPlus size={16} color="var(--accent)" /> ➕ New Folder
-          </button>
-          {activeOpenedFolderId === null && (
-            <button 
-              type="button"
-              className="btn btn-primary" 
-              onClick={() => {
-                setNewTargetFolderId('');
-                setIsCreateModalOpen(true);
-              }} 
-              style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 700, fontSize: '0.85rem', border: 'none', display: 'flex', gap: '6px', alignItems: 'center' }}
-            >
-              <Plus size={16} /> New Presentation
-            </button>
-          )}
+        {/* 2. MENTIMETER "START WITH AI & INTERACTIVE ACTIVITIES" CARDS ROW */}
+        <div style={{ marginBottom: '36px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+            <div style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              Start with AI ✨
+            </div>
+            <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', cursor: 'pointer', fontWeight: 600 }}>
+              Something else &gt;
+            </span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '14px' }}>
+            <div className="menti-activity-card" onClick={() => handleCreateQuickPresentation('Strategic Decision Voting', 'poll')}>
+              <div style={{ fontSize: '1.8rem' }}>🎯</div>
+              <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-primary)' }}>Make decisions</div>
+            </div>
+
+            <div className="menti-activity-card" onClick={() => handleCreateQuickPresentation('Audience Pulse Check-in', 'poll')}>
+              <div style={{ fontSize: '1.8rem' }}>📊</div>
+              <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-primary)' }}>Check-in</div>
+            </div>
+
+            <div className="menti-activity-card" onClick={() => handleCreateQuickPresentation('Team Brainstorm Session', 'brainstorm')}>
+              <div style={{ fontSize: '1.8rem' }}>💡</div>
+              <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-primary)' }}>Brainstorm ideas</div>
+            </div>
+
+            <div className="menti-activity-card" onClick={() => handleCreateQuickPresentation('Live Room Arcade Quiz', 'quiz')}>
+              <div style={{ fontSize: '1.8rem' }}>⚡</div>
+              <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-primary)' }}>Energize the room</div>
+            </div>
+
+            <div className="menti-activity-card" onClick={() => handleCreateQuickPresentation('Instant Feedback Wordcloud', 'wordcloud')}>
+              <div style={{ fontSize: '1.8rem' }}>💬</div>
+              <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-primary)' }}>Get live feedback</div>
+            </div>
+          </div>
         </div>
       </div>
 

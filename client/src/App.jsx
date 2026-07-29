@@ -1407,7 +1407,7 @@ export default function App() {
             <Search size={14} color="var(--text-muted)" />
             <input 
               type="text" 
-              placeholder="Quick Search or Jump... ⌘K" 
+              placeholder="Search Mentis, folders, and pages" 
               style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', fontSize: '0.78rem', outline: 'none', width: '100%' }}
             />
           </div>
