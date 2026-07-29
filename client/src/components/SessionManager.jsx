@@ -945,248 +945,83 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
         </div>
       )}
 
-      {/* MODAL 2: ADD PROGRAM SECTION & TIME TO DAY CARD */}
-      {showSectionModal && selectedDayIdx !== null && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(4px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000,
-          padding: '20px'
-        }}>
-          <div className="glass-card animate-fade" style={{ width: '100%', maxWidth: '500px', padding: '24px', borderRadius: '16px', background: 'var(--surface)', border: '1px solid var(--border)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>
-                ➕ Add Section to Day {selectedDayIdx + 1}
-              </h2>
-              <button className="btn btn-secondary btn-icon" onClick={() => setShowSectionModal(false)}>
-                <X size={16} />
-              </button>
-            </div>
-
-            <form onSubmit={handleAddSectionToDay} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
-                  Program Section Title
-                </label>
-                <input 
-                  type="text"
-                  className="input-text"
-                  placeholder="e.g. Morning Keynote & Diagnostic Assessment"
-                  value={secTitle}
-                  onChange={(e) => setSecTitle(e.target.value)}
-                  required
-                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text-primary)' }}
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
-                <div>
-                  <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
-                    Start Time
-                  </label>
-                  <input 
-                    type="text"
-                    value={secStartTime}
-                    onChange={(e) => setSecStartTime(e.target.value)}
-                    style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text-primary)', fontSize: '0.82rem' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
-                    End Time
-                  </label>
-                  <input 
-                    type="text"
-                    value={secEndTime}
-                    onChange={(e) => setSecEndTime(e.target.value)}
-                    style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text-primary)', fontSize: '0.82rem' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
-                    Duration
-                  </label>
-                  <input 
-                    type="text"
-                    value={secDuration}
-                    onChange={(e) => setSecDuration(e.target.value)}
-                    style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text-primary)', fontSize: '0.82rem' }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
-                  Assign Presentation / Quiz Deck Variant
-                </label>
-                <select 
-                  value={secPresentationId}
-                  onChange={(e) => setSecPresentationId(e.target.value)}
-                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text-primary)', fontSize: '0.85rem' }}
-                >
-                  <option value="sample-pres-1">Deck 1: Executive STEM & Diagnostic Quiz</option>
-                  <option value="sample-pres-2">Deck 2: Escape Vault Cyber Challenge</option>
-                  <option value="sample-pres-3">Deck 3: Innovation 2x2 Grid & Word Cloud</option>
-                  {userPresentations.map(p => (
-                    <option key={p.id} value={p.id}>📁 {p.title || 'Untitled Presentation'}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
-                  OR Provide Custom Screen Web Link URL (Optional)
-                </label>
-                <input 
-                  type="url"
-                  placeholder="https://example.com/live-screen"
-                  value={secCustomUrl}
-                  onChange={(e) => setSecCustomUrl(e.target.value)}
-                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text-primary)' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
-                  Remarks & Facilitator Instructions
-                </label>
-                <input 
-                  type="text"
-                  placeholder="e.g. Remind teams to scan QR code before slide 2"
-                  value={secRemarks}
-                  onChange={(e) => setSecRemarks(e.target.value)}
-                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text-primary)' }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setShowSectionModal(false)}>
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-primary" style={{ flex: 1, background: 'var(--accent)', color: '#08211E', fontWeight: 600, border: 'none' }}>
-                  Save Section
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL 3: EDIT WORKSHOP METADATA (Title, Subject, Date, Time, NumDays, Description) */}
+      {/* EDIT WORKSHOP METADATA MODAL */}
       {showEditWorkshopModal && (
         <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0, 0, 0, 0.65)', backdropFilter: 'blur(4px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000,
-          padding: '20px'
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+          backgroundColor: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(5px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000
         }}>
-          <div className="glass-card animate-fade" style={{ width: '100%', maxWidth: '540px', padding: '26px', borderRadius: '16px', background: 'var(--surface)', border: '1px solid var(--border)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                ⚙️ Edit Workshop Details
-              </h2>
-              <button className="btn btn-secondary btn-icon" onClick={() => setShowEditWorkshopModal(false)}>
-                <X size={16} />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveWorkshopEdits} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div className="glass-card animate-fade" style={{ padding: '24px', width: '90%', maxWidth: '480px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '4px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Settings color="var(--accent)" size={20} /> Edit Workshop Details
+            </h3>
+            
+            <form onSubmit={handleSaveWorkshopEdits} style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '14px' }}>
               <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
-                  Workshop / Program Title
-                </label>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Workshop Title</label>
                 <input 
-                  type="text"
-                  className="input-text"
+                  type="text" 
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
                   required
-                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text-primary)' }}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.9rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Subject / Category</label>
+                <input 
+                  type="text" 
+                  value={editSubject}
+                  onChange={(e) => setEditSubject(e.target.value)}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.9rem' }}
                 />
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
-                    Subject Name / Category
-                  </label>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Start Date</label>
                   <input 
-                    type="text"
-                    className="input-text"
-                    value={editSubject}
-                    onChange={(e) => setEditSubject(e.target.value)}
-                    required
-                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text-primary)' }}
+                    type="date" 
+                    value={editDate}
+                    onChange={(e) => setEditDate(e.target.value)}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.85rem' }}
                   />
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
-                    Number of Days
-                  </label>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Total Program Days</label>
                   <input 
-                    type="number"
-                    min="1"
-                    max="14"
-                    className="input-text"
+                    type="number" 
+                    min="1" max="14"
                     value={editNumDays}
                     onChange={(e) => setEditNumDays(e.target.value)}
-                    required
-                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text-primary)' }}
-                  />
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
-                    Scheduled Start Date <span style={{ fontSize: '0.7rem', color: 'var(--accent)' }}>(🔒 Managed via Schedule)</span>
-                  </label>
-                  <input 
-                    type="text"
-                    className="input-text"
-                    value={editDate || 'Flexible Start Date'}
-                    readOnly={true}
-                    disabled={true}
-                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.05)', color: 'var(--text-muted)', cursor: 'not-allowed', fontWeight: 600 }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
-                    Scheduled Time Slots <span style={{ fontSize: '0.7rem', color: 'var(--accent)' }}>(🔒 Auto-Calculated)</span>
-                  </label>
-                  <input 
-                    type="text"
-                    className="input-text"
-                    value={editTime || 'Auto-generated from Schedule Matrix'}
-                    readOnly={true}
-                    disabled={true}
-                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.05)', color: 'var(--text-muted)', cursor: 'not-allowed', fontWeight: 600 }}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.85rem' }}
                   />
                 </div>
               </div>
 
               <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
-                  Workshop Description / Objectives
-                </label>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Program Summary</label>
                 <textarea 
                   rows={3}
-                  className="input-text"
                   value={editDesc}
                   onChange={(e) => setEditDesc(e.target.value)}
-                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text-primary)', resize: 'vertical' }}
+                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.85rem' }}
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setShowEditWorkshopModal(false)}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '10px' }}>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  onClick={() => setShowEditWorkshopModal(false)}
+                  style={{ padding: '8px 16px' }}
+                >
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary" style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 600 }}>
+                <button type="submit" className="btn btn-primary" style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 700, border: 'none', padding: '8px 20px' }}>
                   Save Workshop Changes
                 </button>
               </div>
@@ -1194,7 +1029,6 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
           </div>
         </div>
       )}
-
     </div>
   );
 }
