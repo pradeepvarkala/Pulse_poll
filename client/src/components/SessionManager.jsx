@@ -160,14 +160,11 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
     return (savedContext && sessions.some(s => s.id === savedContext)) ? 'schedule' : 'details';
   });
 
-  // Collapsible Sections State (All minimized/collapsed by default on load!)
-  const [expandedSections, setExpandedSections] = useState({});
+  // Exclusive Collapsible Section State (Only 1 expanded at a time; all minimized by default on load!)
+  const [expandedSectionId, setExpandedSectionId] = useState(null);
 
   const toggleExpandSection = (secId) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [secId]: !prev[secId]
-    }));
+    setExpandedSectionId(prev => (prev === secId ? null : secId));
   };
 
   const handleOpenWorkshopEdit = (sessionId, tab = 'details') => {
@@ -721,7 +718,7 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     {(day.sections || []).map((sec, secIdx) => {
                       const secKey = sec.id || `sec-${dayIdx}-${secIdx}`;
-                      const isExpanded = !!expandedSections[secKey];
+                      const isExpanded = expandedSectionId === secKey;
                       const durationMins = sec.durationMinutes || 60;
                       const currentHours = Math.floor(durationMins / 60);
                       const currentMins = durationMins % 60;
