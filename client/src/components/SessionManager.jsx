@@ -707,8 +707,8 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
                     </button>
                   </div>
 
-                  {/* SPACIOUS ORGANIZED SESSION ITEM CARDS */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {/* SPACIOUS ORGANIZED SESSION ITEM CARDS WITH CRISP BORDERS AND SHADOWS */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                     {(day.sections || []).map((sec, secIdx) => {
                       const durationMins = sec.durationMinutes || 60;
                       const currentHours = Math.floor(durationMins / 60);
@@ -718,20 +718,36 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
                         <div 
                           key={sec.id || secIdx} 
                           style={{ 
-                            background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', 
-                            padding: '18px', display: 'flex', flexDirection: 'column', gap: '14px',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
+                            background: 'var(--surface)',
+                            border: '1.5px solid var(--border)', 
+                            borderRadius: '16px', 
+                            padding: '20px', 
+                            display: 'flex', 
+                            flexDirection: 'column', 
+                            gap: '16px',
+                            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04)',
+                            position: 'relative'
                           }}
                         >
                           {/* ROW 1: Index badge, Start Time (Accent Color), Duration (H/M Only), End Time (Accent Color), Activity Type */}
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap', background: 'var(--surface-2)', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border-soft)' }}>
-                            <span style={{ fontSize: '0.85rem', fontWeight: 800, background: 'var(--accent)', color: '#08211E', padding: '3px 10px', borderRadius: '6px' }}>
+                          <div style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '14px', 
+                            flexWrap: 'wrap', 
+                            background: 'var(--surface-2)', 
+                            padding: '12px 16px', 
+                            borderRadius: '12px', 
+                            border: '1px solid var(--border)',
+                            borderLeft: '4px solid var(--accent)'
+                          }}>
+                            <span style={{ fontSize: '0.85rem', fontWeight: 800, background: 'var(--accent)', color: '#08211E', padding: '4px 12px', borderRadius: '6px' }}>
                               #{secIdx + 1}
                             </span>
 
                             {/* Start Time (Accent Color Matching End Time) */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)' }}>🕒 Start:</span>
+                              <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-muted)' }}>🕒 Start:</span>
                               <input 
                                 type="text" 
                                 value={sec.startTime || ''}
@@ -741,8 +757,8 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
                             </div>
 
                             {/* SEPARATE HOURS AND MINUTES INPUTS (NO REDUNDANT DURATION TEXT) */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--surface)', padding: '4px 12px', borderRadius: '8px', border: '1px solid var(--border)' }}>
-                              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)' }}>⏱️ Duration:</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--surface)', padding: '5px 12px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                              <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-muted)' }}>⏱️ Duration:</span>
                               
                               {/* Hours Input */}
                               <input 
@@ -757,7 +773,7 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
                                 }}
                                 style={{ width: '46px', padding: '4px 6px', borderRadius: '6px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.85rem', fontWeight: 800, textAlign: 'center' }}
                               />
-                              <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)' }}>h</span>
+                              <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-muted)' }}>h</span>
 
                               {/* Minutes Input */}
                               <input 
@@ -772,13 +788,13 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
                                 }}
                                 style={{ width: '50px', padding: '4px 6px', borderRadius: '6px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.85rem', fontWeight: 800, textAlign: 'center' }}
                               />
-                              <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)' }}>m</span>
+                              <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-muted)' }}>m</span>
                             </div>
 
                             {/* End Time (Accent Color) */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)' }}>🔒 End:</span>
-                              <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--accent)', background: 'var(--surface)', padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--border)' }}>
+                              <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-muted)' }}>🔒 End:</span>
+                              <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--accent)', background: 'var(--surface)', padding: '5px 12px', borderRadius: '6px', border: '1.5px solid var(--border)' }}>
                                 {sec.endTime || '10:00 AM'}
                               </span>
                             </div>
@@ -788,7 +804,7 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
                               <select 
                                 value={sec.activityType || '📚 Training Class'}
                                 onChange={(e) => handleUpdateSectionRowField(dayIdx, secIdx, 'activityType', e.target.value)}
-                                style={{ width: '100%', padding: '6px 12px', borderRadius: '8px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: 700 }}
+                                style={{ width: '100%', padding: '7px 12px', borderRadius: '8px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: 700 }}
                               >
                                 <option value="📚 Training Class">📚 Training Class</option>
                                 <option value="📝 Orientation & Keynote">📝 Orientation & Keynote</option>
@@ -804,38 +820,38 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
                           </div>
 
                           {/* ROW 2: Topic Title & Presenter Name in Generous Grid */}
-                          <div style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr', gap: '14px', borderBottom: '1px solid var(--border-soft)', paddingBottom: '12px' }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr', gap: '14px', background: 'var(--surface-2)', padding: '14px 16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
                             <div>
-                              <label style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '4px' }}>TOPIC / ACTIVITY TITLE</label>
+                              <label style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>TOPIC / ACTIVITY TITLE</label>
                               <input 
                                 type="text" 
                                 value={sec.title || ''}
                                 placeholder="Enter topic or session title..."
                                 onChange={(e) => handleUpdateSectionRowField(dayIdx, secIdx, 'title', e.target.value)}
-                                style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.88rem', fontWeight: 600 }}
+                                style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 600 }}
                               />
                             </div>
 
                             <div>
-                              <label style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '4px' }}>PRESENTER / TRAINER</label>
+                              <label style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '6px' }}>PRESENTER / TRAINER</label>
                               <input 
                                 type="text" 
                                 value={sec.presenterName || ''}
                                 placeholder="Presenter Name"
                                 onChange={(e) => handleUpdateSectionRowField(dayIdx, secIdx, 'presenterName', e.target.value)}
-                                style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.85rem' }}
+                                style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.85rem' }}
                               />
                             </div>
                           </div>
 
                           {/* ROW 3: Linked Presentation Deck + Compact Minus (-) Remove Button */}
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', padding: '0 4px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: '280px' }}>
-                              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)' }}>📊 Linked Deck:</span>
+                              <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-muted)' }}>📊 Linked Deck:</span>
                               <select 
                                 value={sec.presentationId || ''}
                                 onChange={(e) => handleUpdateSectionDeck(dayIdx, secIdx, e.target.value)}
-                                style={{ flex: 1, maxWidth: '340px', padding: '6px 12px', borderRadius: '8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.82rem' }}
+                                style={{ flex: 1, maxWidth: '340px', padding: '7px 12px', borderRadius: '8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: 600 }}
                               >
                                 <option value="">🚫 None (No Slide Deck)</option>
                                 {userPresentations.map(p => (
@@ -867,13 +883,14 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
                               onClick={() => handleDeleteSection(dayIdx, secIdx)}
                               title="Delete Schedule Item (-)"
                               style={{ 
-                                width: '32px', height: '32px', borderRadius: '50%', 
-                                background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.4)', 
+                                width: '34px', height: '34px', borderRadius: '50%', 
+                                background: 'rgba(239, 68, 68, 0.12)', border: '1.5px solid rgba(239, 68, 68, 0.4)', 
                                 color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                padding: 0, cursor: 'pointer', transition: 'all 0.2s ease'
+                                padding: 0, cursor: 'pointer', transition: 'all 0.2s ease',
+                                boxShadow: '0 2px 8px rgba(239, 68, 68, 0.2)'
                               }}
                             >
-                              <Minus size={16} strokeWidth={2.5} />
+                              <Minus size={16} strokeWidth={2.8} />
                             </button>
                           </div>
                         </div>
