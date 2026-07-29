@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Calendar, Plus, Trash2, Play, Users, Lock, Unlock, Shuffle, QrCode,
   ChevronRight, Award, Sparkles, CheckCircle2, Copy, Eye, ArrowLeft, Layers, 
-  Clock, Edit3, Link as LinkIcon, FileText, Check, X, ExternalLink, HelpCircle, FileUp, Settings, Printer, Download, Gamepad2, MessageSquare
+  Clock, Edit3, Link as LinkIcon, FileText, Check, X, ExternalLink, HelpCircle, FileUp, Settings, Printer, Download, Gamepad2, MessageSquare, AlertTriangle
 } from 'lucide-react';
 import { solveGroupAllocation, getGroupNames, GROUP_NAMING_THEMES } from '../utils/groupingAlgorithm';
 
@@ -25,22 +25,22 @@ const SAMPLE_SESSIONS = [
         dayNumber: 1,
         title: 'Day 1: Team Alignment & Diagnostic Pulse',
         sections: [
-          { id: 'sec-101', title: 'Opening Diagnostic Polls & Alignment Quiz', startTime: '09:00 AM', endTime: '10:30 AM', duration: '90 mins', remarks: 'Ensure all participants connect via QR code before slide 3', presentationId: 'sample-pres-1', customUrl: '' },
-          { id: 'sec-102', title: 'Escape Room Vault Team Challenge', startTime: '11:00 AM', endTime: '12:30 PM', duration: '90 mins', remarks: 'Divide teams into rivers groups', presentationId: 'sample-pres-2', customUrl: '' }
+          { id: 'sec-101', title: 'Opening Diagnostic Polls & Alignment Quiz', startTime: '09:00 AM', endTime: '10:30 AM', durationMinutes: 90, duration: '1h 30m', activityType: '📝 Orientation & Keynote', presenterName: 'Prof. Pradeep S Varkala', remarks: 'Ensure all participants connect via QR code before slide 3', presentationId: 'sample-pres-1', customUrl: '' },
+          { id: 'sec-102', title: 'Escape Room Vault Team Challenge', startTime: '11:00 AM', endTime: '12:30 PM', durationMinutes: 90, duration: '1h 30m', activityType: '🔐 Escape Room Challenge', presenterName: 'Lead Facilitator', remarks: 'Divide teams into rivers groups', presentationId: 'sample-pres-2', customUrl: '' }
         ]
       },
       {
         dayNumber: 2,
         title: 'Day 2: Strategic Prioritization & Brainstorming',
         sections: [
-          { id: 'sec-201', title: 'Strategic Impact 2x2 Grid & Word Cloud', startTime: '09:00 AM', endTime: '11:00 AM', duration: '120 mins', remarks: 'Collect 5 sticky notes per participant', presentationId: 'sample-pres-3', customUrl: '' }
+          { id: 'sec-201', title: 'Strategic Impact 2x2 Grid & Word Cloud', startTime: '09:00 AM', endTime: '11:00 AM', durationMinutes: 120, duration: '2h', activityType: '💡 Team Brainstorm Grid', presenterName: 'Strategy Team', remarks: 'Collect 5 sticky notes per participant', presentationId: 'sample-pres-3', customUrl: '' }
         ]
       },
       {
         dayNumber: 3,
         title: 'Day 3: Innovation Pitching & Final Championship',
         sections: [
-          { id: 'sec-301', title: 'Live Team Pitch & Leaderboard Awards', startTime: '02:00 PM', endTime: '04:00 PM', duration: '120 mins', remarks: 'Present live trophies', presentationId: 'sample-pres-1', customUrl: '' }
+          { id: 'sec-301', title: 'Live Team Pitch & Leaderboard Awards', startTime: '02:00 PM', endTime: '04:00 PM', durationMinutes: 120, duration: '2h', activityType: '⭐ Reflection & Peer Review', presenterName: 'Executive Panel', remarks: 'Present live trophies', presentationId: 'sample-pres-1', customUrl: '' }
         ]
       }
     ],
@@ -49,15 +49,13 @@ const SAMPLE_SESSIONS = [
   }
 ];
 
-// Time parsing helper: converts "09:30 AM" to minutes from midnight
 const timeToMinutes = (timeStr) => {
-  if (!timeStr) return 540; // Default 09:00 AM (540 mins)
+  if (!timeStr) return 540;
   const match = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
   if (!match) return 540;
   let hours = parseInt(match[1], 10);
   const minutes = parseInt(match[2], 10);
   const period = match[3] ? match[3].toUpperCase() : null;
-
   if (period) {
     if (period === 'PM' && hours < 12) hours += 12;
     if (period === 'AM' && hours === 12) hours = 0;
@@ -65,7 +63,6 @@ const timeToMinutes = (timeStr) => {
   return hours * 60 + minutes;
 };
 
-// Minutes to time string helper: converts 570 to "09:30 AM"
 const minutesToTime = (totalMins) => {
   let normalizedMins = Math.max(0, totalMins) % (24 * 60);
   let hours = Math.floor(normalizedMins / 60);
@@ -78,27 +75,54 @@ const minutesToTime = (totalMins) => {
   return `${padH}:${padM} ${period}`;
 };
 
-// Auto-cascading schedule time recalculator
+const formatDurationHoursMins = (mins) => {
+  const m = parseInt(mins, 10) || 0;
+  const hours = Math.floor(m / 60);
+  const minutes = m % 60;
+  if (hours > 0 && minutes > 0) return `${hours}h ${minutes}m`;
+  if (hours > 0) return `${hours}h`;
+  return `${minutes}m`;
+};
+
 const recalculateCascadingScheduleTimes = (sectionsList) => {
   if (!sectionsList || sectionsList.length === 0) return [];
-  
   let currentStartMins = timeToMinutes(sectionsList[0]?.startTime || '09:00 AM');
-
   return sectionsList.map((sec, idx) => {
-    const durationMins = parseInt(sec.durationMinutes || sec.duration || 60, 10) || 60;
-    
+    const durationMins = parseInt(sec.durationMinutes || 60, 10) || 60;
     const rowStartMins = idx === 0 ? currentStartMins : currentStartMins + 1;
     const rowEndMins = rowStartMins + durationMins;
     currentStartMins = rowEndMins;
-
     return {
       ...sec,
       startTime: minutesToTime(rowStartMins),
       endTime: minutesToTime(rowEndMins),
       durationMinutes: durationMins,
-      duration: `${durationMins} mins`
+      duration: formatDurationHoursMins(durationMins)
     };
   });
+};
+
+const detectTimeConflicts = (days) => {
+  const conflicts = [];
+  (days || []).forEach((day, dayIdx) => {
+    const sections = day.sections || [];
+    for (let i = 0; i < sections.length - 1; i++) {
+      const currentSec = sections[i];
+      const nextSec = sections[i + 1];
+      const currentEnd = timeToMinutes(currentSec.endTime);
+      const nextStart = timeToMinutes(nextSec.startTime);
+      if (nextStart < currentEnd) {
+        conflicts.push({
+          dayNumber: day.dayNumber || dayIdx + 1,
+          sec1Title: currentSec.title || `Section ${i + 1}`,
+          sec1Time: `${currentSec.startTime} - ${currentSec.endTime}`,
+          sec2Title: nextSec.title || `Section ${i + 2}`,
+          sec2Time: `${nextSec.startTime} - ${nextSec.endTime}`
+        });
+      }
+    }
+  });
+  return conflicts;
 };
 
 export default function SessionManager({ onLaunchPresenter, onBackToDashboard, onViewCreator }) {
@@ -119,38 +143,33 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
     }
   }, []);
 
-  const [activeSessionId, setActiveSessionId] = useState(sessions[0]?.id || null);
-  const [activeTab, setActiveTab] = useState('workshops'); // 'workshops', 'schedule', 'lobby'
+  const [activeSessionId, setActiveSessionId] = useState(() => {
+    const savedContext = localStorage.getItem('pulse-poll-active-workshop-context');
+    if (savedContext && sessions.some(s => s.id === savedContext)) {
+      return savedContext;
+    }
+    return sessions[0]?.id || null;
+  });
 
-  // Listen for browser back button popstate within workshops!
-  useEffect(() => {
-    const handlePopState = (e) => {
-      if (e.state && e.state.tab) {
-        setActiveTab(e.state.tab);
-      } else {
-        setActiveTab('workshops');
-      }
-    };
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+  const [activeTab, setActiveTab] = useState('workshops');
+  const [editTab, setEditTab] = useState('details');
 
-  const handleOpenWorkshopSchedule = (sessionId) => {
+  const handleOpenWorkshopEdit = (sessionId, tab = 'details') => {
     setActiveSessionId(sessionId);
+    localStorage.setItem('pulse-poll-active-workshop-context', sessionId);
+    setEditTab(tab);
     setActiveTab('schedule');
-    window.history.pushState({ view: 'sessions', tab: 'schedule' }, '', '#sessions-schedule');
   };
 
   const handleHeaderBack = () => {
-    if (activeTab === 'schedule' || activeTab === 'lobby') {
+    if (activeTab === 'schedule') {
       setActiveTab('workshops');
-      window.history.pushState({ view: 'sessions', tab: 'workshops' }, '', '#sessions');
+      localStorage.removeItem('pulse-poll-active-workshop-context');
     } else {
       onBackToDashboard();
     }
   };
-  
-  // Wizard Modal States
+
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newSubject, setNewSubject] = useState('');
@@ -159,176 +178,39 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
   const [newNumDays, setNewNumDays] = useState(3);
   const [newDesc, setNewDesc] = useState('');
 
-  // Selected Day Detail Modal States
-  const [selectedDayIdx, setSelectedDayIdx] = useState(null);
-  const [showSectionModal, setShowSectionModal] = useState(false);
+  const activeSession = sessions.find(s => s.id === activeSessionId) || sessions[0];
 
-  // New Section Input States
-  const [secTitle, setSecTitle] = useState('');
-  const [secStartTime, setSecStartTime] = useState('09:00 AM');
-  const [secEndTime, setSecEndTime] = useState('10:00 AM');
-  const [secDuration, setSecDuration] = useState('60 mins');
-  const [secRemarks, setSecRemarks] = useState('');
-  const [secPresentationId, setSecPresentationId] = useState('sample-pres-1');
-  const [secCustomUrl, setSecCustomUrl] = useState('');
+  useEffect(() => {
+    localStorage.setItem('pulse-poll-training-sessions', JSON.stringify(sessions));
+  }, [sessions]);
 
-  // Edit Workshop Metadata Modal States
-  const [showEditWorkshopModal, setShowEditWorkshopModal] = useState(false);
-  const [editingSessionId, setEditingSessionId] = useState(null);
-  const [editTitle, setEditTitle] = useState('');
-  const [editSubject, setEditSubject] = useState('');
-  const [editDate, setEditDate] = useState('');
-  const [editTime, setEditTime] = useState('');
-  const [editNumDays, setEditNumDays] = useState(1);
-  const [editDesc, setEditDesc] = useState('');
-
-  const handleOpenEditWorkshopModal = (sess) => {
-    setEditingSessionId(sess.id);
-    setEditTitle(sess.title || '');
-    setEditSubject(sess.subject || '');
-    setEditDate(sess.scheduledDate || '');
-    setEditTime(sess.scheduledTime || '');
-    setEditNumDays(sess.numDays || sess.days?.length || 1);
-    setEditDesc(sess.description || '');
-    setShowEditWorkshopModal(true);
-  };
-
-  const handleSaveWorkshopEdits = (e) => {
-    e.preventDefault();
-    if (!editingSessionId || !editTitle.trim()) return;
-
+  const updateActiveSession = (updater) => {
     setSessions(prev => prev.map(s => {
-      if (s.id === editingSessionId) {
-        const numDaysInt = parseInt(editNumDays, 10) || 1;
-        let daysArray = [...(s.days || [])];
-        
-        if (numDaysInt > daysArray.length) {
-          for (let i = daysArray.length + 1; i <= numDaysInt; i++) {
-            daysArray.push({
-              dayNumber: i,
-              title: `Day ${i}: Training Module & Orientation`,
-              sections: []
-            });
-          }
-        } else if (numDaysInt < daysArray.length) {
-          daysArray = daysArray.slice(0, numDaysInt);
-        }
-
-        return {
-          ...s,
-          title: editTitle.trim(),
-          subject: editSubject.trim(),
-          scheduledDate: editDate,
-          scheduledTime: editTime,
-          numDays: numDaysInt,
-          description: editDesc.trim(),
-          days: daysArray
-        };
+      if (s.id === activeSession?.id) {
+        return typeof updater === 'function' ? updater(s) : { ...s, ...updater };
       }
       return s;
     }));
-
-    setShowEditWorkshopModal(false);
-    setEditingSessionId(null);
   };
 
-  // Live Registration & Grouping States
-  const [targetGroupCount, setTargetGroupCount] = useState(4);
-  const [selectedGroupTheme, setSelectedGroupTheme] = useState('indian_rivers');
-
-  // Group real workshop registered participants using CSP algorithm
-  const handleGroupWorkshopParticipants = () => {
-    const roster = activeSession?.roster || [];
-    if (roster.length === 0) {
-      alert("No real participants registered yet! Please scan the Workshop QR Code first to register participants.");
-      return;
-    }
-
-    const { groups } = solveGroupAllocation({
-      participants: roster,
-      groupCount: parseInt(targetGroupCount, 10) || 4,
-      themeKey: selectedGroupTheme
-    });
-
-    updateActiveSession({ groups, groupCount: targetGroupCount, groupThemeKey: selectedGroupTheme });
-  };
-
-  const handleUpdateTeamName = (groupIndex, newName) => {
-    updateActiveSession(prev => {
-      const updatedGroups = (prev.groups || []).map((g, idx) => {
-        if (idx === groupIndex) {
-          return { ...g, name: newName };
-        }
-        return g;
-      });
-      return { ...prev, groups: updatedGroups };
-    });
-  };
-
-  // 🤖 Virtual Bot Simulator Helper for Single Developer Testing
-  const handleAddVirtualSimulatorBots = (count = 10) => {
-    const SAMPLE_NAMES = [
-      { name: 'Ananya Verma', designation: 'Senior Product Manager', gender: 'F', avatar: '🚀' },
-      { name: 'Vikram Singh', designation: 'Lead Software Engineer', gender: 'M', avatar: '🦁' },
-      { name: 'Priya Patel', designation: 'UX Strategy Facilitator', gender: 'F', avatar: '🎨' },
-      { name: 'Rahul Sharma', designation: 'Operations Director', gender: 'M', avatar: '⚡' },
-      { name: 'Deepa Nair', designation: 'Head of Talent Development', gender: 'F', avatar: '⭐' },
-      { name: 'David Miller', designation: 'Enterprise Architect', gender: 'M', avatar: '🦅' },
-      { name: 'Sara Khan', designation: 'Innovation Consultant', gender: 'F', avatar: '🔥' },
-      { name: 'Alex Rivers', designation: 'Executive Coach', gender: 'M', avatar: '👑' },
-      { name: 'Meera Krishnan', designation: 'Program Lead', gender: 'F', avatar: '🌸' },
-      { name: 'Arjun Das', designation: 'VP Technology', gender: 'M', avatar: '🐯' },
-      { name: 'Sneha Roy', designation: 'Agile Facilitator', gender: 'F', avatar: '🎮' },
-      { name: 'Karan Malhotra', designation: 'Strategy Analyst', gender: 'M', avatar: '🎯' }
-    ];
-
-    const currentRoster = [...(activeSession?.roster || [])];
-    const newBots = [];
-    const startIndex = currentRoster.length;
-
-    for (let i = 0; i < count; i++) {
-      const template = SAMPLE_NAMES[(startIndex + i) % SAMPLE_NAMES.length];
-      newBots.push({
-        id: `bot-${Math.random().toString(36).substr(2, 8)}`,
-        name: `${template.name} ${startIndex + i > 11 ? startIndex + i + 1 : ''}`.trim(),
-        designation: template.designation,
-        gender: template.gender,
-        avatar: template.avatar,
-        indCode: `BOT-${101 + startIndex + i}`,
-        isSimulatedBot: true
-      });
-    }
-
-    const updatedRoster = [...currentRoster, ...newBots];
-    updateActiveSession({ roster: updatedRoster });
-  };
-
-  const handleClearVirtualBots = () => {
-    updateActiveSession({ roster: [], groups: [] });
+  const handleInlineTitleChange = (sessionId, newTitleVal) => {
+    setSessions(prev => prev.map(s => {
+      if (s.id === sessionId) {
+        return { ...s, title: newTitleVal };
+      }
+      return s;
+    }));
   };
 
   const handleUpdateSectionRowField = (dayIdx, secIdx, field, val) => {
     updateActiveSession(prev => {
       const daysCopy = [...(prev.days || [])];
       if (!daysCopy[dayIdx]) return prev;
-      
       const sectionsCopy = [...(daysCopy[dayIdx].sections || [])];
       if (!sectionsCopy[secIdx]) return prev;
-
-      sectionsCopy[secIdx] = {
-        ...sectionsCopy[secIdx],
-        [field]: val
-      };
-
-      daysCopy[dayIdx] = {
-        ...daysCopy[dayIdx],
-        sections: recalculateCascadingScheduleTimes(sectionsCopy)
-      };
-
-      return {
-        ...prev,
-        days: daysCopy
-      };
+      sectionsCopy[secIdx] = { ...sectionsCopy[secIdx], [field]: val };
+      daysCopy[dayIdx] = { ...daysCopy[dayIdx], sections: recalculateCascadingScheduleTimes(sectionsCopy) };
+      return { ...prev, days: daysCopy };
     });
   };
 
@@ -336,59 +218,54 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
     updateActiveSession(prev => {
       const daysCopy = [...(prev.days || [])];
       if (!daysCopy[dayIdx]) return prev;
-
       const existingSections = daysCopy[dayIdx].sections || [];
       const lastSec = existingSections[existingSections.length - 1];
-      
-      let defaultStartMins = 540; // 09:00 AM default
-      if (lastSec && lastSec.endTime) {
-        defaultStartMins = timeToMinutes(lastSec.endTime) + 1; // Start 1 min after previous end time!
-      }
-
+      let defaultStartMins = 540;
+      if (lastSec && lastSec.endTime) defaultStartMins = timeToMinutes(lastSec.endTime) + 1;
       const newRow = {
         id: `sec-${Math.random().toString(36).substr(2, 6)}`,
         title: `Topic Section ${existingSections.length + 1}`,
         startTime: minutesToTime(defaultStartMins),
-        durationMinutes: 45,
-        duration: '45 mins',
-        endTime: minutesToTime(defaultStartMins + 45),
+        durationMinutes: 60,
+        duration: '1h',
+        endTime: minutesToTime(defaultStartMins + 60),
         activityType: '📚 Training Class',
         presenterName: 'Primary Trainer',
-        presentationId: 'sample-pres-1',
+        presentationId: '',
         customUrl: ''
       };
-
       const updatedSections = [...existingSections, newRow];
-      daysCopy[dayIdx] = {
-        ...daysCopy[dayIdx],
-        sections: recalculateCascadingScheduleTimes(updatedSections)
-      };
+      daysCopy[dayIdx] = { ...daysCopy[dayIdx], sections: recalculateCascadingScheduleTimes(updatedSections) };
+      return { ...prev, days: daysCopy };
+    });
+  };
 
-      return {
-        ...prev,
-        days: daysCopy
-      };
+  const handleDeleteSection = (dayIdx, secIdx) => {
+    updateActiveSession(prev => {
+      const daysCopy = [...(prev.days || [])];
+      if (!daysCopy[dayIdx]) return prev;
+      const updatedSections = (daysCopy[dayIdx].sections || []).filter((_, i) => i !== secIdx);
+      daysCopy[dayIdx] = { ...daysCopy[dayIdx], sections: recalculateCascadingScheduleTimes(updatedSections) };
+      return { ...prev, days: daysCopy };
     });
   };
 
   const handlePrintSchedulePDF = (sess) => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
-
     const htmlContent = `
       <!DOCTYPE html>
       <html>
       <head>
         <title>${sess.title} - Official Program Schedule</title>
         <style>
-          body { font-family: 'Inter', system-ui, -apple-system, sans-serif; padding: 40px; color: #0f172a; background: #ffffff; line-height: 1.5; }
-          .header { border-bottom: 3px solid #06b6d4; padding-bottom: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end; }
+          body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; padding: 40px; color: #0f172a; background: #ffffff; line-height: 1.5; }
+          .header { border-bottom: 3px solid #0f968c; padding-bottom: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end; }
           .title { font-size: 24px; font-weight: 800; color: #0f172a; margin: 0 0 6px 0; }
           .subtitle { font-size: 14px; color: #475569; margin: 0; }
           table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 13px; text-align: left; }
           th { background: #f1f5f9; color: #0f172a; font-weight: 700; padding: 10px 12px; border-bottom: 2px solid #cbd5e1; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; }
           td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
-          tr:nth-child(even) td { background: #f8fafc; }
           .badge { background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; display: inline-block; }
           .footer { margin-top: 40px; font-size: 11px; color: #94a3b8; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 14px; }
         </style>
@@ -399,20 +276,19 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
             <div class="title">${sess.title}</div>
             <div class="subtitle">Subject: <strong>${sess.subject || 'General Training'}</strong> • Scheduled: <strong>${sess.scheduledDate || 'Flexible Date'}</strong> (${sess.numDays || 1} Days)</div>
           </div>
-          <div style="text-align: right; font-size: 12px; color: #0284c7; font-weight: 700;">
-            PulsePoll Workshop Schedule
+          <div style="text-align: right; font-size: 12px; color: #0f968c; font-weight: 700;">
+            PulsePoll Workshops & Trainings
           </div>
         </div>
-
         ${(sess.days || []).map(day => `
-          <h3 style="font-size: 16px; margin-top: 28px; margin-bottom: 8px; color: #0284c7;">📅 ${day.title}</h3>
+          <h3 style="font-size: 16px; margin-top: 28px; margin-bottom: 8px; color: #0f968c;">📅 ${day.title}</h3>
           <table>
             <thead>
               <tr>
                 <th style="width: 30px;">#</th>
                 <th style="width: 140px;">Time Slot</th>
                 <th>Activity / Topic Title</th>
-                <th style="width: 140px;">Activity Type</th>
+                <th style="width: 150px;">Activity Type</th>
                 <th style="width: 140px;">Presenter / Trainer</th>
                 <th style="width: 80px;">Duration</th>
               </tr>
@@ -425,44 +301,23 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
                   <td><strong>${sec.title}</strong></td>
                   <td><span class="badge">${sec.activityType || '📚 Training Class'}</span></td>
                   <td>${sec.presenterName || 'Primary Instructor'}</td>
-                  <td>${sec.duration || '60 mins'}</td>
+                  <td>${sec.duration || formatDurationHoursMins(sec.durationMinutes || 60)}</td>
                 </tr>
               `).join('')}
               ${(day.sections || []).length === 0 ? `<tr><td colspan="6" style="text-align:center; color:#94a3b8;">No program sections scheduled for this day yet.</td></tr>` : ''}
             </tbody>
           </table>
         `).join('')}
-
         <div class="footer">
-          Generated & Exported via PulsePoll Interactive Platform • https://harithahavana.in
+          Generated via PulsePoll Interactive Platform • https://harithahavana.in
         </div>
-        <script>
-          window.onload = function() { window.print(); }
-        </script>
+        <script>window.onload = function() { window.print(); }</script>
       </body>
       </html>
     `;
-
     printWindow.document.write(htmlContent);
     printWindow.document.close();
   };
-
-  const activeSession = sessions.find(s => s.id === activeSessionId) || sessions[0];
-
-  useEffect(() => {
-    localStorage.setItem('pulse-poll-training-sessions', JSON.stringify(sessions));
-  }, [sessions]);
-
-  const updateActiveSession = (updater) => {
-    setSessions(prev => prev.map(s => {
-      if (s.id === activeSession.id) {
-        return typeof updater === 'function' ? updater(s) : { ...s, ...updater };
-      }
-      return s;
-    }));
-  };
-
-  const [showHelp, setShowHelp] = useState(false);
 
   const handleUpdateSectionDeck = (dayIdx, secIdx, selectedVal) => {
     if (selectedVal === '__CREATE_NEW__') {
@@ -472,73 +327,48 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
         title: `${sec?.title || 'Workshop Section'} Deck`,
         updatedAt: new Date().toLocaleDateString(),
         theme: 'corporate',
-        slides: [
-          {
-            id: Math.random().toString(36).substr(2, 9),
-            type: 'poll',
-            question: `Key Concept Check for ${sec?.title || 'this section'}:`,
-            options: [
-              { id: 'opt-1', text: 'Option A' },
-              { id: 'opt-2', text: 'Option B' }
-            ]
-          }
-        ]
+        slides: [{ id: Math.random().toString(36).substr(2, 9), type: 'poll', question: `Question for ${sec?.title || 'section'}:`, options: [{ id: 'opt-1', text: 'Option A' }] }]
       };
-
       let presentations = [];
-      try {
-        const saved = localStorage.getItem('pulse-poll-presentations');
-        if (saved) presentations = JSON.parse(saved);
-      } catch(e) {}
+      try { const saved = localStorage.getItem('pulse-poll-presentations'); if (saved) presentations = JSON.parse(saved); } catch(e) {}
       presentations.unshift(newPres);
       localStorage.setItem('pulse-poll-presentations', JSON.stringify(presentations));
       setUserPresentations(presentations);
-
+      localStorage.setItem('pulse-poll-active-workshop-context', activeSession.id);
       const updatedDays = [...activeSession.days];
       const updatedSections = [...(updatedDays[dayIdx].sections || [])];
       updatedSections[secIdx] = { ...updatedSections[secIdx], presentationId: newPres.id };
       updatedDays[dayIdx] = { ...updatedDays[dayIdx], sections: updatedSections };
       updateActiveSession({ days: updatedDays });
-
-      if (onViewCreator) {
-        onViewCreator(newPres.id, { returnView: 'sessions', returnTab: 'schedule', returnSessionId: activeSession.id });
-      }
+      onViewCreator(newPres.id, 'sessions');
     } else {
-      const updatedDays = [...activeSession.days];
-      const updatedSections = [...(updatedDays[dayIdx].sections || [])];
-      updatedSections[secIdx] = { ...updatedSections[secIdx], presentationId: selectedVal };
-      updatedDays[dayIdx] = { ...updatedDays[dayIdx], sections: updatedSections };
-      updateActiveSession({ days: updatedDays });
+      handleUpdateSectionRowField(dayIdx, secIdx, 'presentationId', selectedVal);
     }
   };
 
-  // Create Workshop Wizard Handler
-  const handleCreateSession = (e) => {
+  const handleCreateWorkshopSubmit = (e) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
-
     const daysArray = [];
     const numDaysInt = parseInt(newNumDays, 10) || 1;
-    
     for (let i = 1; i <= numDaysInt; i++) {
       daysArray.push({
         dayNumber: i,
         title: `Day ${i}: Training Module & Orientation`,
-        sections: [
-          {
-            id: `sec-${Math.random().toString(36).substr(2, 6)}`,
-            title: `Section 1: Morning Keynote & Quiz Deck`,
-            startTime: '09:00 AM',
-            endTime: '10:30 AM',
-            duration: '90 mins',
-            remarks: 'Opening orientation and diagnostic pulse',
-            presentationId: 'sample-pres-1',
-            customUrl: ''
-          }
-        ]
+        sections: [{
+          id: `sec-${Math.random().toString(36).substr(2, 6)}`,
+          title: `Section 1: Morning Keynote & Quiz Deck`,
+          startTime: '09:00 AM',
+          endTime: '10:30 AM',
+          durationMinutes: 90,
+          duration: '1h 30m',
+          activityType: '📝 Orientation & Keynote',
+          remarks: 'Opening orientation and diagnostic pulse',
+          presentationId: 'sample-pres-1',
+          customUrl: ''
+        }]
       });
     }
-
     const newSess = {
       id: `session-${Math.random().toString(36).substr(2, 6)}`,
       title: newTitle.trim(),
@@ -548,7 +378,6 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
       numDays: numDaysInt,
       description: newDesc.trim() || 'Multi-day training workshop facilitation program.',
       status: 'active',
-      registrationLocked: false,
       theme: 'cyber-neon',
       groupThemeKey: 'indian_rivers',
       groupCount: 4,
@@ -556,9 +385,9 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
       roster: [],
       groups: []
     };
-
     setSessions([newSess, ...sessions]);
     setActiveSessionId(newSess.id);
+    localStorage.setItem('pulse-poll-active-workshop-context', newSess.id);
     setShowCreateModal(false);
     setNewTitle('');
     setNewSubject('');
@@ -567,46 +396,8 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
     setActiveTab('schedule');
   };
 
-  // Add Section to Selected Day Handler
-  const handleAddSectionToDay = (e) => {
-    e.preventDefault();
-    if (selectedDayIdx === null || !activeSession) return;
-
-    const newSection = {
-      id: `sec-${Math.random().toString(36).substr(2, 6)}`,
-      title: secTitle.trim() || 'New Program Section',
-      startTime: secStartTime,
-      endTime: secEndTime,
-      duration: secDuration,
-      remarks: secRemarks.trim(),
-      presentationId: secPresentationId,
-      customUrl: secCustomUrl.trim()
-    };
-
-    const updatedDays = [...activeSession.days];
-    const currentSections = updatedDays[selectedDayIdx].sections || [];
-    updatedDays[selectedDayIdx] = {
-      ...updatedDays[selectedDayIdx],
-      sections: [...currentSections, newSection]
-    };
-
-    updateActiveSession({ days: updatedDays });
-
-    // Reset Section Form
-    setSecTitle('');
-    setSecRemarks('');
-    setSecCustomUrl('');
-    setShowSectionModal(false);
-  };
-
-  const handleDeleteSection = (dayIdx, secIdx) => {
-    const updatedDays = [...activeSession.days];
-    const updatedSections = updatedDays[dayIdx].sections.filter((_, i) => i !== secIdx);
-    updatedDays[dayIdx] = { ...updatedDays[dayIdx], sections: updatedSections };
-    updateActiveSession({ days: updatedDays });
-  };
-
-  const handleDeleteWorkshop = (sessionId) => {
+  const handleDeleteWorkshop = (sessionId, e) => {
+    if (e) e.stopPropagation();
     if (confirm('Are you sure you want to delete this workshop?')) {
       const remaining = sessions.filter(s => s.id !== sessionId);
       setSessions(remaining);
@@ -614,717 +405,539 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
     }
   };
 
-  const joinUrl = `${window.location.origin}/join?session=${activeSession?.id || ''}`;
+  const conflicts = detectTimeConflicts(activeSession?.days);
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px', fontFamily: "'Inter', sans-serif", color: 'var(--text-primary)' }}>
-      
-      {/* Top Header Bar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px', marginBottom: '16px' }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <button className="btn btn-secondary btn-icon" onClick={handleHeaderBack} title="Back">
-              <ArrowLeft size={18} />
-            </button>
-            <h1 style={{ fontSize: '1.4rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Calendar color="var(--accent)" /> Multi-Day Workshops & Teacher Programs
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px', fontFamily: "'Plus Jakarta Sans', sans-serif", color: 'var(--text-primary)' }} className="animate-fade">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px', marginBottom: '24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button className="btn btn-secondary btn-icon" onClick={handleHeaderBack} title="Back">
+            <ArrowLeft size={18} />
+          </button>
+          <div>
+            <h1 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Calendar color="var(--accent)" size={24} /> Workshops and Trainings
             </h1>
-            <button 
-              className="btn btn-secondary btn-icon" 
-              onClick={() => setShowHelp(!showHelp)} 
-              title="Toggle Help Guide"
-              style={{ width: '32px', height: '32px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            >
-              <HelpCircle size={16} color="var(--accent)" />
-            </button>
           </div>
         </div>
-
         <button 
           className="btn btn-primary"
           onClick={() => setShowCreateModal(true)}
-          style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 600, gap: '6px', padding: '8px 14px', border: 'none', fontSize: '0.85rem' }}
+          style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 700, gap: '6px', padding: '9px 18px', border: 'none', fontSize: '0.88rem' }}
         >
-          <Plus size={16} /> Schedule Workshop
+          <Plus size={16} /> + Schedule Workshop
         </button>
       </div>
 
-      {/* Optional Help Banner - Shown ONLY when clicked on Help Symbol */}
-      {showHelp && (
-        <div className="animate-fade" style={{ padding: '12px 16px', background: 'var(--surface-2)', border: '1px solid var(--border-soft)', borderRadius: '12px', marginBottom: '20px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-          💡 <strong>Help & Navigation Guide:</strong> Schedule multi-day event cards, link existing presentation decks or create new decks per section slot, and manage participant rosters. Click Back (`←`) to step through previous pages without jumping to default dashboard.
-        </div>
-      )}
-
-      {/* Main Navigation Tabs */}
-      <div style={{ display: 'flex', gap: '12px', borderBottom: '1px solid var(--border-soft)', paddingBottom: '12px', marginBottom: '24px' }}>
-        <button 
-          className={`nav-pill ${activeTab === 'workshops' ? 'active' : ''}`}
-          onClick={() => setActiveTab('workshops')}
-          style={{ padding: '8px 16px', fontSize: '0.85rem', fontWeight: 500 }}
-        >
-          📋 Saved Workshops List ({sessions.length})
-        </button>
-        <button 
-          className={`nav-pill ${activeTab === 'schedule' ? 'active' : ''}`}
-          onClick={() => setActiveTab('schedule')}
-          style={{ padding: '8px 16px', fontSize: '0.85rem', fontWeight: 500 }}
-        >
-          📅 Active Schedule & Day Cards
-        </button>
-        <button 
-          className={`nav-pill ${activeTab === 'lobby' ? 'active' : ''}`}
-          onClick={() => setActiveTab('lobby')}
-          style={{ padding: '8px 16px', fontSize: '0.85rem', fontWeight: 500 }}
-        >
-          👥 QR Registration & Teams ({(activeSession?.roster || []).length})
-        </button>
-      </div>
-
-      {/* TAB 1: SAVED WORKSHOPS LIST & ROW ENTRIES VIEW */}
       {activeTab === 'workshops' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-          <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
-            All Scheduled Workshops & Teacher Programs
+          <div style={{ fontSize: '0.92rem', color: 'var(--text-secondary)', fontWeight: 700 }}>
+            All Scheduled Workshops & Teacher Programs ({sessions.length})
           </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             {sessions.map((sess) => (
               <div 
                 key={sess.id} 
-                className="glass-card" 
+                className="glass-card card-lift" 
+                onClick={() => handleOpenWorkshopEdit(sess.id, 'schedule')}
                 style={{ 
-                  padding: '20px', borderRadius: '12px', background: 'var(--surface)', 
+                  padding: '16px 20px', borderRadius: '14px', background: 'var(--surface)', 
                   border: activeSessionId === sess.id ? '1.5px solid var(--accent)' : '1px solid var(--border)',
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px'
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px',
+                  cursor: 'pointer'
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <div style={{ width: '46px', height: '46px', borderRadius: '10px', background: 'var(--accent-soft)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <Calendar size={22} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: '280px' }}>
+                  <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'var(--accent-soft)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Calendar size={20} />
                   </div>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                      <span style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-primary)' }}>{sess.title}</span>
-                      <span style={{ fontSize: '0.75rem', background: 'var(--surface-2)', padding: '2px 8px', borderRadius: '6px', color: 'var(--text-muted)', fontWeight: 500 }}>
-                        {sess.subject || 'General'}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '100%' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }} onClick={(e) => e.stopPropagation()}>
+                      <input 
+                        type="text"
+                        value={sess.title}
+                        onChange={(e) => handleInlineTitleChange(sess.id, e.target.value)}
+                        style={{
+                          fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)',
+                          background: 'transparent', border: '1px solid transparent', padding: '2px 6px',
+                          borderRadius: '6px', width: '340px', outline: 'none'
+                        }}
+                        onFocus={(e) => e.target.style.border = '1px solid var(--accent)'}
+                        onBlur={(e) => e.target.style.border = '1px solid transparent'}
+                        title="Click to inline edit title (auto-saves)"
+                      />
+                      <span style={{ fontSize: '0.74rem', background: 'var(--surface-2)', padding: '2px 10px', borderRadius: '12px', color: 'var(--text-muted)', fontWeight: 600, border: '1px solid var(--border)' }}>
+                        {sess.subject || 'Enterprise Training'}
                       </span>
                     </div>
-                    <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', display: 'flex', gap: '16px' }}>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
                       <span>📅 Date: <strong>{sess.scheduledDate || 'Flexible'}</strong></span>
-                      <span>🕒 Time: <strong>{sess.scheduledTime || '09:00 AM'}</strong></span>
+                      <span>🕒 Time: <strong>{sess.scheduledTime || '09:00 AM - 05:00 PM'}</strong></span>
                       <span>🗓️ Duration: <strong>{sess.numDays || sess.days?.length || 1} Days</strong></span>
+                    </div>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '600px' }}>
+                      {sess.description || 'Facilitation program and schedule cards.'}
                     </div>
                   </div>
                 </div>
-
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
                   <button 
-                    className="btn btn-secondary"
-                    onClick={() => handleOpenEditWorkshopModal(sess)}
-                    style={{ fontSize: '0.82rem', fontWeight: 500, display: 'flex', gap: '4px', alignItems: 'center' }}
-                    title="Edit Title, Subject, Date, Time & Days"
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={() => handleOpenWorkshopEdit(sess.id, 'schedule')}
+                    style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 700, fontSize: '0.82rem', border: 'none', padding: '7px 14px', display: 'flex', gap: '6px', alignItems: 'center' }}
+                    title="Edit Workshop Details & Schedule Cards"
                   >
-                    <Settings size={14} /> Edit Details
+                    <Edit3 size={15} /> ✏️ Edit Workshop
                   </button>
-
                   <button 
-                    className="btn btn-secondary"
-                    onClick={() => handleOpenWorkshopSchedule(sess.id)}
-                    style={{ fontSize: '0.82rem', fontWeight: 500 }}
-                  >
-                    <Edit3 size={14} /> Edit Schedule & Day Cards
-                  </button>
-
-                  <button 
+                    type="button"
                     className="btn btn-secondary btn-icon"
-                    onClick={() => handleDeleteWorkshop(sess.id)}
+                    onClick={(e) => handleDeleteWorkshop(sess.id, e)}
                     title="Delete Workshop"
-                    style={{ padding: '8px' }}
+                    style={{ padding: '7px' }}
                   >
                     <Trash2 size={15} color="var(--danger)" />
                   </button>
                 </div>
               </div>
             ))}
-
             {sessions.length === 0 && (
               <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px' }}>
-                No workshops created yet. Click "+ Schedule New Workshop" above to create a blank multi-day event!
+                No workshops created yet. Click "+ Schedule Workshop" above to create your first multi-day event!
               </div>
             )}
           </div>
         </div>
       )}
 
-      {/* TAB 2: ACTIVE SCHEDULE & DAY CARDS VIEW */}
+      {/* VIEW 2: WORKSHOP EDITOR WITH TWO TABS ONLY */}
       {activeTab === 'schedule' && activeSession && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+          
+          {/* Editor Header: Title Inline Editable */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', background: 'var(--surface)', padding: '16px 20px', borderRadius: '16px', border: '1px solid var(--border)' }}>
             <div>
-              <div style={{ fontSize: '1.2rem', fontWeight: 600, color: 'var(--text-primary)' }}>{activeSession.title}</div>
-              <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Subject: {activeSession.subject} • Scheduled: {activeSession.scheduledDate} ({activeSession.numDays || activeSession.days?.length} Days)</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <input 
+                  type="text"
+                  value={activeSession.title}
+                  onChange={(e) => handleInlineTitleChange(activeSession.id, e.target.value)}
+                  style={{
+                    fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-primary)',
+                    background: 'transparent', border: '1px solid transparent', padding: '2px 8px',
+                    borderRadius: '6px', width: '420px', outline: 'none'
+                  }}
+                  onFocus={(e) => e.target.style.border = '1px solid var(--accent)'}
+                  onBlur={(e) => e.target.style.border = '1px solid transparent'}
+                  title="Click to edit workshop title"
+                />
+              </div>
+              <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                Subject: <strong>{activeSession.subject}</strong> • Scheduled: <strong>{activeSession.scheduledDate}</strong> ({activeSession.numDays || activeSession.days?.length} Days)
+              </div>
             </div>
 
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
               <button 
+                type="button"
                 className="btn btn-secondary"
                 onClick={() => handlePrintSchedulePDF(activeSession)}
-                style={{ fontSize: '0.82rem', fontWeight: 600, display: 'flex', gap: '6px', alignItems: 'center' }}
+                style={{ fontSize: '0.82rem', fontWeight: 700, display: 'flex', gap: '6px', alignItems: 'center' }}
                 title="Export schedule as printable PDF"
               >
                 <Printer size={15} color="var(--accent)" /> Export PDF Schedule
               </button>
 
               <button 
+                type="button"
                 className="btn btn-secondary"
-                onClick={() => handleOpenEditWorkshopModal(activeSession)}
-                style={{ fontSize: '0.82rem', fontWeight: 500, display: 'flex', gap: '6px', alignItems: 'center' }}
-                title="Edit Title, Subject, Date, Time & Days"
+                onClick={() => setActiveTab('workshops')}
+                style={{ fontSize: '0.82rem', fontWeight: 700 }}
               >
-                <Settings size={14} /> Edit Workshop Details
-              </button>
-
-              <button 
-                className="btn btn-primary"
-                onClick={() => {
-                  const firstDeckId = activeSession.days?.[0]?.sections?.[0]?.presentationId || 'sample-pres-1';
-                  onLaunchPresenter(firstDeckId);
-                }}
-                style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 600, fontSize: '0.85rem', border: 'none' }}
-              >
-                <Play size={16} /> Launch Presentation Live
+                ← Back to Workshops List
               </button>
             </div>
           </div>
 
-          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-            Enter your schedule rows in tabular format below. Start times automatically cascade (+1 minute after previous end time), and end times are auto-calculated from duration!
+          {/* TWO TABS ONLY: DETAILS & SETTINGS | SCHEDULE & DAY CARDS */}
+          <div style={{ display: 'flex', gap: '10px', borderBottom: '1px solid var(--border)', paddingBottom: '10px' }}>
+            <button 
+              type="button"
+              className={`nav-pill ${editTab === 'details' ? 'active' : ''}`}
+              onClick={() => setEditTab('details')}
+              style={{ padding: '8px 18px', fontSize: '0.88rem', fontWeight: 700, display: 'flex', gap: '6px', alignItems: 'center' }}
+            >
+              <Settings size={16} /> ⚙️ 1. Workshop Details & Settings
+            </button>
+
+            <button 
+              type="button"
+              className={`nav-pill ${editTab === 'schedule' ? 'active' : ''}`}
+              onClick={() => setEditTab('schedule')}
+              style={{ padding: '8px 18px', fontSize: '0.88rem', fontWeight: 700, display: 'flex', gap: '6px', alignItems: 'center' }}
+            >
+              <Calendar size={16} /> 🗓️ 2. Schedule & Day Cards Grid
+            </button>
           </div>
 
-          {/* TABULAR SCHEDULE BUILDER MATRIX */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            {(activeSession.days || []).map((day, dIdx) => (
-              <div 
-                key={day.dayNumber || dIdx}
-                className="glass-card"
-                style={{
-                  padding: '24px', borderRadius: '16px', background: 'var(--surface)', border: '1px solid var(--border)',
-                  display: 'flex', flexDirection: 'column', gap: '16px'
-                }}
-              >
-                {/* Day Header with Add Row Button */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-soft)', paddingBottom: '12px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <span style={{ fontSize: '1.2rem' }}>📅</span>
-                    <span style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--text-primary)' }}>{day.title}</span>
-                  </div>
-
-                  <button 
-                    className="btn btn-secondary btn-sm"
-                    onClick={() => handleAddQuickScheduleRow(dIdx)}
-                    style={{ fontSize: '0.8rem', padding: '6px 12px', gap: '6px', background: 'var(--accent-soft)', color: 'var(--accent)', fontWeight: 600, border: 'none' }}
-                    title="Add a new schedule row with start time auto-set to +1 min after previous row!"
-                  >
-                    <Plus size={14} /> + Add Schedule Row
-                  </button>
+          {/* TIME OVERLAP / CONTRACTION CONFLICT WARNING BANNER */}
+          {conflicts.length > 0 && (
+            <div className="animate-fade" style={{ padding: '14px 18px', background: 'rgba(239, 68, 68, 0.12)', border: '1.5px solid #ef4444', borderRadius: '14px', color: '#fca5a5', fontSize: '0.86rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, color: '#ef4444', marginBottom: '4px' }}>
+                <AlertTriangle size={18} /> ⚠️ Time Contraction Conflict Detected in Schedule:
+              </div>
+              {conflicts.map((c, idx) => (
+                <div key={idx} style={{ marginLeft: '26px', marginTop: '3px' }}>
+                  • <strong>Day {c.dayNumber}:</strong> "{c.sec1Title}" ({c.sec1Time}) overlaps with "{c.sec2Title}" ({c.sec2Time}). Please adjust start time or duration.
                 </div>
-
-                {/* Tabular Schedule Entry Table */}
-                <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
-                    <thead>
-                      <tr style={{ background: 'var(--surface-2)', borderBottom: '1px solid var(--border-soft)', color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                        <th style={{ padding: '8px 10px', width: '35px' }}>#</th>
-                        <th style={{ padding: '8px 10px', width: '110px' }}>Start Time</th>
-                        <th style={{ padding: '8px 10px', width: '90px' }}>Duration</th>
-                        <th style={{ padding: '8px 10px', width: '110px' }}>End Time</th>
-                        <th style={{ padding: '8px 10px', minWidth: '180px' }}>Topic / Activity Title</th>
-                        <th style={{ padding: '8px 10px', width: '170px' }}>Type of Activity</th>
-                        <th style={{ padding: '8px 10px', width: '140px' }}>Presenter Name</th>
-                        <th style={{ padding: '8px 10px', width: '160px' }}>Linked Deck</th>
-                        <th style={{ padding: '8px 10px', width: '40px', textAlign: 'center' }}></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(day.sections || []).map((sec, sIdx) => (
-                        <tr key={sec.id || sIdx} style={{ borderBottom: '1px solid var(--border-soft)' }}>
-                          <td style={{ padding: '8px 10px', fontWeight: 700, color: 'var(--text-muted)' }}>{sIdx + 1}</td>
-                          
-                          {/* Start Time Input */}
-                          <td style={{ padding: '6px 8px' }}>
-                            <input 
-                              type="text" 
-                              value={sec.startTime || '09:00 AM'}
-                              onChange={(e) => handleUpdateSectionRowField(dIdx, sIdx, 'startTime', e.target.value)}
-                              style={{ width: '95px', padding: '5px 8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600 }}
-                            />
-                          </td>
-
-                          {/* Duration Minutes Input */}
-                          <td style={{ padding: '6px 8px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              <input 
-                                type="number" 
-                                min="5"
-                                max="480"
-                                value={sec.durationMinutes || parseInt(sec.duration, 10) || 60}
-                                onChange={(e) => handleUpdateSectionRowField(dIdx, sIdx, 'durationMinutes', e.target.value)}
-                                style={{ width: '55px', padding: '5px 6px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600 }}
-                              />
-                              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>m</span>
-                            </div>
-                          </td>
-
-                          {/* Calculated End Time */}
-                          <td style={{ padding: '8px 10px', fontWeight: 700, color: 'var(--accent)', fontSize: '0.85rem' }}>
-                            {sec.endTime || '10:00 AM'}
-                          </td>
-
-                          {/* Topic / Activity Title */}
-                          <td style={{ padding: '6px 8px' }}>
-                            <input 
-                              type="text" 
-                              value={sec.title || ''}
-                              onChange={(e) => handleUpdateSectionRowField(dIdx, sIdx, 'title', e.target.value)}
-                              placeholder="e.g. Executive Alignment Quiz"
-                              style={{ width: '100%', padding: '5px 8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 500 }}
-                            />
-                          </td>
-
-                          {/* Type of Activity Dropdown */}
-                          <td style={{ padding: '6px 8px' }}>
-                            <select 
-                              value={sec.activityType || '📚 Training Class'}
-                              onChange={(e) => handleUpdateSectionRowField(dIdx, sIdx, 'activityType', e.target.value)}
-                              style={{ width: '100%', padding: '5px 6px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', borderRadius: '6px', fontSize: '0.78rem' }}
-                            >
-                              <option value="📊 Live Poll / Quiz">📊 Live Poll / Quiz</option>
-                              <option value="🎮 Interactive Game">🎮 Interactive Game</option>
-                              <option value="🧩 Puzzle Vault">🧩 Puzzle Vault</option>
-                              <option value="⚡ Challenge / Competition">⚡ Challenge / Competition</option>
-                              <option value="📚 Training Class">📚 Training Class</option>
-                              <option value="💬 Group Discussion">💬 Group Discussion</option>
-                              <option value="☕ Break / Networking">☕ Break / Networking</option>
-                            </select>
-                          </td>
-
-                          {/* Presenter Name */}
-                          <td style={{ padding: '6px 8px' }}>
-                            <input 
-                              type="text" 
-                              value={sec.presenterName || ''}
-                              onChange={(e) => handleUpdateSectionRowField(dIdx, sIdx, 'presenterName', e.target.value)}
-                              placeholder="e.g. Prof. Pradeep"
-                              style={{ width: '100%', padding: '5px 8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', borderRadius: '6px', fontSize: '0.8rem' }}
-                            />
-                          </td>
-
-                          {/* Linked Presentation Deck Dropdown */}
-                          <td style={{ padding: '6px 8px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              <select 
-                                value={sec.presentationId || 'sample-pres-1'}
-                                onChange={(e) => handleUpdateSectionDeck(dIdx, sIdx, e.target.value)}
-                                style={{ width: '100%', padding: '5px 6px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', borderRadius: '6px', fontSize: '0.78rem' }}
-                              >
-                                <option value="sample-pres-1">Diagnostic Quiz</option>
-                                <option value="sample-pres-2">Escape Vault</option>
-                                <option value="sample-pres-3">2x2 Grid</option>
-                                <option value="__CREATE_NEW__">✨ + New Deck...</option>
-                              </select>
-                              <button 
-                                type="button"
-                                className="btn btn-secondary btn-icon"
-                                onClick={() => onViewCreator(sec.presentationId || 'sample-pres-1', { returnView: 'sessions', returnTab: 'schedule', returnSessionId: activeSession.id })}
-                                title="Open & View Linked Presentation Deck"
-                                style={{ width: '26px', height: '26px', padding: 0, flexShrink: 0 }}
-                              >
-                                <Eye size={13} color="var(--accent)" />
-                              </button>
-                              <button 
-                                type="button"
-                                className="btn btn-primary"
-                                onClick={() => {
-                                  const targetDeck = sec.presentationId || 'sample-pres-1';
-                                  onLaunchPresenter(targetDeck);
-                                }}
-                                title="Play & Launch Intended Presentation Deck Directly"
-                                style={{ padding: '4px 10px', fontSize: '0.75rem', fontWeight: 800, background: 'var(--accent)', color: '#08211E', border: 'none', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0, marginLeft: '4px' }}
-                              >
-                                <Play size={12} fill="#08211E" /> Play
-                              </button>
-                            </div>
-                          </td>
-
-                          {/* Delete Row */}
-                          <td style={{ padding: '6px 8px', textAlign: 'center' }}>
-                            <button 
-                              className="btn btn-secondary btn-icon"
-                              onClick={() => handleDeleteSection(dIdx, sIdx)}
-                              title="Delete Row"
-                              style={{ width: '26px', height: '26px', padding: 0 }}
-                            >
-                              <Trash2 size={13} color="var(--danger)" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-
-                  {(day.sections || []).length === 0 && (
-                    <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem', background: 'var(--surface-2)', borderRadius: '8px', border: '1px dashed var(--border-soft)', margin: '12px 0' }}>
-                      No schedule rows entered for {day.title} yet.<br />
-                      Click <strong>"+ Add Schedule Row"</strong> above to enter your first topic!
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* TAB 3: QR REGISTRATION & TEAMS LOBBY */}
-      {(activeTab === 'lobby' || activeTab === 'teams') && activeSession && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          
-          {/* Top Row: Upfront Registration QR Code & Live Registration Tabular Roster */}
-          <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '20px', alignItems: 'stretch' }}>
-            
-            {/* Left Box: Pre-Generated Upfront QR Code */}
-            <div className="glass-card" style={{ padding: '20px', borderRadius: '16px', background: 'var(--surface)', border: '1px solid var(--border)', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <QrCode size={18} color="var(--accent)" /> Upfront Registration QR
-              </div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                Participants scan once to register Name, Designation & Gender:
-              </div>
-              <div style={{ background: 'white', padding: '10px', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.2)', marginBottom: '12px' }}>
-                <img 
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(joinUrl)}`} 
-                  alt="Session Join QR"
-                  style={{ width: '150px', height: '150px', display: 'block' }}
-                />
-              </div>
-              <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <CheckCircle2 size={14} color="#10b981" /> 🟢 Registration Open & Ready
-              </div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px', wordBreak: 'break-all' }}>
-                Link: <strong>{joinUrl}</strong>
-              </div>
+              ))}
             </div>
+          )}
 
-            {/* Right Box: Real-Time Tabular Live Roster */}
-            <div className="glass-card" style={{ padding: '20px', borderRadius: '16px', background: 'var(--surface)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
-                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  📋 Real-Time Registration Roster
-                  <span style={{ fontSize: '0.78rem', background: 'var(--accent-soft)', color: 'var(--accent)', padding: '2px 10px', borderRadius: '12px', fontWeight: 700 }}>
-                    {(activeSession.roster || []).length} Registered
-                  </span>
-                </div>
-
-                {/* Developer Simulation Bar for Single Device Testing */}
-                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                  <button 
-                    type="button" 
-                    className="btn btn-secondary" 
-                    onClick={() => handleAddVirtualSimulatorBots(5)}
-                    style={{ padding: '4px 8px', fontSize: '0.75rem', fontWeight: 700, display: 'flex', gap: '4px', alignItems: 'center', background: 'rgba(6,182,212,0.15)', color: '#06b6d4', border: '1px solid rgba(6,182,212,0.3)' }}
-                    title="Simulate 5 Virtual Participants for testing"
-                  >
-                    🤖 +5 Bots
-                  </button>
-                  <button 
-                    type="button" 
-                    className="btn btn-secondary" 
-                    onClick={() => handleAddVirtualSimulatorBots(10)}
-                    style={{ padding: '4px 8px', fontSize: '0.75rem', fontWeight: 700, display: 'flex', gap: '4px', alignItems: 'center', background: 'rgba(6,182,212,0.15)', color: '#06b6d4', border: '1px solid rgba(6,182,212,0.3)' }}
-                    title="Simulate 10 Virtual Participants for testing"
-                  >
-                    🤖 +10 Bots
-                  </button>
-                  {(activeSession.roster || []).length > 0 && (
-                    <button 
-                      type="button" 
-                      className="btn btn-secondary btn-icon" 
-                      onClick={handleClearVirtualBots}
-                      style={{ padding: '4px 8px' }}
-                      title="Clear Roster"
-                    >
-                      <Trash2 size={13} color="var(--danger)" />
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Tabular Registration List Table */}
-              <div style={{ overflowX: 'auto', flex: 1, maxHeight: '280px', overflowY: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
-                  <thead>
-                    <tr style={{ background: 'var(--surface-2)', borderBottom: '1px solid var(--border-soft)', color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      <th style={{ padding: '8px 10px', width: '35px' }}>#</th>
-                      <th style={{ padding: '8px 10px' }}>Participant Name</th>
-                      <th style={{ padding: '8px 10px' }}>Designation / Position</th>
-                      <th style={{ padding: '8px 10px', width: '90px' }}>Gender</th>
-                      <th style={{ padding: '8px 10px', width: '110px' }}>Reg Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(activeSession.roster || []).length > 0 ? (
-                      (activeSession.roster || []).map((p, idx) => (
-                        <tr key={p.id || idx} style={{ borderBottom: '1px solid var(--border-soft)' }}>
-                          <td style={{ padding: '8px 10px', fontWeight: 700, color: 'var(--text-muted)' }}>{idx + 1}</td>
-                          <td style={{ padding: '8px 10px', fontWeight: 600, color: 'var(--text-primary)' }}>
-                            {p.avatar || '🚀'} {p.name}
-                          </td>
-                          <td style={{ padding: '8px 10px', color: 'var(--text-secondary)' }}>
-                            {p.designation || 'Participant'}
-                          </td>
-                          <td style={{ padding: '8px 10px' }}>
-                            <span style={{ fontSize: '0.78rem', background: (p.gender || 'M').toUpperCase() === 'F' ? 'rgba(236, 72, 153, 0.15)' : 'rgba(6, 182, 212, 0.15)', color: (p.gender || 'M').toUpperCase() === 'F' ? '#ec4899' : '#06b6d4', padding: '2px 8px', borderRadius: '8px', fontWeight: 700 }}>
-                              {(p.gender || 'M').toUpperCase() === 'F' ? '👩 Female' : '👨 Male'}
-                            </span>
-                          </td>
-                          <td style={{ padding: '8px 10px', color: '#10b981', fontWeight: 600, fontSize: '0.78rem' }}>
-                            ✓ Live Ready
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="5" style={{ padding: '30px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                          ✨ No live registrants yet. Have participants scan the QR Code on the left to register their Name, Designation & Gender in real time!
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Bottom Box: Intelligent Grouping & Editable Team Cards */}
-          <div className="glass-card" style={{ padding: '24px', borderRadius: '16px', background: 'var(--surface)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            
-            {/* Grouping Toolbar Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', borderBottom: '1px solid var(--border-soft)', paddingBottom: '14px' }}>
-              <div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Users size={20} color="var(--accent)" /> Intelligent Team Grouping & Editable Team Names
-                </div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                  Constraint Satisfaction Programming (CSP) balances gender ratios & equal team sizes.
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)' }}>Groups:</span>
+          {/* TAB 1: WORKSHOP DETAILS & SETTINGS */}
+          {editTab === 'details' && (
+            <div className="glass-card animate-fade" style={{ padding: '24px', borderRadius: '16px', background: 'var(--surface)', border: '1px solid var(--border)' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '16px', color: 'var(--text-primary)' }}>⚙️ Workshop Metadata & Configuration</h3>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+                <div>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Workshop Title</label>
                   <input 
-                    type="range"
-                    min="1"
-                    max="10"
-                    value={targetGroupCount}
-                    onChange={(e) => setTargetGroupCount(e.target.value)}
-                    style={{ width: '90px' }}
+                    type="text" 
+                    value={activeSession.title} 
+                    onChange={(e) => updateActiveSession({ title: e.target.value })}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.9rem' }}
                   />
-                  <span style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--accent)' }}>{targetGroupCount}</span>
                 </div>
 
-                <select 
-                  value={selectedGroupTheme}
-                  onChange={(e) => setSelectedGroupTheme(e.target.value)}
-                  style={{ padding: '6px 10px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600 }}
-                >
-                  <option value="indian_rivers">🌊 Indian Rivers (Ganga, Yamuna...)</option>
-                  <option value="greek_alphabets">🏛️ Greek Alphabets (Alpha, Beta...)</option>
-                  <option value="constellations">✨ Cosmic Constellations (Orion...)</option>
-                  <option value="numeric">🔢 Numeric Teams (Team 1, Team 2...)</option>
-                </select>
+                <div>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Subject / Program Category</label>
+                  <input 
+                    type="text" 
+                    value={activeSession.subject || ''} 
+                    onChange={(e) => updateActiveSession({ subject: e.target.value })}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.9rem' }}
+                  />
+                </div>
 
-                <button 
-                  className="btn btn-primary"
-                  onClick={handleGroupWorkshopParticipants}
-                  style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 700, fontSize: '0.85rem', border: 'none', padding: '8px 16px', display: 'flex', gap: '6px', alignItems: 'center' }}
-                >
-                  <Shuffle size={16} /> 🔀 Group Participants (CSP)
-                </button>
+                <div>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Start Date</label>
+                  <input 
+                    type="date" 
+                    value={activeSession.scheduledDate || ''} 
+                    onChange={(e) => updateActiveSession({ scheduledDate: e.target.value })}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.9rem' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Total Program Days</label>
+                  <input 
+                    type="number" 
+                    min="1" max="14"
+                    value={activeSession.numDays || activeSession.days?.length || 1} 
+                    onChange={(e) => {
+                      const num = parseInt(e.target.value, 10) || 1;
+                      let daysCopy = [...(activeSession.days || [])];
+                      if (num > daysCopy.length) {
+                        for (let i = daysCopy.length + 1; i <= num; i++) {
+                          daysCopy.push({ dayNumber: i, title: `Day ${i}: Training Module & Orientation`, sections: [] });
+                        }
+                      } else if (num < daysCopy.length) {
+                        daysCopy = daysCopy.slice(0, num);
+                      }
+                      updateActiveSession({ numDays: num, days: daysCopy });
+                    }}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.9rem' }}
+                  />
+                </div>
+
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Program Objectives & Summary</label>
+                  <textarea 
+                    rows={3}
+                    value={activeSession.description || ''} 
+                    onChange={(e) => updateActiveSession({ description: e.target.value })}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.88rem' }}
+                  />
+                </div>
               </div>
             </div>
+          )}
 
-            {/* Display Allocated Team Cards with Editable Team Names */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
-              {(activeSession.groups || []).length > 0 ? (
-                (activeSession.groups || []).map((grp, idx) => (
-                  <div 
-                    key={grp.id || idx}
-                    style={{
-                      padding: '16px', borderRadius: '12px', background: 'var(--surface-2)',
-                      border: '1.5px solid var(--border-glass)', display: 'flex', flexDirection: 'column', gap: '10px'
-                    }}
-                  >
-                    {/* Inline Editable Team Name Input */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* TAB 2: SCHEDULE & DAY CARDS GRID */}
+          {editTab === 'schedule' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              {(activeSession.days || []).map((day, dayIdx) => (
+                <div key={dayIdx} className="glass-card" style={{ padding: '22px', borderRadius: '16px', background: 'var(--surface)', border: '1px solid var(--border)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ fontSize: '1.2rem' }}>📅</span>
                       <input 
-                        type="text"
-                        value={grp.name || `Team ${idx + 1}`}
-                        onChange={(e) => handleUpdateTeamName(idx, e.target.value)}
-                        style={{
-                          fontSize: '1.05rem', fontWeight: 800, color: 'var(--accent)',
-                          background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border)',
-                          borderRadius: '6px', padding: '4px 8px', width: '100%'
+                        type="text" 
+                        value={day.title}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          updateActiveSession(prev => {
+                            const daysCopy = [...prev.days];
+                            daysCopy[dayIdx] = { ...daysCopy[dayIdx], title: val };
+                            return { ...prev, days: daysCopy };
+                          });
                         }}
-                        title="Click to edit team name!"
+                        style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)', background: 'transparent', border: '1px solid transparent', borderRadius: '6px', padding: '2px 6px', width: '320px', outline: 'none' }}
+                        onFocus={(e) => e.target.style.border = '1px solid var(--accent)'}
+                        onBlur={(e) => e.target.style.border = '1px solid transparent'}
                       />
-                      <span style={{ fontSize: '0.72rem', background: 'var(--accent-soft)', color: 'var(--accent)', padding: '2px 6px', borderRadius: '6px', fontWeight: 700, flexShrink: 0 }}>
-                        {grp.code || `TEAM-${idx+1}`}
-                      </span>
                     </div>
 
-                    {/* Team Members List */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                      {(grp.members || []).map((m, mIdx) => (
-                        <div key={mIdx} style={{ padding: '6px 10px', background: 'var(--surface)', borderRadius: '6px', fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ fontWeight: 500 }}>{(m.gender || 'M').toUpperCase() === 'F' ? '👩' : '👨'} {m.name}</span>
-                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{m.designation || 'Participant'}</span>
-                        </div>
-                      ))}
-                      {(grp.members || []).length === 0 && (
-                        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', italic: 'true' }}>
-                          No members allocated yet.
-                        </div>
-                      )}
-                    </div>
+                    <button 
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => handleAddQuickScheduleRow(dayIdx)}
+                      style={{ fontSize: '0.8rem', fontWeight: 700, display: 'flex', gap: '6px', alignItems: 'center' }}
+                    >
+                      <Plus size={14} color="var(--accent)" /> + Add Schedule Row
+                    </button>
                   </div>
-                ))
-              ) : (
-                <div style={{ gridColumn: '1 / -1', padding: '24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem', background: 'var(--surface-2)', borderRadius: '12px', border: '1px dashed var(--border-soft)' }}>
-                  ✨ Click <strong>"🔀 Group Participants (CSP)"</strong> above to generate balanced teams with editable names!
+
+                  {/* TABULAR SCHEDULE ROW EDITOR */}
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '1.5px solid var(--border)', textAlign: 'left', color: 'var(--text-muted)' }}>
+                          <th style={{ padding: '8px 10px', width: '35px' }}>#</th>
+                          <th style={{ padding: '8px 10px', width: '110px' }}>START TIME</th>
+                          <th style={{ padding: '8px 10px', width: '130px' }}>DURATION</th>
+                          <th style={{ padding: '8px 10px', width: '100px' }}>END TIME</th>
+                          <th style={{ padding: '8px 10px' }}>TOPIC / ACTIVITY TITLE</th>
+                          <th style={{ padding: '8px 10px', width: '180px' }}>TYPE OF ACTIVITY</th>
+                          <th style={{ padding: '8px 10px', width: '140px' }}>PRESENTER</th>
+                          <th style={{ padding: '8px 10px', width: '180px' }}>LINKED DECK</th>
+                          <th style={{ padding: '8px 10px', width: '40px' }}></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(day.sections || []).map((sec, secIdx) => {
+                          const durationMins = sec.durationMinutes || 60;
+
+                          return (
+                            <tr key={sec.id || secIdx} style={{ borderBottom: '1px solid var(--border-soft)' }}>
+                              <td style={{ padding: '10px', fontWeight: 700, color: 'var(--text-muted)' }}>{secIdx + 1}</td>
+                              
+                              {/* Start Time */}
+                              <td style={{ padding: '10px' }}>
+                                <input 
+                                  type="text" 
+                                  value={sec.startTime || ''}
+                                  onChange={(e) => handleUpdateSectionRowField(dayIdx, secIdx, 'startTime', e.target.value)}
+                                  style={{ width: '95px', padding: '5px 8px', borderRadius: '6px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.8rem', fontWeight: 700 }}
+                                />
+                              </td>
+
+                              {/* Duration (Hours & Minutes) */}
+                              <td style={{ padding: '10px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  <input 
+                                    type="number" 
+                                    min="5" max="480" step="5"
+                                    value={durationMins}
+                                    onChange={(e) => handleUpdateSectionRowField(dayIdx, secIdx, 'durationMinutes', parseInt(e.target.value, 10) || 30)}
+                                    style={{ width: '60px', padding: '5px 6px', borderRadius: '6px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.8rem', fontWeight: 700 }}
+                                  />
+                                  <span style={{ fontSize: '0.75rem', color: 'var(--accent)', fontWeight: 700 }}>
+                                    {formatDurationHoursMins(durationMins)}
+                                  </span>
+                                </div>
+                              </td>
+
+                              {/* End Time (Auto Cascaded) */}
+                              <td style={{ padding: '10px', fontWeight: 800, color: 'var(--accent)' }}>
+                                {sec.endTime || '10:00 AM'}
+                              </td>
+
+                              {/* Topic Title */}
+                              <td style={{ padding: '10px' }}>
+                                <input 
+                                  type="text" 
+                                  value={sec.title || ''}
+                                  onChange={(e) => handleUpdateSectionRowField(dayIdx, secIdx, 'title', e.target.value)}
+                                  style={{ width: '100%', padding: '5px 8px', borderRadius: '6px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: 600 }}
+                                />
+                              </td>
+
+                              {/* Activity Type Dropdown */}
+                              <td style={{ padding: '10px' }}>
+                                <select 
+                                  value={sec.activityType || '📚 Training Class'}
+                                  onChange={(e) => handleUpdateSectionRowField(dayIdx, secIdx, 'activityType', e.target.value)}
+                                  style={{ width: '100%', padding: '5px 8px', borderRadius: '6px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.78rem', fontWeight: 700 }}
+                                >
+                                  <option value="📚 Training Class">📚 Training Class</option>
+                                  <option value="📝 Orientation & Keynote">📝 Orientation & Keynote</option>
+                                  <option value="💬 Participant Feedback & Survey">💬 Participant Feedback & Survey</option>
+                                  <option value="⭐ Reflection & Peer Review">⭐ Reflection & Peer Review</option>
+                                  <option value="☕ Tea & Coffee Break">☕ Tea & Coffee Break</option>
+                                  <option value="🤝 Networking & Team Building">🤝 Networking & Team Building</option>
+                                  <option value="🎯 Interactive Diagnostic Poll">🎯 Interactive Diagnostic Poll</option>
+                                  <option value="💡 Team Brainstorm Grid">💡 Team Brainstorm Grid</option>
+                                  <option value="🔐 Escape Room Challenge">🔐 Escape Room Challenge</option>
+                                </select>
+                              </td>
+
+                              {/* Presenter Name */}
+                              <td style={{ padding: '10px' }}>
+                                <input 
+                                  type="text" 
+                                  value={sec.presenterName || ''}
+                                  placeholder="Presenter Name"
+                                  onChange={(e) => handleUpdateSectionRowField(dayIdx, secIdx, 'presenterName', e.target.value)}
+                                  style={{ width: '100%', padding: '5px 8px', borderRadius: '6px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.78rem' }}
+                                />
+                              </td>
+
+                              {/* Linked Presentation Deck */}
+                              <td style={{ padding: '10px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                  <select 
+                                    value={sec.presentationId || ''}
+                                    onChange={(e) => handleUpdateSectionDeck(dayIdx, secIdx, e.target.value)}
+                                    style={{ width: '110px', padding: '5px 6px', borderRadius: '6px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.75rem' }}
+                                  >
+                                    <option value="">🚫 None</option>
+                                    {userPresentations.map(p => (
+                                      <option key={p.id} value={p.id}>📊 {p.title}</option>
+                                    ))}
+                                    <option value="__CREATE_NEW__">➕ Create New Deck...</option>
+                                  </select>
+
+                                  {sec.presentationId && (
+                                    <button 
+                                      type="button"
+                                      className="btn btn-secondary btn-icon"
+                                      style={{ padding: '4px', width: '26px', height: '26px' }}
+                                      onClick={() => {
+                                        localStorage.setItem('pulse-poll-active-workshop-context', activeSession.id);
+                                        onViewCreator(sec.presentationId, 'sessions');
+                                      }}
+                                      title="Edit Linked Deck"
+                                    >
+                                      <Edit3 size={13} />
+                                    </button>
+                                  )}
+                                </div>
+                              </td>
+
+                              {/* Delete Row */}
+                              <td style={{ padding: '10px' }}>
+                                <button 
+                                  type="button"
+                                  className="btn btn-secondary btn-icon"
+                                  onClick={() => handleDeleteSection(dayIdx, secIdx)}
+                                  title="Delete Row"
+                                  style={{ padding: '4px', width: '26px', height: '26px', color: 'var(--danger)' }}
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              )}
+              ))}
             </div>
-
-          </div>
-
+          )}
         </div>
       )}
 
-      {/* MODAL 1: NEW WORKSHOP / TEACHER PROGRAM BLANK WIZARD */}
+      {/* CREATE WORKSHOP WIZARD MODAL */}
       {showCreateModal && (
         <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(4px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000,
-          padding: '20px'
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+          backgroundColor: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(5px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000
         }}>
-          <div className="glass-card animate-fade" style={{ width: '100%', maxWidth: '520px', padding: '26px', borderRadius: '16px', background: 'var(--surface)', border: '1px solid var(--border)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>
-                📅 Schedule New Workshop / Program
-              </h2>
-              <button className="btn btn-secondary btn-icon" onClick={() => setShowCreateModal(false)}>
-                <X size={16} />
-              </button>
-            </div>
-
-            <form onSubmit={handleCreateSession} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div className="glass-card animate-fade" style={{ padding: '24px', width: '90%', maxWidth: '480px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '4px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Calendar color="var(--accent)" size={20} /> Schedule New Workshop & Training
+            </h3>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '16px' }}>Configure event details and multi-day program schedule:</p>
+            
+            <form onSubmit={handleCreateWorkshopSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
-                  Workshop / Program Title
-                </label>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Workshop Title</label>
                 <input 
-                  type="text"
-                  className="input-text"
-                  placeholder="e.g. 5-Day Executive Leadership & Innovation Program"
+                  type="text" 
+                  className="input-text" 
+                  placeholder="e.g. 5-Day Executive Leadership & Innovation" 
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
+                  autoFocus
                   required
-                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text-primary)' }}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.9rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Subject / Category</label>
+                <input 
+                  type="text" 
+                  className="input-text" 
+                  placeholder="e.g. Enterprise Leadership & Strategy" 
+                  value={newSubject}
+                  onChange={(e) => setNewSubject(e.target.value)}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.9rem' }}
                 />
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
-                    Subject Name / Category
-                  </label>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Start Date</label>
                   <input 
-                    type="text"
-                    className="input-text"
-                    placeholder="e.g. Physics / Enterprise Strategy"
-                    value={newSubject}
-                    onChange={(e) => setNewSubject(e.target.value)}
-                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text-primary)' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
-                    Number of Days
-                  </label>
-                  <input 
-                    type="number"
-                    min="1"
-                    max="14"
-                    value={newNumDays}
-                    onChange={(e) => setNewNumDays(e.target.value)}
-                    required
-                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text-primary)' }}
-                  />
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
-                    Start Date
-                  </label>
-                  <input 
-                    type="date"
+                    type="date" 
                     value={newDate}
                     onChange={(e) => setNewDate(e.target.value)}
-                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text-primary)' }}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.85rem' }}
                   />
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
-                    Daily Time Slot
-                  </label>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Total Program Days</label>
                   <input 
-                    type="text"
-                    placeholder="e.g. 09:00 AM - 04:00 PM"
-                    value={newTime}
-                    onChange={(e) => setNewTime(e.target.value)}
-                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text-primary)' }}
+                    type="number" 
+                    min="1" max="14"
+                    value={newNumDays}
+                    onChange={(e) => setNewNumDays(e.target.value)}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.85rem' }}
                   />
                 </div>
               </div>
 
               <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
-                  Description & Remarks
-                </label>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Program Summary</label>
                 <textarea 
-                  className="input-text"
-                  rows="2"
-                  placeholder="Enter workshop goals, prerequisites, or notes..."
+                  rows={2}
+                  placeholder="Brief summary of facilitation goals..."
                   value={newDesc}
                   onChange={(e) => setNewDesc(e.target.value)}
-                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text-primary)' }}
+                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.85rem' }}
                 />
               </div>
 
-              <div style={{ display: 'flex', gap: '12px', marginTop: '10px' }}>
-                <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setShowCreateModal(false)}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '10px' }}>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  onClick={() => setShowCreateModal(false)}
+                  style={{ padding: '8px 16px' }}
+                >
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary" style={{ flex: 1, background: 'var(--accent)', color: '#08211E', fontWeight: 600, border: 'none' }}>
-                  Create Workshop & Days
+                <button type="submit" className="btn btn-primary" style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 700, border: 'none', padding: '8px 20px' }}>
+                  Create Workshop
                 </button>
               </div>
             </form>
