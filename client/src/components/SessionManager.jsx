@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Calendar, Plus, Minus, Trash2, Play, Users, Lock, Unlock, Shuffle, QrCode,
-  ChevronRight, Award, Sparkles, CheckCircle2, Copy, Eye, ArrowLeft, Layers, 
+  ChevronRight, ChevronDown, ChevronUp, Award, Sparkles, CheckCircle2, Copy, Eye, ArrowLeft, Layers, 
   Clock, Edit3, Link as LinkIcon, FileText, Check, X, ExternalLink, HelpCircle, FileUp, Settings, Printer, Download, Gamepad2, MessageSquare, AlertTriangle
 } from 'lucide-react';
 import { solveGroupAllocation, getGroupNames, GROUP_NAMING_THEMES } from '../utils/groupingAlgorithm';
@@ -159,6 +159,16 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
     const savedContext = localStorage.getItem('pulse-poll-active-workshop-context');
     return (savedContext && sessions.some(s => s.id === savedContext)) ? 'schedule' : 'details';
   });
+
+  // Collapsible Sections State (All minimized/collapsed by default on load!)
+  const [expandedSections, setExpandedSections] = useState({});
+
+  const toggleExpandSection = (secId) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [secId]: !prev[secId]
+    }));
+  };
 
   const handleOpenWorkshopEdit = (sessionId, tab = 'details') => {
     setActiveSessionId(sessionId);
@@ -707,29 +717,97 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
                     </button>
                   </div>
 
-                  {/* SPACIOUS ORGANIZED SESSION ITEM CARDS WITH CRISP BORDERS AND SHADOWS */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  {/* COLLAPSIBLE ACCORDION SESSION ITEM LINES (MINIMIZED BY DEFAULT) */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     {(day.sections || []).map((sec, secIdx) => {
+                      const secKey = sec.id || `sec-${dayIdx}-${secIdx}`;
+                      const isExpanded = !!expandedSections[secKey];
                       const durationMins = sec.durationMinutes || 60;
                       const currentHours = Math.floor(durationMins / 60);
                       const currentMins = durationMins % 60;
 
+                      {/* MINIMIZED / COLLAPSED SINGLE-LINE SUMMARY SUMMARY BAR */}
+                      if (!isExpanded) {
+                        return (
+                          <div 
+                            key={secKey} 
+                            className="glass-card card-lift animate-fade"
+                            onClick={() => toggleExpandSection(secKey)}
+                            style={{ 
+                              background: 'var(--surface)',
+                              border: '1.5px solid var(--border)', 
+                              borderRadius: '14px', 
+                              padding: '12px 18px', 
+                              display: 'flex', 
+                              alignItems: 'center',
+                              justify: 'space-between',
+                              gap: '16px',
+                              cursor: 'pointer',
+                              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.04)',
+                              borderLeft: '5px solid var(--accent)',
+                              transition: 'all 0.2s ease'
+                            }}
+                            title="Click to Expand & Edit Section Provisions"
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, overflow: 'hidden' }}>
+                              <span style={{ fontSize: '0.85rem', fontWeight: 800, background: 'var(--accent)', color: '#08211E', padding: '3px 10px', borderRadius: '6px', flexShrink: 0 }}>
+                                #{secIdx + 1}
+                              </span>
+
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', overflow: 'hidden', flex: 1 }}>
+                                <div style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {sec.title || `Topic Section #${secIdx + 1}`}
+                                </div>
+                                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                  <span>👤 <strong>{sec.presenterName || 'Primary Instructor'}</strong></span>
+                                  <span>•</span>
+                                  <span style={{ color: 'var(--accent)', fontWeight: 700 }}>{sec.activityType || '📚 Training Class'}</span>
+                                  {sec.presentationId && (
+                                    <>
+                                      <span>•</span>
+                                      <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>📊 Linked Deck</span>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexShrink: 0 }}>
+                              <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--accent)', background: 'var(--surface-2)', padding: '5px 12px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                                🕒 {sec.startTime || '09:00 AM'} - {sec.endTime || '10:00 AM'} ({sec.duration || formatDurationHoursMins(durationMins)})
+                              </div>
+
+                              <button 
+                                type="button" 
+                                className="btn btn-secondary btn-icon"
+                                style={{ width: '32px', height: '32px', padding: 0 }}
+                                title="Click to Expand"
+                              >
+                                <ChevronDown size={18} color="var(--accent)" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      {/* EXPANDED FULL EDIT CARD */}
                       return (
                         <div 
-                          key={sec.id || secIdx} 
+                          key={secKey} 
+                          className="animate-fade"
                           style={{ 
                             background: 'var(--surface)',
-                            border: '1.5px solid var(--border)', 
+                            border: '1.5px solid var(--accent)', 
                             borderRadius: '16px', 
                             padding: '20px', 
                             display: 'flex', 
                             flexDirection: 'column', 
                             gap: '16px',
-                            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04)',
+                            boxShadow: '0 10px 30px rgba(6, 182, 212, 0.15)',
                             position: 'relative'
                           }}
                         >
-                          {/* ROW 1: Index badge, Start Time (Accent Color), Duration (H/M Only), End Time (Accent Color), Activity Type */}
+                          {/* ROW 1: Index badge, Start Time (Accent Color), Duration (H/M Only), End Time (Accent Color), Activity Type, Collapse Button */}
                           <div style={{ 
                             display: 'flex', 
                             alignItems: 'center', 
@@ -756,7 +834,7 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
                               />
                             </div>
 
-                            {/* SEPARATE HOURS AND MINUTES INPUTS (NO REDUNDANT DURATION TEXT) */}
+                            {/* SEPARATE HOURS AND MINUTES INPUTS */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--surface)', padding: '5px 12px', borderRadius: '8px', border: '1px solid var(--border)' }}>
                               <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-muted)' }}>⏱️ Duration:</span>
                               
@@ -817,6 +895,17 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
                                 <option value="🔐 Escape Room Challenge">🔐 Escape Room Challenge</option>
                               </select>
                             </div>
+
+                            {/* Collapse Button */}
+                            <button 
+                              type="button" 
+                              className="btn btn-secondary btn-icon"
+                              onClick={() => toggleExpandSection(secKey)}
+                              style={{ width: '32px', height: '32px', padding: 0 }}
+                              title="Collapse Section"
+                            >
+                              <ChevronUp size={18} color="var(--accent)" />
+                            </button>
                           </div>
 
                           {/* ROW 2: Topic Title & Presenter Name in Generous Grid */}
@@ -880,7 +969,10 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
                             <button 
                               type="button"
                               className="btn"
-                              onClick={() => handleDeleteSection(dayIdx, secIdx)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteSection(dayIdx, secIdx);
+                              }}
                               title="Delete Schedule Item (-)"
                               style={{ 
                                 width: '34px', height: '34px', borderRadius: '50%', 
