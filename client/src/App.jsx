@@ -1385,7 +1385,7 @@ export default function App() {
               <div className="logo-icon" style={{ width: '28px', height: '28px', borderRadius: '7px' }}>
                 <PresIcon size={16} color="white" />
               </div>
-              <span style={{ fontWeight: 800, fontSize: '1.05rem', letterSpacing: '-0.02em', background: 'linear-gradient(90deg, var(--accent), #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              <span style={{ fontWeight: 800, fontSize: '1.05rem', letterSpacing: '-0.02em', color: 'var(--accent)' }}>
                 PulsePoll
               </span>
             </div>
@@ -1414,14 +1414,6 @@ export default function App() {
 
           {/* Right: Quick Action Controls & User Profile */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <button 
-              className="btn btn-primary"
-              onClick={() => handleNavigateToCreator(null)}
-              style={{ padding: '5px 12px', fontSize: '0.78rem', fontWeight: 600, background: 'var(--accent)', color: '#08211E', border: 'none', borderRadius: '8px', gap: '4px' }}
-            >
-              <Plus size={14} /> New Deck
-            </button>
-
             {/* User Design System Theme Toggle */}
             <div 
               className="theme-toggle" 
@@ -2106,67 +2098,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Global Floating FAB One-Sided Popout Menu (No Screen Darkening) */}
-      {user && view !== 'presenter' && view !== 'audience' && (
-        <div 
-          style={{
-            position: 'fixed',
-            bottom: '36px',
-            right: '36px',
-            zIndex: 99999
-          }}
-          className={`radial-menu-container ${isGlobalRadialOpen ? 'open' : ''}`}
-          onMouseEnter={() => setIsGlobalRadialOpen(true)}
-          onMouseLeave={() => setIsGlobalRadialOpen(false)}
-        >
-          {[
-            { label: 'Workshops', icon: <Calendar size={19} />, action: () => setView('sessions') },
-            { label: 'Present Live', icon: <Play size={19} />, action: () => handleNavigateToPresenter() },
-            { label: 'Audience View', icon: <Users size={19} />, action: () => handleNavigateToAudience() },
-            { label: 'Analytics', icon: <BarChart2 size={19} />, action: () => setView('analytics') },
-            { label: 'Escape Vault', icon: <Lock size={19} />, action: () => setView('escaperoom') },
-            { label: 'AI Generator', icon: <Sparkles size={19} />, action: () => handleTriggerContextualSlide('AI Quiz Generator', true) }
-          ].map((item, i) => {
-            const radius = 130;
-            // Arc popping out on top-left side (-90° to -180°)
-            const angleDeg = -90 - (90 / 5) * i;
-            const angleRad = (angleDeg * Math.PI) / 180;
-            const x = Math.round(Math.cos(angleRad) * radius);
-            const y = Math.round(Math.sin(angleRad) * radius);
-
-            return (
-              <button 
-                key={item.label}
-                className="petal-item"
-                style={{
-                  transitionDelay: isGlobalRadialOpen ? `${i * 35}ms` : '0ms',
-                  transform: isGlobalRadialOpen ? `translate(${x}px, ${y}px) scale(1)` : 'translate(0px, 0px) scale(0.3)'
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  item.action();
-                  setIsGlobalRadialOpen(false);
-                }}
-                title={item.label}
-              >
-                {item.icon}
-                <span className="petal-label">{item.label}</span>
-              </button>
-            );
-          })}
-
-          <button 
-            className="radial-fab" 
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsGlobalRadialOpen(!isGlobalRadialOpen);
-            }}
-            title="Toggle Quick Action Radial Menu"
-          >
-            <Plus size={24} />
-          </button>
-        </div>
-      )}
     </div>
   );
 }

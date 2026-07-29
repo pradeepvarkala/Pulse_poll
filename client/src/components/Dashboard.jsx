@@ -196,7 +196,7 @@ export default function Dashboard({
       color: newFolderColor
     };
 
-    const updated = [...folders, newFolder];
+    const updated = [newFolder, ...folders];
     setFolders(updated);
     localStorage.setItem('pulse-poll-folders', JSON.stringify(updated));
     setNewFolderName('');
@@ -369,7 +369,34 @@ export default function Dashboard({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', minHeight: 'calc(100vh - 120px)', width: '100%' }} className="animate-fade">
       
-      {/* 📊 Top Dual Navigation Tab Switcher */}
+      {/* 1. TOP OF PAGE: WELCOME BANNER */}
+      <div style={getBannerStyle()}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+            <h1 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>Welcome back, {user?.name || 'Presenter'}</h1>
+            <span style={getBadgeStyle()}>{getBadgeText()}</span>
+          </div>
+          <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.88rem', lineHeight: 1.5 }}>
+            {user?.tier === 'admin' 
+              ? 'You have complete administrative root permissions. Manage presentations, folders, system settings, and databases.' 
+              : 'Create interactive presentation decks, organize into folders, and collect real-time audience feedback.'}
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          {onOpenAiGenerator && (
+            <button 
+              className="btn btn-primary" 
+              style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', border: 'none', padding: '8px 16px', fontSize: '0.85rem' }}
+              onClick={onOpenAiGenerator}
+            >
+              <span>🤖 PulseAI Quiz Generator</span>
+              <span>⚡</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* 2. DUAL NAVIGATION TABS & ACTION BAR */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
         <div className="top-dual-tab-bar">
           <button 
@@ -417,33 +444,6 @@ export default function Dashboard({
       <div style={{ width: '100%' }}>
         {dashboardTab === 'presentations' && (
           <>
-            {/* Tier Custom Differentiated Dashboard Banner */}
-            <div style={getBannerStyle()}>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                  <h1 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>Welcome back, {user?.name || 'Presenter'}</h1>
-                  <span style={getBadgeStyle()}>{getBadgeText()}</span>
-                </div>
-                <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.88rem', lineHeight: 1.5 }}>
-                  {user?.tier === 'admin' 
-                    ? 'You have complete administrative root permissions. Manage presentations, folders, system settings, and databases.' 
-                    : 'Create interactive presentation decks, organize into folders, and collect real-time audience feedback.'}
-                </p>
-              </div>
-              <div style={{ display: 'flex', gap: '12px' }}>
-                {onOpenAiGenerator && (
-                  <button 
-                    className="btn btn-primary" 
-                    style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', border: 'none', padding: '8px 16px', fontSize: '0.85rem' }}
-                    onClick={onOpenAiGenerator}
-                  >
-                    <span>🤖 PulseAI Quiz Generator</span>
-                    <span>⚡</span>
-                  </button>
-                )}
-              </div>
-            </div>
-
             {/* WINDOWS EXPLORER FOLDER SYSTEM: IF INSIDE OPENED FOLDER VIEW */}
             {activeOpenedFolderId !== null ? (
               (() => {
@@ -612,17 +612,17 @@ export default function Dashboard({
                 );
               })()
             ) : (
-              /* ROOT DIRECTORY VIEW: WINDOWS EXPLORER FOLDER CARDS GRID */
+              /* ROOT DIRECTORY VIEW: SLEEK COMPACT MINI FOLDER CARDS */
               <>
                 <div style={{ marginBottom: '28px' }}>
                   <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     📁 Presentation Folders Directory
                     <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-                      (Click any folder card to open up and view presentations inside)
+                      (Click any folder to open up and view presentations inside)
                     </span>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '16px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: '12px' }}>
                     {folders.map(f => {
                       const count = presentations.filter(p => p.folderId === f.id).length;
                       return (
@@ -631,45 +631,47 @@ export default function Dashboard({
                           className="glass-card card-lift"
                           onClick={() => setActiveOpenedFolderId(f.id)}
                           style={{
-                            padding: '18px', borderRadius: '16px', background: 'var(--surface)', border: `1px solid ${f.color}40`,
-                            cursor: 'pointer', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '130px',
-                            boxShadow: `0 8px 24px -10px ${f.color}25`
+                            padding: '12px 14px', borderRadius: '14px', background: 'var(--surface)', border: `1px solid ${f.color}40`,
+                            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
+                            minHeight: '72px', boxShadow: `0 4px 14px -6px ${f.color}20`
                           }}
                         >
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                            <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: `${f.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden' }}>
+                            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: `${f.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0 }}>
                               📁
                             </div>
-                            <span style={{ fontSize: '0.75rem', background: `${f.color}20`, color: f.color, padding: '3px 10px', borderRadius: '12px', fontWeight: 800 }}>
-                              {count} {count === 1 ? 'Deck' : 'Decks'}
-                            </span>
+                            <div style={{ overflow: 'hidden' }}>
+                              <div style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {f.name}
+                              </div>
+                              <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                                Click to Open 📂
+                              </div>
+                            </div>
                           </div>
 
-                          <div style={{ marginTop: '12px' }}>
-                            <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '4px' }}>
-                              {f.name}
-                            </div>
-                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              Click to Open Folder 📂 ➔
-                            </div>
-                          </div>
+                          <span style={{ fontSize: '0.72rem', background: `${f.color}20`, color: f.color, padding: '2px 8px', borderRadius: '10px', fontWeight: 800, flexShrink: 0 }}>
+                            {count} {count === 1 ? 'Deck' : 'Decks'}
+                          </span>
                         </div>
                       );
                     })}
 
-                    {/* ➕ Create New Folder Card */}
+                    {/* ➕ Create New Folder Compact Card */}
                     <div 
                       className="glass-card card-lift"
                       onClick={() => setIsFolderModalOpen(true)}
                       style={{
-                        padding: '18px', borderRadius: '16px', background: 'rgba(255,255,255,0.02)', border: '1.5px dashed var(--border)',
-                        cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '130px',
-                        color: 'var(--text-muted)', textAlign: 'center'
+                        padding: '12px 14px', borderRadius: '14px', background: 'rgba(255,255,255,0.02)', border: '1.5px dashed var(--border)',
+                        cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', minHeight: '72px',
+                        color: 'var(--text-muted)'
                       }}
                     >
-                      <FolderPlus size={28} color="var(--accent)" style={{ marginBottom: '6px' }} />
-                      <div style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--text-primary)' }}>➕ Create New Folder</div>
-                      <div style={{ fontSize: '0.75rem' }}>Organize decks into folders</div>
+                      <FolderPlus size={20} color="var(--accent)" style={{ flexShrink: 0 }} />
+                      <div>
+                        <div style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--text-primary)' }}>➕ New Folder</div>
+                        <div style={{ fontSize: '0.72rem' }}>Add directory</div>
+                      </div>
                     </div>
                   </div>
                 </div>
