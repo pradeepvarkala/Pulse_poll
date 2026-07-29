@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Calendar, Plus, Trash2, Play, Users, Lock, Unlock, Shuffle, QrCode,
+  Calendar, Plus, Minus, Trash2, Play, Users, Lock, Unlock, Shuffle, QrCode,
   ChevronRight, Award, Sparkles, CheckCircle2, Copy, Eye, ArrowLeft, Layers, 
   Clock, Edit3, Link as LinkIcon, FileText, Check, X, ExternalLink, HelpCircle, FileUp, Settings, Printer, Download, Gamepad2, MessageSquare, AlertTriangle
 } from 'lucide-react';
@@ -701,8 +701,8 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
                     </button>
                   </div>
 
-                  {/* SPACIOUS 3-ROW SESSION ITEM CARDS */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  {/* SPACIOUS ORGANIZED SESSION ITEM CARDS */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     {(day.sections || []).map((sec, secIdx) => {
                       const durationMins = sec.durationMinutes || 60;
                       const currentHours = Math.floor(durationMins / 60);
@@ -712,28 +712,30 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
                         <div 
                           key={sec.id || secIdx} 
                           style={{ 
-                            background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '12px', 
-                            padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' 
+                            background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', 
+                            padding: '18px', display: 'flex', flexDirection: 'column', gap: '14px',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
                           }}
                         >
-                          {/* ROW 1: Index badge, Start Time, Separate Hours & Minutes Duration inputs, End Time (Auto), Activity Type */}
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap', borderBottom: '1px solid var(--border-soft)', paddingBottom: '10px' }}>
-                            <span style={{ fontSize: '0.85rem', fontWeight: 800, background: 'var(--surface)', padding: '4px 10px', borderRadius: '8px', color: 'var(--text-muted)' }}>
+                          {/* ROW 1: Index badge, Start Time (Accent Color), Duration (H/M Only), End Time (Accent Color), Activity Type */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap', background: 'var(--surface-2)', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border-soft)' }}>
+                            <span style={{ fontSize: '0.85rem', fontWeight: 800, background: 'var(--accent)', color: '#08211E', padding: '3px 10px', borderRadius: '6px' }}>
                               #{secIdx + 1}
                             </span>
 
+                            {/* Start Time (Accent Color Matching End Time) */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                               <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)' }}>🕒 Start:</span>
                               <input 
                                 type="text" 
                                 value={sec.startTime || ''}
                                 onChange={(e) => handleUpdateSectionRowField(dayIdx, secIdx, 'startTime', e.target.value)}
-                                style={{ width: '95px', padding: '6px 10px', borderRadius: '6px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: 700 }}
+                                style={{ width: '95px', padding: '5px 10px', borderRadius: '6px', background: 'var(--surface)', border: '1.5px solid var(--accent)', color: 'var(--accent)', fontSize: '0.85rem', fontWeight: 800 }}
                               />
                             </div>
 
-                            {/* SEPARATE HOURS AND MINUTES INPUTS */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--surface)', padding: '4px 10px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                            {/* SEPARATE HOURS AND MINUTES INPUTS (NO REDUNDANT DURATION TEXT) */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--surface)', padding: '4px 12px', borderRadius: '8px', border: '1px solid var(--border)' }}>
                               <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)' }}>⏱️ Duration:</span>
                               
                               {/* Hours Input */}
@@ -747,9 +749,9 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
                                   const total = (hours * 60) + mins;
                                   handleUpdateSectionRowField(dayIdx, secIdx, 'durationMinutes', Math.max(5, total));
                                 }}
-                                style={{ width: '48px', padding: '4px 6px', borderRadius: '6px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: 800, textAlign: 'center' }}
+                                style={{ width: '46px', padding: '4px 6px', borderRadius: '6px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.85rem', fontWeight: 800, textAlign: 'center' }}
                               />
-                              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)' }}>h</span>
+                              <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)' }}>h</span>
 
                               {/* Minutes Input */}
                               <input 
@@ -762,27 +764,25 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
                                   const total = (hours * 60) + mins;
                                   handleUpdateSectionRowField(dayIdx, secIdx, 'durationMinutes', Math.max(5, total));
                                 }}
-                                style={{ width: '52px', padding: '4px 6px', borderRadius: '6px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: 800, textAlign: 'center' }}
+                                style={{ width: '50px', padding: '4px 6px', borderRadius: '6px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.85rem', fontWeight: 800, textAlign: 'center' }}
                               />
-                              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)' }}>m</span>
-
-                              <span style={{ fontSize: '0.76rem', color: 'var(--accent)', fontWeight: 800, marginLeft: '4px' }}>
-                                ({formatDurationHoursMins(durationMins)})
-                              </span>
+                              <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)' }}>m</span>
                             </div>
 
+                            {/* End Time (Accent Color) */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                               <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)' }}>🔒 End:</span>
-                              <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--accent)' }}>
+                              <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--accent)', background: 'var(--surface)', padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--border)' }}>
                                 {sec.endTime || '10:00 AM'}
                               </span>
                             </div>
 
+                            {/* Activity Type Dropdown */}
                             <div style={{ flex: 1, minWidth: '200px' }}>
                               <select 
                                 value={sec.activityType || '📚 Training Class'}
                                 onChange={(e) => handleUpdateSectionRowField(dayIdx, secIdx, 'activityType', e.target.value)}
-                                style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.8rem', fontWeight: 700 }}
+                                style={{ width: '100%', padding: '6px 12px', borderRadius: '8px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: 700 }}
                               >
                                 <option value="📚 Training Class">📚 Training Class</option>
                                 <option value="📝 Orientation & Keynote">📝 Orientation & Keynote</option>
@@ -797,39 +797,39 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
                             </div>
                           </div>
 
-                          {/* ROW 2: Generous full-width Topic Title & Presenter Name */}
-                          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px' }}>
+                          {/* ROW 2: Topic Title & Presenter Name in Generous Grid */}
+                          <div style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr', gap: '14px', borderBottom: '1px solid var(--border-soft)', paddingBottom: '12px' }}>
                             <div>
-                              <label style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>TOPIC / ACTIVITY TITLE</label>
+                              <label style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '4px' }}>TOPIC / ACTIVITY TITLE</label>
                               <input 
                                 type="text" 
                                 value={sec.title || ''}
                                 placeholder="Enter topic or session title..."
                                 onChange={(e) => handleUpdateSectionRowField(dayIdx, secIdx, 'title', e.target.value)}
-                                style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.88rem', fontWeight: 600 }}
+                                style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.88rem', fontWeight: 600 }}
                               />
                             </div>
 
                             <div>
-                              <label style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>PRESENTER / TRAINER</label>
+                              <label style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '4px' }}>PRESENTER / TRAINER</label>
                               <input 
                                 type="text" 
                                 value={sec.presenterName || ''}
                                 placeholder="Presenter Name"
                                 onChange={(e) => handleUpdateSectionRowField(dayIdx, secIdx, 'presenterName', e.target.value)}
-                                style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.85rem' }}
+                                style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.85rem' }}
                               />
                             </div>
                           </div>
 
-                          {/* ROW 3: Linked Presentation Deck + Action Controls */}
+                          {/* ROW 3: Linked Presentation Deck + Compact Minus (-) Remove Button */}
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: '280px' }}>
                               <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)' }}>📊 Linked Deck:</span>
                               <select 
                                 value={sec.presentationId || ''}
                                 onChange={(e) => handleUpdateSectionDeck(dayIdx, secIdx, e.target.value)}
-                                style={{ flex: 1, maxWidth: '320px', padding: '6px 10px', borderRadius: '6px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.82rem' }}
+                                style={{ flex: 1, maxWidth: '340px', padding: '6px 12px', borderRadius: '8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.82rem' }}
                               >
                                 <option value="">🚫 None (No Slide Deck)</option>
                                 {userPresentations.map(p => (
@@ -842,26 +842,32 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
                                 <button 
                                   type="button"
                                   className="btn btn-secondary"
-                                  style={{ padding: '6px 12px', fontSize: '0.78rem', fontWeight: 600, display: 'flex', gap: '4px', alignItems: 'center' }}
+                                  style={{ padding: '6px 14px', fontSize: '0.78rem', fontWeight: 700, display: 'flex', gap: '6px', alignItems: 'center' }}
                                   onClick={() => {
                                     localStorage.setItem('pulse-poll-active-workshop-context', activeSession.id);
                                     onViewCreator(sec.presentationId, 'sessions');
                                   }}
                                   title="Edit Linked Deck"
                                 >
-                                  <Edit3 size={14} /> Edit Deck
+                                  <Edit3 size={14} color="var(--accent)" /> Edit Deck
                                 </button>
                               )}
                             </div>
 
+                            {/* COMPACT RED (-) MINUS REMOVE BUTTON */}
                             <button 
                               type="button"
-                              className="btn btn-secondary btn-icon"
+                              className="btn"
                               onClick={() => handleDeleteSection(dayIdx, secIdx)}
-                              title="Delete Schedule Item"
-                              style={{ padding: '6px 12px', color: 'var(--danger)', display: 'flex', gap: '4px', alignItems: 'center', fontSize: '0.78rem' }}
+                              title="Delete Schedule Item (-)"
+                              style={{ 
+                                width: '32px', height: '32px', borderRadius: '50%', 
+                                background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.4)', 
+                                color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                padding: 0, cursor: 'pointer', transition: 'all 0.2s ease'
+                              }}
                             >
-                              <Trash2 size={14} /> Remove Item
+                              <Minus size={16} strokeWidth={2.5} />
                             </button>
                           </div>
                         </div>
