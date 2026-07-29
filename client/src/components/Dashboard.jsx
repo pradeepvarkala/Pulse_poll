@@ -274,40 +274,10 @@ export default function Dashboard({
     onViewCreator(newPres.id);
   };
 
-  const handleCreateQuickPresentation = (title, slideType) => {
-    const newPres = {
-      id: `pres-${Math.random().toString(36).substr(2, 6)}`,
-      title: title,
-      folderId: activeOpenedFolderId || null,
-      updatedAt: new Date().toLocaleDateString(),
-      theme: 'cyber-neon',
-      slides: [
-        {
-          id: `s-${Math.random().toString(36).substr(2, 4)}`,
-          type: slideType,
-          question: '',
-          options: slideType === 'quiz' || slideType === 'poll' ? [
-            { id: 'opt-1', text: '' },
-            { id: 'opt-2', text: '' }
-          ] : []
-        }
-      ]
-    };
-
-    const updated = [newPres, ...presentations];
-    setPresentations(updated);
-    localStorage.setItem('pulse-poll-presentations', JSON.stringify(updated));
-
-    fetch('/api/presentations', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-user-email': userEmail
-      },
-      body: JSON.stringify(newPres)
-    }).catch(err => console.error(err));
-
-    onViewCreator(newPres.id);
+  const handleCreateQuickPresentation = (suggestedTitle, slideType) => {
+    setNewTitle(suggestedTitle || '');
+    setNewTargetFolderId(activeOpenedFolderId || '');
+    setIsCreateModalOpen(true);
   };
 
   const handleDelete = async (id, e) => {
@@ -661,7 +631,7 @@ export default function Dashboard({
                                 {f.name}
                               </div>
                               <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                                Click to Open 📂
+                                Open Folder →
                               </div>
                             </div>
                           </div>
@@ -1138,6 +1108,9 @@ export default function Dashboard({
                   required
                   style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.9rem' }}
                 />
+                <span style={{ fontSize: '0.74rem', color: 'var(--accent)', marginTop: '5px', display: 'block', fontWeight: 600 }}>
+                  💡 Tip: Enter a recognizable title for your audience (e.g., 'Q3 Executive Strategy' or 'Physics 101 Quiz')
+                </span>
               </div>
 
               <div>
