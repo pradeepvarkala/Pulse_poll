@@ -7,6 +7,41 @@ const DEFAULT_FOLDERS = [
   { id: 'folder-highered', name: 'University Lectures', color: '#8b5cf6' }
 ];
 
+const DEFAULT_INITIAL_DECKS = [
+  {
+    id: 'deck-sample-highered',
+    title: '🎓 University Thesis Defense & Peer Q&A Panel',
+    folderId: 'folder-highered',
+    theme: 'classic-slate',
+    updatedAt: new Date().toLocaleDateString(),
+    slides: [
+      { id: 's1', type: 'quiz', question: 'What is the standard significance threshold (p-value)? 📊', options: [{ id: 'opt-1', text: 'p < 0.05 (Correct)' }, { id: 'opt-2', text: 'p < 0.50' }] },
+      { id: 's2', type: 'wordcloud', question: 'What is the single biggest methodology challenge in your research? 🎓' }
+    ]
+  },
+  {
+    id: 'deck-sample-leadership',
+    title: '🚀 Executive Leadership & Strategy Alignment',
+    folderId: 'folder-leadership',
+    theme: 'corporate',
+    updatedAt: new Date().toLocaleDateString(),
+    slides: [
+      { id: 's1', type: 'brainstorm', question: 'Brainstorm key leadership capabilities for 2026! 🚀', category1: 'Strategic Alignment 🎯', category2: 'Empathy ❤️' },
+      { id: 's2', type: 'poll', question: 'Which executive initiative should take top priority this quarter?' }
+    ]
+  },
+  {
+    id: 'deck-sample-stem',
+    title: '📊 STEM Science & Environmental Ecosystems',
+    folderId: 'folder-stem',
+    theme: 'playroom',
+    updatedAt: new Date().toLocaleDateString(),
+    slides: [
+      { id: 's1', type: 'quiz', question: 'Which process converts sunlight and CO2 into oxygen? 🌿', options: [{ id: 'opt-1', text: 'Photosynthesis (Correct)' }, { id: 'opt-2', text: 'Respiration' }] }
+    ]
+  }
+];
+
 export default function Dashboard({ 
   user, onViewCreator, onViewPresenter, onJoinAudience, onOpenAiGenerator, 
   onViewAnalytics, onViewEscapeRoom, onViewMeetingScheduler, onViewSessions,
@@ -57,8 +92,6 @@ export default function Dashboard({
     }
   }, [userEmail]);
 
-
-
   useEffect(() => {
     const fetchPresentations = async () => {
       try {
@@ -70,11 +103,13 @@ export default function Dashboard({
         if (Array.isArray(data) && data.length > 0) {
           const parsed = data.map(p => ({
             ...p,
+            folderId: p.folderId || p.folder_id || null,
             slides: typeof p.slides === 'string' ? JSON.parse(p.slides) : p.slides
           }));
           setPresentations(parsed);
         } else {
-          setPresentations([]);
+          setPresentations(DEFAULT_INITIAL_DECKS);
+          localStorage.setItem('pulse-poll-presentations', JSON.stringify(DEFAULT_INITIAL_DECKS));
         }
       } catch (err) {
         console.error('Error fetching presentations:', err);
@@ -82,12 +117,21 @@ export default function Dashboard({
           const saved = localStorage.getItem('pulse-poll-presentations');
           if (saved && saved !== 'undefined') {
             const parsed = JSON.parse(saved);
-            setPresentations(Array.isArray(parsed) ? parsed : []);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setPresentations(parsed.map(p => ({
+                ...p,
+                folderId: p.folderId || p.folder_id || null
+              })));
+            } else {
+              setPresentations(DEFAULT_INITIAL_DECKS);
+              localStorage.setItem('pulse-poll-presentations', JSON.stringify(DEFAULT_INITIAL_DECKS));
+            }
           } else {
-            setPresentations([]);
+            setPresentations(DEFAULT_INITIAL_DECKS);
+            localStorage.setItem('pulse-poll-presentations', JSON.stringify(DEFAULT_INITIAL_DECKS));
           }
         } catch (e) {
-          setPresentations([]);
+          setPresentations(DEFAULT_INITIAL_DECKS);
         }
       }
     };
@@ -323,14 +367,19 @@ export default function Dashboard({
           >
             <FolderPlus size={16} color="var(--accent)" /> ➕ New Folder
           </button>
-          <button 
-            type="button"
-            className="btn btn-primary" 
-            onClick={() => setIsCreateModalOpen(true)} 
-            style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 700, fontSize: '0.85rem', border: 'none', display: 'flex', gap: '6px', alignItems: 'center' }}
-          >
-            <Plus size={16} /> New Presentation
-          </button>
+          {activeOpenedFolderId === null && (
+            <button 
+              type="button"
+              className="btn btn-primary" 
+              onClick={() => {
+                setNewTargetFolderId('');
+                setIsCreateModalOpen(true);
+              }} 
+              style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 700, fontSize: '0.85rem', border: 'none', display: 'flex', gap: '6px', alignItems: 'center' }}
+            >
+              <Plus size={16} /> New Presentation
+            </button>
+          )}
         </div>
       </div>
 
@@ -524,20 +573,9 @@ export default function Dashboard({
                         <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '6px' }}>
                           Folder "{activeFolder?.name}" is currently empty
                         </div>
-                        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '16px' }}>
-                          Click the button below to create your first presentation deck inside this folder!
+                        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>
+                          Click the <b>"+ New Presentation"</b> button above to create a deck inside this folder!
                         </p>
-                        <button 
-                          type="button"
-                          className="btn btn-primary"
-                          onClick={() => {
-                            setNewTargetFolderId(activeOpenedFolderId);
-                            setIsCreateModalOpen(true);
-                          }}
-                          style={{ background: 'var(--accent)', color: '#08211E', fontWeight: 700, border: 'none', padding: '8px 20px' }}
-                        >
-                          ➕ Create Presentation Deck inside {activeFolder?.name}
-                        </button>
                       </div>
                     )}
                   </div>
@@ -614,7 +652,7 @@ export default function Dashboard({
                     </div>
 
                     {/* Filter Pills */}
-                    <div style={{ display: 'flex', gap: '6px' }}>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                       <button 
                         type="button"
                         className={`folder-chip-pill ${selectedFolderId === 'all' ? 'active' : ''}`}
@@ -622,6 +660,20 @@ export default function Dashboard({
                       >
                         📁 All Decks ({presentations.length})
                       </button>
+                      {folders.map(f => {
+                        const count = presentations.filter(p => p.folderId === f.id).length;
+                        return (
+                          <button
+                            key={f.id}
+                            type="button"
+                            className={`folder-chip-pill ${selectedFolderId === f.id ? 'active' : ''}`}
+                            onClick={() => setSelectedFolderId(f.id)}
+                            style={{ borderColor: selectedFolderId === f.id ? f.color : undefined }}
+                          >
+                            📁 {f.name} ({count})
+                          </button>
+                        );
+                      })}
                       <button 
                         type="button"
                         className={`folder-chip-pill ${selectedFolderId === 'unorganized' ? 'active' : ''}`}
