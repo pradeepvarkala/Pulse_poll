@@ -701,150 +701,178 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
                     </button>
                   </div>
 
-                  {/* TABULAR SCHEDULE ROW EDITOR */}
-                  <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem' }}>
-                      <thead>
-                        <tr style={{ borderBottom: '1.5px solid var(--border)', textAlign: 'left', color: 'var(--text-muted)' }}>
-                          <th style={{ padding: '8px 10px', width: '35px' }}>#</th>
-                          <th style={{ padding: '8px 10px', width: '110px' }}>START TIME</th>
-                          <th style={{ padding: '8px 10px', width: '130px' }}>DURATION</th>
-                          <th style={{ padding: '8px 10px', width: '100px' }}>END TIME</th>
-                          <th style={{ padding: '8px 10px' }}>TOPIC / ACTIVITY TITLE</th>
-                          <th style={{ padding: '8px 10px', width: '180px' }}>TYPE OF ACTIVITY</th>
-                          <th style={{ padding: '8px 10px', width: '140px' }}>PRESENTER</th>
-                          <th style={{ padding: '8px 10px', width: '180px' }}>LINKED DECK</th>
-                          <th style={{ padding: '8px 10px', width: '40px' }}></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {(day.sections || []).map((sec, secIdx) => {
-                          const durationMins = sec.durationMinutes || 60;
+                  {/* SPACIOUS 3-ROW SESSION ITEM CARDS */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    {(day.sections || []).map((sec, secIdx) => {
+                      const durationMins = sec.durationMinutes || 60;
+                      const currentHours = Math.floor(durationMins / 60);
+                      const currentMins = durationMins % 60;
 
-                          return (
-                            <tr key={sec.id || secIdx} style={{ borderBottom: '1px solid var(--border-soft)' }}>
-                              <td style={{ padding: '10px', fontWeight: 700, color: 'var(--text-muted)' }}>{secIdx + 1}</td>
+                      return (
+                        <div 
+                          key={sec.id || secIdx} 
+                          style={{ 
+                            background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '12px', 
+                            padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' 
+                          }}
+                        >
+                          {/* ROW 1: Index badge, Start Time, Separate Hours & Minutes Duration inputs, End Time (Auto), Activity Type */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap', borderBottom: '1px solid var(--border-soft)', paddingBottom: '10px' }}>
+                            <span style={{ fontSize: '0.85rem', fontWeight: 800, background: 'var(--surface)', padding: '4px 10px', borderRadius: '8px', color: 'var(--text-muted)' }}>
+                              #{secIdx + 1}
+                            </span>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)' }}>🕒 Start:</span>
+                              <input 
+                                type="text" 
+                                value={sec.startTime || ''}
+                                onChange={(e) => handleUpdateSectionRowField(dayIdx, secIdx, 'startTime', e.target.value)}
+                                style={{ width: '95px', padding: '6px 10px', borderRadius: '6px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: 700 }}
+                              />
+                            </div>
+
+                            {/* SEPARATE HOURS AND MINUTES INPUTS */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--surface)', padding: '4px 10px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)' }}>⏱️ Duration:</span>
                               
-                              {/* Start Time */}
-                              <td style={{ padding: '10px' }}>
-                                <input 
-                                  type="text" 
-                                  value={sec.startTime || ''}
-                                  onChange={(e) => handleUpdateSectionRowField(dayIdx, secIdx, 'startTime', e.target.value)}
-                                  style={{ width: '95px', padding: '5px 8px', borderRadius: '6px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.8rem', fontWeight: 700 }}
-                                />
-                              </td>
+                              {/* Hours Input */}
+                              <input 
+                                type="number" 
+                                min="0" max="12"
+                                value={currentHours}
+                                onChange={(e) => {
+                                  const hours = Math.max(0, parseInt(e.target.value, 10) || 0);
+                                  const mins = currentMins;
+                                  const total = (hours * 60) + mins;
+                                  handleUpdateSectionRowField(dayIdx, secIdx, 'durationMinutes', Math.max(5, total));
+                                }}
+                                style={{ width: '48px', padding: '4px 6px', borderRadius: '6px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: 800, textAlign: 'center' }}
+                              />
+                              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)' }}>h</span>
 
-                              {/* Duration (Hours & Minutes) */}
-                              <td style={{ padding: '10px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                  <input 
-                                    type="number" 
-                                    min="5" max="480" step="5"
-                                    value={durationMins}
-                                    onChange={(e) => handleUpdateSectionRowField(dayIdx, secIdx, 'durationMinutes', parseInt(e.target.value, 10) || 30)}
-                                    style={{ width: '60px', padding: '5px 6px', borderRadius: '6px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.8rem', fontWeight: 700 }}
-                                  />
-                                  <span style={{ fontSize: '0.75rem', color: 'var(--accent)', fontWeight: 700 }}>
-                                    {formatDurationHoursMins(durationMins)}
-                                  </span>
-                                </div>
-                              </td>
+                              {/* Minutes Input */}
+                              <input 
+                                type="number" 
+                                min="0" max="59" step="5"
+                                value={currentMins}
+                                onChange={(e) => {
+                                  const hours = currentHours;
+                                  const mins = Math.max(0, Math.min(59, parseInt(e.target.value, 10) || 0));
+                                  const total = (hours * 60) + mins;
+                                  handleUpdateSectionRowField(dayIdx, secIdx, 'durationMinutes', Math.max(5, total));
+                                }}
+                                style={{ width: '52px', padding: '4px 6px', borderRadius: '6px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: 800, textAlign: 'center' }}
+                              />
+                              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)' }}>m</span>
 
-                              {/* End Time (Auto Cascaded) */}
-                              <td style={{ padding: '10px', fontWeight: 800, color: 'var(--accent)' }}>
+                              <span style={{ fontSize: '0.76rem', color: 'var(--accent)', fontWeight: 800, marginLeft: '4px' }}>
+                                ({formatDurationHoursMins(durationMins)})
+                              </span>
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)' }}>🔒 End:</span>
+                              <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--accent)' }}>
                                 {sec.endTime || '10:00 AM'}
-                              </td>
+                              </span>
+                            </div>
 
-                              {/* Topic Title */}
-                              <td style={{ padding: '10px' }}>
-                                <input 
-                                  type="text" 
-                                  value={sec.title || ''}
-                                  onChange={(e) => handleUpdateSectionRowField(dayIdx, secIdx, 'title', e.target.value)}
-                                  style={{ width: '100%', padding: '5px 8px', borderRadius: '6px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: 600 }}
-                                />
-                              </td>
+                            <div style={{ flex: 1, minWidth: '200px' }}>
+                              <select 
+                                value={sec.activityType || '📚 Training Class'}
+                                onChange={(e) => handleUpdateSectionRowField(dayIdx, secIdx, 'activityType', e.target.value)}
+                                style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.8rem', fontWeight: 700 }}
+                              >
+                                <option value="📚 Training Class">📚 Training Class</option>
+                                <option value="📝 Orientation & Keynote">📝 Orientation & Keynote</option>
+                                <option value="💬 Participant Feedback & Survey">💬 Participant Feedback & Survey</option>
+                                <option value="⭐ Reflection & Peer Review">⭐ Reflection & Peer Review</option>
+                                <option value="☕ Tea & Coffee Break">☕ Tea & Coffee Break</option>
+                                <option value="🤝 Networking & Team Building">🤝 Networking & Team Building</option>
+                                <option value="🎯 Interactive Diagnostic Poll">🎯 Interactive Diagnostic Poll</option>
+                                <option value="💡 Team Brainstorm Grid">💡 Team Brainstorm Grid</option>
+                                <option value="🔐 Escape Room Challenge">🔐 Escape Room Challenge</option>
+                              </select>
+                            </div>
+                          </div>
 
-                              {/* Activity Type Dropdown */}
-                              <td style={{ padding: '10px' }}>
-                                <select 
-                                  value={sec.activityType || '📚 Training Class'}
-                                  onChange={(e) => handleUpdateSectionRowField(dayIdx, secIdx, 'activityType', e.target.value)}
-                                  style={{ width: '100%', padding: '5px 8px', borderRadius: '6px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.78rem', fontWeight: 700 }}
-                                >
-                                  <option value="📚 Training Class">📚 Training Class</option>
-                                  <option value="📝 Orientation & Keynote">📝 Orientation & Keynote</option>
-                                  <option value="💬 Participant Feedback & Survey">💬 Participant Feedback & Survey</option>
-                                  <option value="⭐ Reflection & Peer Review">⭐ Reflection & Peer Review</option>
-                                  <option value="☕ Tea & Coffee Break">☕ Tea & Coffee Break</option>
-                                  <option value="🤝 Networking & Team Building">🤝 Networking & Team Building</option>
-                                  <option value="🎯 Interactive Diagnostic Poll">🎯 Interactive Diagnostic Poll</option>
-                                  <option value="💡 Team Brainstorm Grid">💡 Team Brainstorm Grid</option>
-                                  <option value="🔐 Escape Room Challenge">🔐 Escape Room Challenge</option>
-                                </select>
-                              </td>
+                          {/* ROW 2: Generous full-width Topic Title & Presenter Name */}
+                          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px' }}>
+                            <div>
+                              <label style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>TOPIC / ACTIVITY TITLE</label>
+                              <input 
+                                type="text" 
+                                value={sec.title || ''}
+                                placeholder="Enter topic or session title..."
+                                onChange={(e) => handleUpdateSectionRowField(dayIdx, secIdx, 'title', e.target.value)}
+                                style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.88rem', fontWeight: 600 }}
+                              />
+                            </div>
 
-                              {/* Presenter Name */}
-                              <td style={{ padding: '10px' }}>
-                                <input 
-                                  type="text" 
-                                  value={sec.presenterName || ''}
-                                  placeholder="Presenter Name"
-                                  onChange={(e) => handleUpdateSectionRowField(dayIdx, secIdx, 'presenterName', e.target.value)}
-                                  style={{ width: '100%', padding: '5px 8px', borderRadius: '6px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.78rem' }}
-                                />
-                              </td>
+                            <div>
+                              <label style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>PRESENTER / TRAINER</label>
+                              <input 
+                                type="text" 
+                                value={sec.presenterName || ''}
+                                placeholder="Presenter Name"
+                                onChange={(e) => handleUpdateSectionRowField(dayIdx, secIdx, 'presenterName', e.target.value)}
+                                style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.85rem' }}
+                              />
+                            </div>
+                          </div>
 
-                              {/* Linked Presentation Deck */}
-                              <td style={{ padding: '10px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                  <select 
-                                    value={sec.presentationId || ''}
-                                    onChange={(e) => handleUpdateSectionDeck(dayIdx, secIdx, e.target.value)}
-                                    style={{ width: '110px', padding: '5px 6px', borderRadius: '6px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.75rem' }}
-                                  >
-                                    <option value="">🚫 None</option>
-                                    {userPresentations.map(p => (
-                                      <option key={p.id} value={p.id}>📊 {p.title}</option>
-                                    ))}
-                                    <option value="__CREATE_NEW__">➕ Create New Deck...</option>
-                                  </select>
+                          {/* ROW 3: Linked Presentation Deck + Action Controls */}
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: '280px' }}>
+                              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)' }}>📊 Linked Deck:</span>
+                              <select 
+                                value={sec.presentationId || ''}
+                                onChange={(e) => handleUpdateSectionDeck(dayIdx, secIdx, e.target.value)}
+                                style={{ flex: 1, maxWidth: '320px', padding: '6px 10px', borderRadius: '6px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.82rem' }}
+                              >
+                                <option value="">🚫 None (No Slide Deck)</option>
+                                {userPresentations.map(p => (
+                                  <option key={p.id} value={p.id}>📊 {p.title}</option>
+                                ))}
+                                <option value="__CREATE_NEW__">➕ Create New Deck...</option>
+                              </select>
 
-                                  {sec.presentationId && (
-                                    <button 
-                                      type="button"
-                                      className="btn btn-secondary btn-icon"
-                                      style={{ padding: '4px', width: '26px', height: '26px' }}
-                                      onClick={() => {
-                                        localStorage.setItem('pulse-poll-active-workshop-context', activeSession.id);
-                                        onViewCreator(sec.presentationId, 'sessions');
-                                      }}
-                                      title="Edit Linked Deck"
-                                    >
-                                      <Edit3 size={13} />
-                                    </button>
-                                  )}
-                                </div>
-                              </td>
-
-                              {/* Delete Row */}
-                              <td style={{ padding: '10px' }}>
+                              {sec.presentationId && (
                                 <button 
                                   type="button"
-                                  className="btn btn-secondary btn-icon"
-                                  onClick={() => handleDeleteSection(dayIdx, secIdx)}
-                                  title="Delete Row"
-                                  style={{ padding: '4px', width: '26px', height: '26px', color: 'var(--danger)' }}
+                                  className="btn btn-secondary"
+                                  style={{ padding: '6px 12px', fontSize: '0.78rem', fontWeight: 600, display: 'flex', gap: '4px', alignItems: 'center' }}
+                                  onClick={() => {
+                                    localStorage.setItem('pulse-poll-active-workshop-context', activeSession.id);
+                                    onViewCreator(sec.presentationId, 'sessions');
+                                  }}
+                                  title="Edit Linked Deck"
                                 >
-                                  <Trash2 size={13} />
+                                  <Edit3 size={14} /> Edit Deck
                                 </button>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                              )}
+                            </div>
+
+                            <button 
+                              type="button"
+                              className="btn btn-secondary btn-icon"
+                              onClick={() => handleDeleteSection(dayIdx, secIdx)}
+                              title="Delete Schedule Item"
+                              style={{ padding: '6px 12px', color: 'var(--danger)', display: 'flex', gap: '4px', alignItems: 'center', fontSize: '0.78rem' }}
+                            >
+                              <Trash2 size={14} /> Remove Item
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {(day.sections || []).length === 0 && (
+                      <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem', background: 'var(--surface-2)', borderRadius: '10px', border: '1px dashed var(--border)' }}>
+                        No schedule items added yet. Click <strong>"+ Add Schedule Row"</strong> above!
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
