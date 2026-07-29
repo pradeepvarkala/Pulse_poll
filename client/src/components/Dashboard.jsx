@@ -100,13 +100,40 @@ export default function Dashboard({
         });
         const data = await res.json();
         
+        const saved = localStorage.getItem('pulse-poll-presentations');
+        let localDecks = [];
+        if (saved && saved !== 'undefined') {
+          try { localDecks = JSON.parse(saved); } catch(e){}
+        }
+
         if (Array.isArray(data) && data.length > 0) {
           const parsed = data.map(p => ({
             ...p,
             folderId: p.folderId || p.folder_id || null,
             slides: typeof p.slides === 'string' ? JSON.parse(p.slides) : p.slides
           }));
-          setPresentations(parsed);
+
+          // Merge local decks to preserve folderId if server database doesn't store folderId column
+          const merged = [...parsed];
+          if (Array.isArray(localDecks) && localDecks.length > 0) {
+            localDecks.forEach(ld => {
+              const existingIdx = merged.findIndex(m => m.id === ld.id);
+              if (existingIdx !== -1) {
+                if (!merged[existingIdx].folderId && ld.folderId) {
+                  merged[existingIdx].folderId = ld.folderId;
+                }
+              } else {
+                merged.unshift(ld);
+              }
+            });
+          }
+
+          setPresentations(merged);
+        } else if (Array.isArray(localDecks) && localDecks.length > 0) {
+          setPresentations(localDecks.map(p => ({
+            ...p,
+            folderId: p.folderId || p.folder_id || null
+          })));
         } else {
           setPresentations(DEFAULT_INITIAL_DECKS);
           localStorage.setItem('pulse-poll-presentations', JSON.stringify(DEFAULT_INITIAL_DECKS));
@@ -204,10 +231,12 @@ export default function Dashboard({
     e.preventDefault();
     if (!newTitle.trim()) return;
 
+    const assignedFolder = newTargetFolderId || activeOpenedFolderId || null;
+
     const newPres = {
       id: Math.random().toString(36).substr(2, 9),
       title: newTitle.trim(),
-      folderId: newTargetFolderId || null,
+      folderId: assignedFolder,
       updatedAt: new Date().toLocaleDateString(),
       theme: newTheme || 'corporate',
       slides: [
@@ -249,6 +278,7 @@ export default function Dashboard({
     const newPres = {
       id: `pres-${Math.random().toString(36).substr(2, 6)}`,
       title: title,
+      folderId: activeOpenedFolderId || null,
       updatedAt: new Date().toLocaleDateString(),
       theme: 'cyber-neon',
       slides: [
