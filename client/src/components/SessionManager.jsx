@@ -151,8 +151,14 @@ export default function SessionManager({ onLaunchPresenter, onBackToDashboard, o
     return sessions[0]?.id || null;
   });
 
-  const [activeTab, setActiveTab] = useState('workshops');
-  const [editTab, setEditTab] = useState('details');
+  const [activeTab, setActiveTab] = useState(() => {
+    const savedContext = localStorage.getItem('pulse-poll-active-workshop-context');
+    return (savedContext && sessions.some(s => s.id === savedContext)) ? 'schedule' : 'workshops';
+  });
+  const [editTab, setEditTab] = useState(() => {
+    const savedContext = localStorage.getItem('pulse-poll-active-workshop-context');
+    return (savedContext && sessions.some(s => s.id === savedContext)) ? 'schedule' : 'details';
+  });
 
   const handleOpenWorkshopEdit = (sessionId, tab = 'details') => {
     setActiveSessionId(sessionId);

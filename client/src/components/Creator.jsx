@@ -805,16 +805,22 @@ export default function Creator({ presentationId, onBack, onPresent, user, onReq
         margin: 0
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <button 
-            type="button"
-            className="btn btn-secondary btn-sm" 
-            onClick={onBack} 
-            title={returnNavContext?.returnView === 'sessions' ? "Back to Schedule" : "Dashboard"}
-            style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '3px 8px', fontSize: '0.76rem', fontWeight: 600 }}
-          >
-            <ArrowLeft size={13} />
-            <span>{returnNavContext?.returnView === 'sessions' ? "Back to Schedule" : "Dashboard"}</span>
-          </button>
+          {(() => {
+            const isWorkshop = returnNavContext === 'sessions' || returnNavContext?.returnView === 'sessions' || localStorage.getItem('pulse-poll-active-workshop-context');
+            const label = isWorkshop ? "Back to Workshop Schedule" : "Dashboard";
+            return (
+              <button 
+                type="button"
+                className="btn btn-secondary btn-sm" 
+                onClick={onBack} 
+                title={label}
+                style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '3px 8px', fontSize: '0.76rem', fontWeight: 600 }}
+              >
+                <ArrowLeft size={13} />
+                <span>{label}</span>
+              </button>
+            );
+          })()}
           <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600 }}>/</span>
           <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
             🎨 Presentation Creator

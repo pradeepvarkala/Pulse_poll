@@ -1749,7 +1749,7 @@ export default function App() {
             <Creator 
               presentationId={selectedPresentationId}
               onBack={() => {
-                if (returnNavContext && returnNavContext.returnView === 'sessions') {
+                if (returnNavContext === 'sessions' || (returnNavContext && returnNavContext.returnView === 'sessions') || localStorage.getItem('pulse-poll-active-workshop-context')) {
                   setView('sessions');
                 } else {
                   handleNavigateToDashboard();
